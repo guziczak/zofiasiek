@@ -1,0 +1,8 @@
+# Surowe materiały od klienta (nie wdrażamy ich na stronę — tylko źródło do obróbki)
+WWW Łukasz/
+konwersacja i obraz/
+
+# Śmieci systemowe
+.DS_Store
+Thumbs.db
+desktop.ini
