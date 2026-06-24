@@ -53,7 +53,6 @@
           <li><a href="kopie-obrazow.html" class="nav__link">Kopie obrazów</a></li>
           <li><a href="konserwacja.html" class="nav__link">Konserwacja</a></li>
           <li><a href="o-mnie.html" class="nav__link nav__link--active">O mnie</a></li>
-          <li><a href="aktualnosci.html" class="nav__link">Aktualności</a></li>
           <li><a href="kontakt.html" class="nav__link">Kontakt</a></li>
                   <li class="nav__footer">
             <div class="nav__footer-contact">
@@ -71,7 +70,7 @@
   </header>
   <div class="mobile-nav-overlay"></div>
 
-  <section class="page-header page-header--image" style="background-image:url('img/omnie/tlo-omnie.jpg');">
+  <section class="page-header page-header--image" style="background-image:url('img/banners/o-mnie.jpg');background-position:center 38%">
     <div class="container">
       <h1 class="page-header__title">O mnie</h1>
       <p class="page-header__breadcrumb"><a href="index.html">Strona główna</a> / O mnie</p>
@@ -87,7 +86,7 @@
         <div class="about-text">
           <h3 class="reveal">Zofia Siek-Mlicka</h3>
           <p class="reveal">
-            Nazywam się Zofia Siek-Mlicka – jestem konserwatorką dzieł sztuki i malarką. Specjalizuję się w konserwacji obrazów sztalugowych oraz w wykonywaniu wiernych kopii malarstwa tworzonych na zamówienie. Każde dzieło, które trafia do mojej pracowni, traktuję z indywidualną uwagą i odpowiedzialnością, zgodnie z aktualnymi standardami oraz zasadami etyki konserwatorskiej.
+            Jestem dyplomowaną konserwatorką dzieł sztuki i malarką, absolwentką krakowskiej ASP. Specjalizuję się w konserwacji obrazów sztalugowych oraz w wykonywaniu wiernych kopii malarstwa tworzonych na zamówienie. Każde dzieło, które trafia do mojej pracowni, traktuję z indywidualną uwagą i odpowiedzialnością, zgodnie z aktualnymi standardami oraz zasadami etyki konserwatorskiej.
           </p>
           <p class="reveal">
             Ukończyłam studia na Wydziale Konserwacji i Restauracji Dzieł Sztuki Akademii Sztuk Pięknych w Krakowie, gdzie zdobyłam solidne podstawy technologiczne i historyczne. Wierzę, że nie można dobrze konserwować ani tworzyć wartościowej kopii bez głębokiego zrozumienia struktury dzieła, jego budowy oraz kontekstu historycznego.
@@ -126,29 +125,191 @@
     </div>
   </section>
 
-  <!-- Galeria O mnie -->
+  <!-- Galeria O mnie: prace w oprawie (06) + malarstwo (07) + pracownia (08) -->
+  <style>
+    .rama-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.8rem 1.4rem;margin-top:var(--space-xl);align-items:end}
+    .rama-work{appearance:none;-webkit-appearance:none;background:none;border:0;padding:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.55rem}
+    .rama-work canvas{max-width:100%;height:auto;border-radius:2px;filter:drop-shadow(0 14px 22px rgba(40,33,24,.26));transition:transform var(--transition)}
+    .rama-work:hover canvas,.rama-work:focus-visible canvas{transform:translateY(-4px)}
+    .rama-work__hint{font-family:var(--font-body);font-size:.78rem;letter-spacing:.04em;color:var(--color-muted);opacity:.55;transition:opacity var(--transition),color var(--transition)}
+    .rama-work:hover .rama-work__hint,.rama-work:focus-visible .rama-work__hint{opacity:1;color:var(--color-accent-dark)}
+    .rama-gallery__foot{text-align:center;margin-top:2.25rem}
+    .rama-upload-label{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.85rem;color:var(--color-accent-dark);border:1px dashed var(--color-accent-light);padding:.6rem 1.1rem;border-radius:var(--border-radius);transition:background var(--transition)}
+    .rama-upload-label:hover{background:var(--color-bg-warm)}
+    .rama-upload-label input{display:none}
+    .rama-opt{background:var(--color-white);border:1px solid var(--color-border);border-radius:var(--border-radius);padding:.45rem .45rem .5rem;cursor:pointer;width:104px;transition:border-color var(--transition),box-shadow var(--transition),transform var(--transition);font-family:var(--font-body);display:flex;flex-direction:column;align-items:center}
+    .rama-opt:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(60,50,38,.12)}
+    .rama-opt canvas{width:74px;height:auto;border-radius:2px}
+    .rama-opt span{display:block;margin-top:.35rem;font-size:.72rem;color:var(--color-text);text-align:center;line-height:1.25}
+    .rama-opt.is-active{border-color:var(--color-accent);box-shadow:0 0 0 2px var(--color-accent) inset}
+    .rama-opt.is-active span{color:var(--color-accent-dark);font-weight:700}
+    .rama-modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:1.5rem 1rem}
+    .rama-modal.is-open{display:flex}
+    .rama-modal__backdrop{position:absolute;inset:0;background:rgba(28,22,16,.72)}
+    .rama-modal__panel{position:relative;z-index:1;display:flex;gap:1.5rem;max-width:1020px;width:100%;max-height:90vh;background:var(--color-white);border-radius:var(--border-radius);padding:1.75rem;box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:auto}
+    .rama-modal__close{position:absolute;top:.35rem;right:.6rem;font-size:1.9rem;line-height:1;background:none;border:0;color:var(--color-muted);cursor:pointer;z-index:2}
+    .rama-modal__close:hover{color:var(--color-heading)}
+    .rama-modal__stage{flex:1 1 55%;display:flex;align-items:center;justify-content:center;min-width:0;background:radial-gradient(120% 90% at 50% 10%,#f4f2ed,#e4e0d8);border-radius:var(--border-radius);padding:1.25rem}
+    .rama-modal__stage canvas{max-width:100%;height:auto;filter:drop-shadow(0 18px 26px rgba(40,33,24,.4))}
+    .rama-modal__side{flex:1 1 45%;min-width:220px;display:flex;flex-direction:column}
+    .rama-modal__title{font-family:var(--font-heading);font-size:1.35rem;color:var(--color-heading);margin:.25rem 0 0}
+    .rama-modal__lead{color:var(--color-muted);font-size:.88rem;margin:.4rem 0 1rem}
+    .rama-modal__picker{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.25rem}
+    @media(max-width:720px){.rama-modal__panel{flex-direction:column;padding:1.25rem}.rama-modal__stage{flex-basis:auto}}
+  </style>
+
   <section class="section section--warm">
     <div class="container">
       <div class="text-center">
-        <p class="section-subtitle reveal">Pracownia i prace</p>
-        <h2 class="section-title reveal">Z mojej pracowni</h2>
-        <p class="section-description reveal">Zdjęcia z pracowni w Siedlcu oraz wybrane prace. Galeria będzie sukcesywnie uzupełniana o autorskie obrazy.</p>
+        <p class="section-subtitle reveal">Malarstwo autorskie</p>
+        <h2 class="section-title reveal">Prace w oprawie</h2>
+        <p class="section-description reveal">Wybrane obrazy w przykładowych ramach — rysowanych na żywo wokół płótna. Kliknij pracę, aby przymierzyć inną oprawę, albo wgraj własny obraz i zobacz go w ramie.</p>
       </div>
-      <div class="gallery-grid reveal" data-fill="omnie" style="margin-top: var(--space-xl);">
-        <button class="gallery-item" data-images="img/omnie/pracownia-w-siedlcu.jpg" data-title="Pracownia w Siedlcu" data-meta="Pracownia">
-          <img class="gallery-item__img" src="img/omnie/pracownia-w-siedlcu.jpg" alt="Pracownia w Siedlcu" loading="lazy">
+      <div class="rama-gallery reveal" data-rama-gallery>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-1.jpg" data-title="Pejzaż śródziemnomorski" data-frame="zlota-zdobiona"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-2.jpg" data-title="Zatoka" data-frame="zlota-gladka"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-3.jpg" data-title="Płycizna" data-frame="orzech"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-4.jpg" data-title="Przylądek" data-frame="czarna"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-5.jpg" data-title="Brzeg" data-frame="debowa"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+        <button class="rama-work" type="button" data-src="img/oprawa/pejzaz-nadmorski-6.jpg" data-title="Skaliste wybrzeże" data-frame="zlota-zdobiona"><canvas></canvas><span class="rama-work__hint">Przymierz ramę</span></button>
+      </div>
+      <div class="rama-gallery__foot reveal">
+        <label class="rama-upload-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Wgraj własny obraz i zobacz w ramie
+          <input type="file" accept="image/*" data-rama-upload>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-subtitle reveal">Obrazy autorskie</p>
+        <h2 class="section-title reveal">Twórczość malarska</h2>
+        <p class="section-description reveal">Malarstwo sztalugowe w różnych technikach — pejzaże, akty i prace inspirowane nastrojem chwili. Kliknij obraz, aby powiększyć.</p>
+      </div>
+      <div class="gallery-grid reveal" style="margin-top: var(--space-xl);">
+        <button class="gallery-item" data-images="img/prace/akt-1.jpg" data-title="Akt I" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/akt-1.jpg" alt="Akt I — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Akt I</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/akt-2.jpg" data-title="Akt II" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/akt-2.jpg" alt="Akt II — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Akt II</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/akt-3.jpg" data-title="Akt III" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/akt-3.jpg" alt="Akt III — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Akt III</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/gniazdo-zloto.jpg" data-title="Gniazdo" data-meta="Malarstwo, złoto">
+          <img class="gallery-item__img" src="img/prace/gniazdo-zloto.jpg" alt="Gniazdo — Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Gniazdo</span><span class="gallery-item__meta">Malarstwo, złoto</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/kwiat.jpg" data-title="Kwiat" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/kwiat.jpg" alt="Kwiat — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Kwiat</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/morze-1.jpg" data-title="Morze I" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/morze-1.jpg" alt="Morze I — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Morze I</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/morze-2.jpg" data-title="Morze II" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/morze-2.jpg" alt="Morze II — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Morze II</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/morze-noca.jpg" data-title="Morze nocą" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/morze-noca.jpg" alt="Morze nocą — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Morze nocą</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/pejzaz-nadmorski-3.jpg" data-title="Pejzaż nadmorski I" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/pejzaz-nadmorski-3.jpg" alt="Pejzaż nadmorski I — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Pejzaż nadmorski I</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/pejzaz-nadmorski-5.jpg" data-title="Pejzaż nadmorski II" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/pejzaz-nadmorski-5.jpg" alt="Pejzaż nadmorski II — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Pejzaż nadmorski II</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/rzeka-1.jpg" data-title="Rzeka I" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/rzeka-1.jpg" alt="Rzeka I — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Rzeka I</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/rzeka-2.jpg" data-title="Rzeka II" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/rzeka-2.jpg" alt="Rzeka II — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Rzeka II</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/rzeka-3.jpg" data-title="Rzeka III" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/rzeka-3.jpg" alt="Rzeka III — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Rzeka III</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/tryptyk.jpg" data-title="Tryptyk" data-meta="Rysunek">
+          <img class="gallery-item__img" src="img/prace/tryptyk.jpg" alt="Tryptyk — Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Tryptyk</span><span class="gallery-item__meta">Rysunek</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/wazka.jpg" data-title="Ważka" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/wazka.jpg" alt="Ważka — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Ważka</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/lodka-na-morzu.jpg" data-title="Łódka na morzu" data-meta="Malarstwo">
+          <img class="gallery-item__img" src="img/prace/lodka-na-morzu.jpg" alt="Łódka na morzu — obraz Zofii Siek-Mlickiej" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Łódka na morzu</span><span class="gallery-item__meta">Malarstwo</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/przy-pracy.jpg" data-title="Przy pracy" data-meta="W plenerze">
+          <img class="gallery-item__img" src="img/prace/przy-pracy.jpg" alt="Przy pracy — Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Przy pracy</span><span class="gallery-item__meta">W plenerze</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/w-trakcie-pracy.jpg" data-title="W trakcie pracy" data-meta="Z pracowni">
+          <img class="gallery-item__img" src="img/prace/w-trakcie-pracy.jpg" alt="W trakcie pracy — Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">W trakcie pracy</span><span class="gallery-item__meta">Z pracowni</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/prace/wystawa.jpg" data-title="Wystawa" data-meta="Wystawa">
+          <img class="gallery-item__img" src="img/prace/wystawa.jpg" alt="Wystawa — Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Wystawa</span><span class="gallery-item__meta">Wystawa</span></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm">
+    <div class="container">
+      <div class="text-center">
+        <p class="section-subtitle reveal">Z mojej pracowni</p>
+        <h2 class="section-title reveal">Pracownia w Siedlcu</h2>
+        <p class="section-description reveal">Kilka kadrów z mojej pracowni pod Krakowem — przy konserwacji, dublowaniu i pracy nad obrazami.</p>
+      </div>
+      <div class="gallery-grid reveal" style="margin-top: var(--space-xl);">
+        <button class="gallery-item" data-images="img/pracownia/pracownia-w-siedlcu.jpg" data-title="Pracownia w Siedlcu" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/pracownia-w-siedlcu.jpg" alt="Pracownia w Siedlcu — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
           <span class="gallery-item__info"><span class="gallery-item__title">Pracownia w Siedlcu</span><span class="gallery-item__meta">Pracownia</span></span>
-          
         </button>
-        <button class="gallery-item" data-images="img/omnie/zdj-do-tlo-kontakt.jpg" data-title="Zdj do tlo kontakt" data-meta="Pracownia">
-          <img class="gallery-item__img" src="img/omnie/zdj-do-tlo-kontakt.jpg" alt="Zdj do tlo kontakt" loading="lazy">
-          <span class="gallery-item__info"><span class="gallery-item__title">Zdj do tlo kontakt</span><span class="gallery-item__meta">Pracownia</span></span>
-          
+        <button class="gallery-item" data-images="img/pracownia/w-pracowni-1.jpg" data-title="W pracowni" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/w-pracowni-1.jpg" alt="W pracowni — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">W pracowni</span><span class="gallery-item__meta">Pracownia</span></span>
         </button>
-        <button class="gallery-item" data-images="img/omnie/zofia-siek-mlicka.jpg" data-title="Zofia Siek-Mlicka" data-meta="Pracownia">
-          <img class="gallery-item__img" src="img/omnie/zofia-siek-mlicka.jpg" alt="Zofia Siek-Mlicka" loading="lazy">
-          <span class="gallery-item__info"><span class="gallery-item__title">Zofia Siek-Mlicka</span><span class="gallery-item__meta">Pracownia</span></span>
-          
+        <button class="gallery-item" data-images="img/pracownia/w-pracowni-3.jpg" data-title="W pracowni" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/w-pracowni-3.jpg" alt="W pracowni — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">W pracowni</span><span class="gallery-item__meta">Pracownia</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/pracownia/w-pracowni-5.jpg" data-title="W pracowni" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/w-pracowni-5.jpg" alt="W pracowni — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">W pracowni</span><span class="gallery-item__meta">Pracownia</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/pracownia/w-pracowni-4.jpg" data-title="Przy sztaludze" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/w-pracowni-4.jpg" alt="Przy sztaludze — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Przy sztaludze</span><span class="gallery-item__meta">Pracownia</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/pracownia/w-pracowni-2.jpg" data-title="W pracowni" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/w-pracowni-2.jpg" alt="W pracowni — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">W pracowni</span><span class="gallery-item__meta">Pracownia</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/pracownia/odczyszczanie.jpg" data-title="Odczyszczanie obrazu" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/odczyszczanie.jpg" alt="Odczyszczanie obrazu — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Odczyszczanie obrazu</span><span class="gallery-item__meta">Pracownia</span></span>
+        </button>
+        <button class="gallery-item" data-images="img/pracownia/prasowanie-obrazu.jpg" data-title="Prasowanie obrazu" data-meta="Pracownia">
+          <img class="gallery-item__img" src="img/pracownia/prasowanie-obrazu.jpg" alt="Prasowanie obrazu — pracownia konserwatorska w Siedlcu, Zofia Siek-Mlicka" loading="lazy">
+          <span class="gallery-item__info"><span class="gallery-item__title">Prasowanie obrazu</span><span class="gallery-item__meta">Pracownia</span></span>
         </button>
       </div>
     </div>
@@ -179,7 +340,6 @@
           <ul class="footer__links">
             <li><a href="kopie-obrazow.html">Kopie obrazów</a></li>
             <li><a href="konserwacja.html">Konserwacja</a></li>
-            <li><a href="aktualnosci.html">Aktualności</a></li>
           </ul>
         </div>
         <div>
@@ -237,6 +397,7 @@
       } catch (e) {}
     })();
   </script>
+  <script src="js/rama.js?v=20260624"></script>
   <script src="js/main.js?v=20260620v6"></script>
 </body>
 </html>

@@ -3,6 +3,11 @@
    Rysuje profil listwy dookoła dowolnego obrazu. Bez gotowych
    obrazków ram — wszystko liczone w przeglądarce, więc działa
    na każdej pracy (również wgranej przez użytkownika).
+
+   Dwa tryby (oba opcjonalne, wykrywane po elementach na stronie):
+   1) demo: #frameCanvas + #picker (+ #ramaUpload)   — strona rama-demo.html
+   2) galeria: [data-rama-gallery] z kafelkami .rama-work — sekcja na O mnie;
+      każda praca dostaje przypisaną ramę, a klik otwiera modal z przymiarką.
    ============================================================ */
 (function () {
   'use strict';
@@ -24,8 +29,21 @@
     { key: 'bez-ramy', name: 'Bez ramy', t: 0, tex: 'none', stops: [] },
   ];
 
-  /* light from top-left → per-side brightness multiplier */
-  const TINT = { top: 1.13, left: 1.05, bottom: 0.84, right: 0.92, flat: 1 };
+  /* Światło z górnego-lewego rogu → cieniowanie fazki jako [zewn, wewn] jasność.
+     Każdy przystanek profilu mnożymy przez wartość interpolowaną w poprzek listwy
+     (0 = krawędź zewnętrzna, 1 = przy obrazie). Bok zwrócony do światła dostaje
+     rozjaśnienie: górna i lewa listwa od strony ZEWNĘTRZNEJ, dolna i prawa od
+     strony WEWNĘTRZNEJ. Dzięki temu prawa i dolna listwa łapią światło na
+     wewnętrznej fazce i wyglądają trójwymiarowo, a nie jak płaski, przyciemniony
+     pasek (wcześniej był jeden mnożnik na cały bok → prawa rama wyglądała płasko). */
+  const LIGHT = {
+    top:    [1.17, 0.99],
+    left:   [1.11, 0.95],
+    bottom: [0.87, 1.07],
+    right:  [0.83, 1.09],
+    flat:   [1, 1],
+  };
+  function dirMul(side, pos) { const L = LIGHT[side] || LIGHT.flat; return L[0] + (L[1] - L[0]) * pos; }
 
   /* small seeded PRNG so main canvas & thumbnails render identically */
   function rng(seed) { let s = seed >>> 0; return function () {
@@ -36,13 +54,14 @@
   function tint(h, m) { const c = hexRGB(h);
     return 'rgb(' + c.map(v => Math.max(0, Math.min(255, Math.round(v*m)))).join(',') + ')'; }
 
-  function grad(ctx, side, ox, oy, T, stops, m) {
+  /* profil w poprzek listwy + kierunkowe cieniowanie fazki (dirMul per przystanek) */
+  function grad(ctx, side, ox, oy, T, stops) {
     let g;
     if (side === 'top')    g = ctx.createLinearGradient(0, oy, 0, oy + T);
     if (side === 'bottom') g = ctx.createLinearGradient(0, oy, 0, oy - T);
     if (side === 'left')   g = ctx.createLinearGradient(ox, 0, ox + T, 0);
     if (side === 'right')  g = ctx.createLinearGradient(ox, 0, ox - T, 0);
-    stops.forEach(s => g.addColorStop(s[0], tint(s[1], m)));
+    stops.forEach(s => g.addColorStop(s[0], tint(s[1], dirMul(side, s[0]))));
     return g;
   }
 
@@ -55,9 +74,8 @@
     if (name === 'left')   { p.moveTo(oX,BY);  p.lineTo(oX,oY);  p.lineTo(oX+T,oY+T); p.lineTo(oX+T,BY-T); }
     if (name === 'right')  { p.moveTo(RX,oY);  p.lineTo(RX,BY);  p.lineTo(RX-T,BY-T); p.lineTo(RX-T,oY+T); }
     ctx.save(); ctx.clip(p);
-    const m = TINT[name];
     const anchor = (name==='bottom') ? BY : (name==='right') ? RX : (name==='left') ? oX : oY;
-    ctx.fillStyle = grad(ctx, name, oX, anchor, T, spec.stops, m);
+    ctx.fillStyle = grad(ctx, name, oX, anchor, T, spec.stops);
     ctx.fillRect(oX, oY, W, H);
 
     const horiz = (name === 'top' || name === 'bottom');
@@ -86,6 +104,22 @@
     } else if (spec.tex === 'matte') {
       ctx.fillStyle = 'rgba(255,255,255,0.015)';          // faint sheen noise
       for (let i = 0; i < T*2; i++) ctx.fillRect(oX + r()*W, oY + r()*H, 1, 1);
+    }
+
+    /* cienka świetlna grań na wewnętrznej krawędzi boku zwróconego do światła
+       — mocniej sprzedaje trójwymiar (zwł. na prawej/dolnej listwie). */
+    if (T > 6 && spec.tex !== 'none') {
+      const lit = LIGHT[name] ? LIGHT[name][1] > 1 : false; // wewn. fazka łapie światło (bottom/right)
+      if (lit) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = 'rgba(255,248,228,0.16)';
+        ctx.lineWidth = Math.max(1, T * 0.06);
+        ctx.beginPath();
+        if (name === 'right')  { ctx.moveTo(RX-T+0.5, oY+T); ctx.lineTo(RX-T+0.5, BY-T); }
+        if (name === 'bottom') { ctx.moveTo(oX+T, BY-T+0.5); ctx.lineTo(RX-T, BY-T+0.5); }
+        ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+      }
     }
     ctx.restore();
   }
@@ -130,8 +164,16 @@
     }
   }
 
-  /* ---- wire up the page ---- */
-  function init() {
+  function frameByKey(k) { return FRAMES.find(f => f.key === k) || FRAMES[0]; }
+  /* render scaling outer box (art + frame) to a target outer width in CSS px */
+  function renderOuter(canvas, img, spec, outerW) {
+    render(canvas, img, spec, Math.max(40, Math.round(outerW / (1 + 2 * spec.t))));
+  }
+
+  /* ============================================================
+     Tryb 1 — demo (rama-demo.html)
+     ============================================================ */
+  function initDemo() {
     const canvas = document.getElementById('frameCanvas');
     const stage  = document.getElementById('stage');
     const picker = document.getElementById('picker');
@@ -141,7 +183,6 @@
     let current = FRAMES[0];
 
     function fitArtW() {
-      // outer frame must fit the stage; reserve room for the thickest frame
       const avail = Math.min(stage.clientWidth - 32, 760);
       return Math.round(avail / (1 + 2 * 0.088));
     }
@@ -149,13 +190,12 @@
       render(canvas, img, current, fitArtW());
       canvas.animate ? canvas.animate([{opacity:.4},{opacity:1}], {duration:200,easing:'ease'}) : null;
     }
-
     function buildPicker() {
       picker.innerHTML = '';
       FRAMES.forEach(f => {
         const b = document.createElement('button');
         b.className = 'rama-opt' + (f.key === current.key ? ' is-active' : '');
-        b.type = 'button';
+        b.type = 'button'; b.setAttribute('aria-label', 'Rama: ' + f.name);
         const c = document.createElement('canvas');
         render(c, img, f, 92);
         const span = document.createElement('span'); span.textContent = f.name;
@@ -172,7 +212,6 @@
     img.onload = () => { paint(); buildPicker(); };
     img.src = canvas.dataset.src || 'img/ramki/obraz-bez-ramy.jpg';
 
-    // own-image upload (the "wrzuć swój i zobacz oprawiony" idea)
     const up = document.getElementById('ramaUpload');
     if (up) up.addEventListener('change', e => {
       const file = e.target.files[0]; if (!file) return;
@@ -184,6 +223,147 @@
     let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(paint, 120); });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  /* ============================================================
+     Tryb 2 — galeria prac w ramach + modal przymiarki
+     ============================================================ */
+  let modal = null, modalImg = null, modalSpec = null, lastFocus = null;
+
+  function buildModal() {
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.className = 'rama-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Przymierzalnia ram');
+    modal.innerHTML =
+      '<div class="rama-modal__backdrop" data-close></div>' +
+      '<div class="rama-modal__panel" role="document">' +
+        '<button class="rama-modal__close" type="button" aria-label="Zamknij przymierzalnię" data-close>&times;</button>' +
+        '<div class="rama-modal__stage"><canvas aria-hidden="true"></canvas></div>' +
+        '<div class="rama-modal__side">' +
+          '<h3 class="rama-modal__title"></h3>' +
+          '<p class="rama-modal__lead">Wybierz oprawę — rysowana na żywo wokół obrazu:</p>' +
+          '<div class="rama-modal__picker" role="group" aria-label="Style ram"></div>' +
+          '<label class="rama-upload-label">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
+            ' Wgraj własny obraz<input type="file" accept="image/*"></label>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeModal));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    });
+    modal.querySelector('.rama-upload-label input').addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => { const im = new Image(); im.onload = () => {
+        modalImg = im; modalSpec = FRAMES[0];
+        modal.querySelector('.rama-modal__title').textContent = 'Twój obraz';
+        buildModalPicker(); paintModal();
+      }; im.src = fr.result; };
+      fr.readAsDataURL(file);
+    });
+
+    let rt; window.addEventListener('resize', () => {
+      if (!modal.classList.contains('is-open')) return;
+      clearTimeout(rt); rt = setTimeout(paintModal, 120);
+    });
+    return modal;
+  }
+
+  function fitModalArtW(spec) {
+    const stage = modal.querySelector('.rama-modal__stage');
+    const availW = Math.min((stage.clientWidth || 480) - 12, 620);
+    const availH = Math.min(window.innerHeight * 0.72, 660);
+    const ar = modalImg.naturalWidth / modalImg.naturalHeight;
+    let artW = availW / (1 + 2 * spec.t);
+    let artH = artW / ar;
+    const T = Math.min(artW, artH) * spec.t;
+    const outerH = artH + 2 * T;
+    if (outerH > availH) artW *= availH / outerH;
+    return Math.max(80, Math.round(artW));
+  }
+  function paintModal() {
+    const c = modal.querySelector('.rama-modal__stage canvas');
+    render(c, modalImg, modalSpec, fitModalArtW(modalSpec));
+    modal.querySelectorAll('.rama-modal__picker .rama-opt').forEach(b =>
+      b.classList.toggle('is-active', b.dataset.key === modalSpec.key));
+  }
+  function buildModalPicker() {
+    const pick = modal.querySelector('.rama-modal__picker');
+    pick.innerHTML = '';
+    FRAMES.forEach(f => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'rama-opt'; b.dataset.key = f.key;
+      b.setAttribute('aria-label', 'Rama: ' + f.name);
+      const c = document.createElement('canvas'); renderOuter(c, modalImg, f, 78);
+      const s = document.createElement('span'); s.textContent = f.name;
+      b.appendChild(c); b.appendChild(s);
+      b.addEventListener('click', () => { modalSpec = f; paintModal(); });
+      pick.appendChild(b);
+    });
+  }
+  function openModal(img, spec, title) {
+    buildModal();
+    modalImg = img; modalSpec = spec || FRAMES[0];
+    modal.querySelector('.rama-modal__title').textContent = title || '';
+    buildModalPicker(); paintModal();
+    lastFocus = document.activeElement;
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.rama-modal__close').focus();
+  }
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  function initGallery() {
+    const galleries = document.querySelectorAll('[data-rama-gallery]');
+    if (!galleries.length) return;
+    const works = [];
+
+    galleries.forEach(g => {
+      g.querySelectorAll('.rama-work').forEach(work => {
+        const canvas = work.querySelector('canvas');
+        const spec = frameByKey(work.dataset.frame);
+        const title = work.dataset.title || '';
+        const img = new Image();
+        img.onload = () => {
+          const w = (work.clientWidth || 280);
+          renderOuter(canvas, img, spec, Math.min(w, 360));
+          work._img = img; work._spec = spec;
+          works.push({ work, canvas, img, spec });
+        };
+        img.src = work.dataset.src;
+        if (canvas) canvas.setAttribute('aria-hidden', 'true');
+        work.setAttribute('aria-label', 'Przymierz ramę do pracy: ' + title);
+        work.addEventListener('click', () => { if (work._img) openModal(work._img, work._spec, title); });
+      });
+    });
+
+    document.querySelectorAll('[data-rama-upload]').forEach(inp => {
+      inp.addEventListener('change', e => {
+        const file = e.target.files[0]; if (!file) return;
+        const fr = new FileReader();
+        fr.onload = () => { const im = new Image(); im.onload = () => openModal(im, FRAMES[0], 'Twój obraz'); im.src = fr.result; };
+        fr.readAsDataURL(file);
+        e.target.value = '';
+      });
+    });
+
+    let rt; window.addEventListener('resize', () => {
+      clearTimeout(rt); rt = setTimeout(() => works.forEach(w => {
+        renderOuter(w.canvas, w.img, w.spec, Math.min(w.work.clientWidth || 280, 360));
+      }), 150);
+    });
+  }
+
+  function boot() { initDemo(); initGallery(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
