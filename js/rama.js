@@ -309,10 +309,11 @@
     buildModal();
     modalImg = img; modalSpec = spec || FRAMES[0];
     modal.querySelector('.rama-modal__title').textContent = title || '';
-    buildModalPicker(); paintModal();
     lastFocus = document.activeElement;
-    modal.classList.add('is-open');
+    modal.classList.add('is-open');                 // najpierw POKAŻ modal…
     document.body.style.overflow = 'hidden';
+    buildModalPicker();
+    requestAnimationFrame(paintModal);              // …a renderuj dopiero gdy ma layout → poprawne proporcje
     modal.querySelector('.rama-modal__close').focus();
   }
   function closeModal() {
