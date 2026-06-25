@@ -137,7 +137,7 @@
           <span class="gallery-item__info"><span class="gallery-item__title">Krzyk Edvard Munch</span><span class="gallery-item__meta">Kopia malarska</span></span>
           <span class="gallery-item__badge">5 zdjęć</span>
         </button>
-        <figcaption class="art-seo"><span class="art-seo__label">O dziele</span><p>Ikona ekspresjonizmu Edvarda Muncha (1893) — symbol egzystencjalnego lęku. Malowane wersje znajdują się w Nasjonalmuseet oraz Muzeum Muncha (MUNCH) w Oslo.</p><a href="https://pl.wikipedia.org/wiki/Krzyk_(obraz_Edvarda_Muncha)" target="_blank" rel="noopener">Dowiedz się więcej →</a></figcaption>
+        <figcaption class="art-seo"><span class="art-seo__label">O dziele</span><p>Ikona ekspresjonizmu Edvarda Muncha (1893) — symbol egzystencjalnego lęku. Malowane wersje znajdują się w Nasjonalmuseet oraz Muzeum Muncha (MUNCH) w Oslo.</p><a href="https://pl.wikipedia.org/wiki/Krzyk_(obraz)" target="_blank" rel="noopener">Dowiedz się więcej →</a></figcaption>
         </figure>
         <figure class="art-card">
         <button class="gallery-item" data-images="img/kopie/matka-boska-wspomozenia-wiernych-lucas-cranach/00.jpg|img/kopie/matka-boska-wspomozenia-wiernych-lucas-cranach/01.jpg" data-title="Matka Boska Wspomożenia Wiernych Lucas Cranach" data-meta="Kopia malarska">
@@ -303,11 +303,15 @@
   <button class="scroll-top" aria-label="Wróć na górę"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
 
   <script>
-    /* Przywróć pozycję przewijania PRZED malowaniem, bez płynnej animacji */
+    /* Pozycję przewijania przywracamy tylko przy nawigacji wstecz/dalej w przeglądarce.
+       Zwykłe wejście (klik w menu, odświeżenie) otwiera stronę od góry. */
     (function () {
       if (!('scrollRestoration' in history)) return;
       history.scrollRestoration = 'manual';
       try {
+        var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null;
+        var navType = nav ? nav.type : (performance.navigation && performance.navigation.type === 2 ? 'back_forward' : '');
+        if (navType !== 'back_forward') return;
         var y = parseInt(sessionStorage.getItem('scrollY:' + location.pathname) || '0', 10);
         if (y > 0) {
           var h = document.documentElement, prev = h.style.scrollBehavior;
