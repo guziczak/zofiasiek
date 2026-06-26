@@ -75,10 +75,13 @@
     if (name === 'right')  { p.moveTo(RX,oY);  p.lineTo(RX,BY);  p.lineTo(RX-T,BY-T); p.lineTo(RX-T,oY+T); }
     ctx.save(); ctx.clip(p);
     const anchor = (name==='bottom') ? BY : (name==='right') ? RX : (name==='left') ? oX : oY;
-    ctx.fillStyle = grad(ctx, name, oX, anchor, T, spec.stops);
+    const vert = (name === 'left' || name === 'right');   // profil biegnie w poprzek X (lewa/prawa) albo Y (góra/dół)
+    ctx.fillStyle = grad(ctx, name, vert ? anchor : oX, vert ? oY : anchor, T, spec.stops);
     ctx.fillRect(oX, oY, W, H);
 
     const horiz = (name === 'top' || name === 'bottom');
+    const bx = (name === 'right')  ? RX - T : oX;   // początek pasma listwy przy krawędzi, żeby tekstura
+    const by = (name === 'bottom') ? BY - T : oY;   // trafiła w clip także na prawej/dolnej, nie tylko górnej/lewej
     const r = rng(seed + name.charCodeAt(0));
     if (spec.tex === 'wood') {
       const n = Math.round(T * 0.7);
@@ -87,9 +90,9 @@
         ctx.strokeStyle = 'rgba(' + (dark ? '40,26,14' : '235,210,170') + ',' + (0.05 + r()*0.10) + ')';
         ctx.lineWidth = 0.6 + r()*1.1; ctx.beginPath();
         const off = (r() - 0.5) * 6;
-        if (horiz) { const y = oY + r()*T; ctx.moveTo(oX, y);
+        if (horiz) { const y = by + r()*T; ctx.moveTo(oX, y);
           for (let x = oX; x <= RX; x += 24) ctx.lineTo(x, y + Math.sin(x*0.03 + i)*1.4 + off*0.0);
-        } else { const x = oX + r()*T; ctx.moveTo(x, oY);
+        } else { const x = bx + r()*T; ctx.moveTo(x, oY);
           for (let y = oY; y <= BY; y += 24) ctx.lineTo(x + Math.sin(y*0.03 + i)*1.4, y); }
         ctx.stroke();
       }
@@ -97,8 +100,8 @@
       for (let i = 0; i < 6; i++) {                       // specular glints across the width
         ctx.strokeStyle = 'rgba(255,250,225,' + (0.10 + r()*0.16) + ')';
         ctx.lineWidth = 0.8 + r()*1.4; ctx.beginPath();
-        if (horiz) { const x = oX + r()*W; ctx.moveTo(x, oY); ctx.lineTo(x - T*0.5, oY + T); }
-        else       { const y = oY + r()*H; ctx.moveTo(oX, y); ctx.lineTo(oX + T, y - T*0.5); }
+        if (horiz) { const x = oX + r()*W; ctx.moveTo(x, by); ctx.lineTo(x - T*0.5, by + T); }
+        else       { const y = oY + r()*H; ctx.moveTo(bx, y); ctx.lineTo(bx + T, y - T*0.5); }
         ctx.stroke();
       }
     } else if (spec.tex === 'matte') {
