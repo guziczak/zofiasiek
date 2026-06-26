@@ -2,31 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://zofiasiek.pl/</loc>
-    <lastmod>2026-06-18</lastmod>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://zofiasiek.pl/kopie-obrazow.html</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://zofiasiek.pl/kopie-obrazow/</loc>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://zofiasiek.pl/konserwacja.html</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://zofiasiek.pl/konserwacja/</loc>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://zofiasiek.pl/o-mnie.html</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://zofiasiek.pl/o-mnie/</loc>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://zofiasiek.pl/kontakt.html</loc>
-    <lastmod>2026-06-18</lastmod>
+    <loc>https://zofiasiek.pl/kontakt/</loc>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
