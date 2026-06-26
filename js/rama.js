@@ -5,7 +5,7 @@
    na każdej pracy (również wgranej przez użytkownika).
 
    Dwa tryby (oba opcjonalne, wykrywane po elementach na stronie):
-   1) demo: #frameCanvas + #picker (+ #ramaUpload)   — strona rama-demo.html
+   1) demo: #frameCanvas + #picker (+ #ramaUpload)   — strona rama-demo/
    2) galeria: [data-rama-gallery] z kafelkami .rama-work — sekcja na O mnie;
       każda praca dostaje przypisaną ramę, a klik otwiera modal z przymiarką.
    ============================================================ */
@@ -171,7 +171,7 @@
   }
 
   /* ============================================================
-     Tryb 1 — demo (rama-demo.html)
+     Tryb 1 — demo (rama-demo/)
      ============================================================ */
   function initDemo() {
     const canvas = document.getElementById('frameCanvas');
