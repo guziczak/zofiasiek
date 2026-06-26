@@ -210,7 +210,7 @@
     }
 
     img.onload = () => { paint(); buildPicker(); };
-    img.src = canvas.dataset.src || '/img/ramki/obraz-bez-ramy.jpg';
+    img.src = canvas.dataset.src || 'img/ramki/obraz-bez-ramy.jpg';
 
     const up = document.getElementById('ramaUpload');
     if (up) up.addEventListener('change', e => {

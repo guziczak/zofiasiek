@@ -252,7 +252,7 @@ function initContactMap() {
       if (textEl) {
         textEl.innerHTML =
           'Interaktywna mapa Google używa plików cookies Google. Zaakceptuj wszystkie, aby ją wyświetlić. ' +
-          '<a href="/polityka-prywatnosci/">Dowiedz się więcej</a>.';
+          '<a href="https://zofiasiek.pl/polityka-prywatnosci/">Dowiedz się więcej</a>.';
       }
       const acceptBtn = banner.querySelector('[data-accept]');
       if (acceptBtn) acceptBtn.textContent = 'Akceptuję wszystkie';
