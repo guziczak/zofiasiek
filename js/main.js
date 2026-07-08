@@ -483,9 +483,11 @@ function initHeroSlider() {
   if (index < 0) index = 0;
   let timer = null;
 
-  // WCAG 2.2.2: autoodtwarzanie musi dać się zatrzymać; przy preferencji
-  // redukcji ruchu pokaz w ogóle nie startuje sam (guzik pozwala go włączyć).
-  let userPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // WCAG 2.2.2: autoodtwarzanie musi dać się zatrzymać — służy do tego przycisk
+  // pauzy poniżej. Pokaz startuje SAM przy każdym wejściu/odświeżeniu. Przy
+  // preferencji redukcji ruchu globalny CSS skraca przenikanie do ~0 ms, więc
+  // slajdy przełączają się bez animacji (treść leci, ruchu brak).
+  let userPaused = false;
 
   const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2.5" y="1.5" width="4" height="13" rx="1"/><rect x="9.5" y="1.5" width="4" height="13" rx="1"/></svg>';
   const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5l11 6.5-11 6.5z"/></svg>';

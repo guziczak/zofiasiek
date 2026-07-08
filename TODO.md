@@ -80,9 +80,13 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] Opcjonalny upgrade: prawdziwe HTTP 301 w panelu hostingu (Plesk), jeśli kiedyś będzie dostęp — wtedy stuby można skasować
 - [ ] Pełną listę starych 404 pokaże Search Console (indeks może trzymać więcej niż te 3)
 - [ ] **Google Search Console**: weryfikacja domeny, zgłoszenie sitemap.xml, prośba o przeindeksowanie (indeks ma jeszcze stary title „Zofia Siek"), raport Strony/404 — zero cookies, zgodne z privacy-first
+- [ ] **Po deployu (teraz!)**: w GSC „Sprawdź URL" → „Poproś o zindeksowanie" dla 4 głównych podstron + 3 starych URL-i (żeby Google szybciej zobaczył przekierowania zamiast czekać na crawl); Test wyników z elementami rozszerzonymi (Rich Results) dla schema LocalBusiness/BreadcrumbList
+- [ ] **Bing Webmaster Tools**: weryfikacja + ta sama sitemap.xml (Bing zasila też DuckDuck; import jednym klikiem z GSC) — mały ruch, ale darmowy i 5 minut
 - [ ] **Wizytówka Google (Business Profile)** dla pracowni (Siedlec 3, Krzeszowice) + systematyczne zbieranie opinii — dla fraz lokalnych pack mapowy stoi nad wynikami organicznymi
+- [ ] **Spójność NAP** (nazwa/adres/telefon identyczne co do znaku wszędzie): strona, wizytówka Google, FB, IG, stare katalogi. Uwaga: strona ma 2 telefony (607 752 370 i 502 244 629) — ustalić JEDEN główny do NAP, żeby Google nie widział rozjazdu. Musi zgadzać się ze schema LocalBusiness (jest tam 607…)
 - [ ] Linki zwrotne: strona w bio FB/IG/TikToka, katalogi lokalne, współprace (np. Muzeum w Chrzanowie), prasa lokalna
 - [ ] Treść przyrostowa: `aktualnosci/` jako blog realizacji (każda praca = wpis z unikalnym opisem) — powiązane z decyzją w P4
+- [ ] Favicon w wynikach Google: dziś jest tylko SVG — Google do wyników wymaga też PNG/ICO (min. 48×48) pod stałym URL-em; powiązane z pozycją favicon w P3
 - Podgląd guziczak.github.io/zofiasiek jest SEO-bezpieczny: absolutne canonicale na zofiasiek.pl skleją kopie w Google (nic nie trzeba robić)
 
 ## P2 — Formularz kontaktowy
