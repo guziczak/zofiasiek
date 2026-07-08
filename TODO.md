@@ -1,0 +1,93 @@
+# TODO — zofiasiek.pl / siekart.pl
+
+Backlog z audytu strony (2026-07-08). Priorytety: P0 = robimy teraz, P4 = decyzje/kiedyś.
+Uwaga: repo jest deployowane w całości na hosting, więc ten plik będzie publicznie dostępny pod `/TODO.md` — nie wpisywać tu nic wrażliwego.
+
+## P0 — Dostępność (cel: WCAG 2.2 AA bez naruszeń, ocena ≥9,5/10)
+
+Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 par ≥4,5:1.
+
+### Kontrast (WCAG 1.4.3, 1.4.11)
+- [x] `--color-muted: #777` → `#666` (5,7:1 na białym, 5,4:1 na `#faf7f2`)
+- [x] `--color-accent-dark` przyciemniony `#8b7355` → `#7a6449` (5,6:1; naprawia też wszystkie linki, które miały 4,49:1) + nowy `--color-accent-darker: #66533c` na hovery; tekstowe użycia beżu `#b8976a` przemapowane:
+  - [x] `.section-subtitle` + `.about-teaser__subtitle` (eyebrowy)
+  - [x] `.about-stat__number`
+  - [x] `.art-seo__label` (+ rozmiar 0.66rem → 0.72rem)
+  - [x] `.btn--primary` — na jasnym tle ciemne złoto + biały tekst; na ciemnym (`.section--dark`, cookie-banner) jasne złoto + ciemny tekst (6,4:1)
+  - [x] `.btn--outline`, podkreślenie nav, focus inputów, checkbox, social hover, mobile-cta, scroll-top, hint mapy
+- [x] `.gallery-item__badge` — scrim `.68` → `.8`
+- [x] `.toast` — tło `.62` → `.85`
+- [x] `.rama-work__hint` — bez `opacity:.55`, zawsze czytelny
+- [x] Fokus: zostają domyślne dwukolorowe ringi przeglądarek (przechodzą na każdym tle — jeden własny kolor by nie przeszedł); dodany `:focus-within` na etykietach uploadu (ukryty input)
+- [x] Kropki slidera — scrim pod kropkami + cele 24px
+
+### Ruch i autoplay (WCAG 2.2.2, 2.3.3)
+- [x] Przycisk pauza/start w hero-sliderze (24px, zmienna etykieta aria)
+- [x] `@media (prefers-reduced-motion: reduce)`: reveal/crossfade/animacje off; smooth-scroll tylko pod `no-preference`
+- [x] JS: przy redukcji ruchu autoplay nie startuje (guzik pozwala włączyć); scroll-top bez smooth
+- [x] Guard na `canvas.animate` w rama.js
+
+### Klawiatura i fokus (WCAG 2.1.1, 2.1.2, 2.4.3, 2.4.7)
+- [x] Lightbox → natywny `<dialog>` + `showModal()` (focus-trap, Esc, inert, powrót fokusu — natywnie)
+- [x] Modal przymiarki ram → j.w.
+- [x] Menu mobilne: pętla Tab (toggle + pozycje), Esc zamyka i wraca na hamburger
+- [x] Inputy upload: `display:none` → `.sr-only` (fokusowalne; o-mnie, rama-demo, modal ram)
+- [x] Skip link „Przejdź do treści" + `<main id="tresc">` (8 stron)
+- [x] Cele dotykowe: kropki 24px, hamburger 44×44
+
+### Semantyka / ARIA (WCAG 1.3.1, 4.1.2)
+- [x] `<main>` na 8 stronach
+- [x] Hamburger: `aria-expanded` + `aria-controls` + zmienna etykieta (ustawiane w JS)
+- [x] `aria-current="page"` na aktywnym linku nav (5 podstron)
+- [x] Karuzela: `role="region"` + `aria-roledescription="karuzela"` + `aria-label`; aktywna kropka z `aria-current`
+- [x] Licznik lightboxa: `aria-live="polite"`
+- [x] Nagłówki: o-mnie h3 → h2 (styl zachowany przez `.about-text h2`), stopki h4 → h2 (7 stron)
+- [x] SVG: `aria-hidden="true" focusable="false"` + naprawiony markup (domknięte dzieci, usunięte artefakty `"../>`)
+- [x] Breadcrumby: `<nav aria-label="Ścieżka nawigacji">` + `<ol>` + `aria-current` (6 podstron)
+- [x] `<nav aria-label="Główna nawigacja">` (8 stron)
+
+### Formularz (WCAG 1.3.5, 3.3.1)
+- [x] `autocomplete="name|email|tel"`
+- [x] Błędy inline przy polach (`.form__error` + `aria-invalid` + `aria-describedby`), czyszczone przy wpisywaniu; toast jako podsumowanie; fokus na pierwsze błędne pole
+
+### Treść
+- [x] Alt-y w konserwacji: „— 1/— 2" → „— po konserwacji / — przed konserwacją" (konwencja zweryfikowana na zdjęciach: `thumb.jpg` = po, `thumb-b.jpg` = przed/kolaż z prac)
+
+### Weryfikacja (definicja „zrobione")
+- [x] Statycznie: składnia JS (node --check), balans tagów HTML na 8 stronach, komplet referencji do plików, kontrasty 16/16 ≥4,5:1
+- [x] Lighthouse Accessibility (silnik axe-core, headless Chrome): **100/100 na wszystkich 8 stronach, 0 naruszeń** (2026-07-08)
+- [ ] Ręczny przejazd klawiaturą: menu mobilne, lightbox, modal ram, formularz, mapa (automat tego nie sprawdzi)
+- [ ] Smoke test NVDA (Windows): strona główna + kontakt
+- [ ] Emulacja `prefers-reduced-motion` w DevTools: zero animacji, slider stoi
+
+## P1 — Wydajność
+
+- [ ] Hero: pierwszy slajd jako `<img fetchpriority="high">` (albo `<link rel="preload">`), pozostałe 4 slajdy doładowywane lazy/po loadzie — teraz 2,3 MB backgroundów ładuje się od razu (index.html:88-92)
+- [ ] Miniatury dla strony głównej i aktualności — kafelki używają pełnych zdjęć 100–450 KB; konwencja `thumb.jpg` już istnieje w kopiach/konserwacjach
+- [ ] WebP/AVIF + `srcset/sizes` dla galerii (60 MB JPG → ~40–50% mniej)
+- [ ] `<link rel="preload">` dla krytycznych fontów woff2 (latin, 400/700)
+- [ ] Skompresować najcięższe slajdy (slide-01 768 KB, slide-02 600 KB)
+
+## P2 — Formularz kontaktowy
+
+- [ ] Backend zamiast samego `mailto:` (Formspree/Web3Forms/skrypt na hostingu DirectAdmin) — mailto na desktopie bez klienta poczty kończy się niczym; mailto zostawić jako fallback
+- [ ] Ochrona antyspamowa (honeypot wystarczy)
+
+## P3 — Porządki w kodzie
+
+- [ ] Usunąć osierocony duplikat `img/kopie/paysage-de-juan-les-pins-pablo-picasso/` (5 plików; zastąpiony przez `pablo-picasso-pejzaz-z-lodkami/`)
+- [ ] `pablo-picasso-pejzaz-z-lodkami/04.jpg` — pominięty w `data-images` (00|01|02|03|05); dodać albo skasować plik — kopie-obrazow/index.html:159
+- [ ] Usunąć martwe atrybuty `data-fill="kopie|konserwacje|realizacje"` (nic ich nie czyta)
+- [x] Naprawić markup SVG: niedomknięte `<path>` na index.html, artefakty `"../>` na podstronach (zrobione razem z `aria-hidden`)
+- [x] main.js — absolutny link do polityki prywatności → relatywny (naprawione przy pakiecie dostępności)
+- [ ] Link „Ustawienia cookies" w stopce (ponowne otwarcie banera; teraz zmiana zgody wymaga czyszczenia danych przeglądarki)
+- [ ] Custom 404 (teraz default hostingu)
+- [ ] `apple-touch-icon` + fallback favicon PNG/ICO (jest tylko SVG)
+- [ ] Wynieść inline style z HTML do klas (drobne, przy okazji)
+
+## P4 — Architektura / decyzje
+
+- [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach i już się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — rozważyć prosty generator/szablonowanie albo przynajmniej checklistę „zmiana menu = 8 plików"
+- [ ] Los `aktualnosci/`: albo na produkcję (nav na wszystkich stronach + sitemap + zdjąć noindex), albo usunąć
+- [ ] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — canonicale zakładają `zofiasiek.pl/...` bez `/new1`
+- [ ] Decyzja: analityka bez cookies (Plausible/Matomo/logi serwera)? Teraz zero danych o ruchu

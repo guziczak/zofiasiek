@@ -65,12 +65,21 @@ function initMobileNav() {
   const overlay = document.querySelector('.mobile-nav-overlay');
   if (!toggle || !navList) return;
 
-  function closeNav() {
+  if (!navList.id) navList.id = 'menu-glowne';
+  toggle.setAttribute('aria-controls', navList.id);
+  toggle.setAttribute('aria-expanded', 'false');
+
+  const isOpen = () => navList.classList.contains('open');
+
+  function closeNav(returnFocus) {
     toggle.classList.remove('active');
     navList.classList.remove('open');
     if (overlay) overlay.classList.remove('visible');
     document.body.classList.remove('nav-open');
     document.body.style.overflow = '';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Otwórz menu nawigacji');
+    if (returnFocus) toggle.focus();
   }
 
   function openNav() {
@@ -79,10 +88,12 @@ function initMobileNav() {
     if (overlay) overlay.classList.add('visible');
     document.body.classList.add('nav-open');
     document.body.style.overflow = 'hidden';
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Zamknij menu nawigacji');
   }
 
   toggle.addEventListener('click', () => {
-    if (navList.classList.contains('open')) {
+    if (isOpen()) {
       closeNav();
     } else {
       openNav();
@@ -90,11 +101,32 @@ function initMobileNav() {
   });
 
   if (overlay) {
-    overlay.addEventListener('click', closeNav);
+    overlay.addEventListener('click', () => closeNav());
   }
 
   navList.querySelectorAll('.nav__link').forEach(link => {
-    link.addEventListener('click', closeNav);
+    link.addEventListener('click', () => closeNav());
+  });
+
+  // Klawiatura: Esc zamyka panel, Tab krąży w jego obrębie (toggle + pozycje menu),
+  // żeby fokus nie uciekał na treść zasłoniętą overlayem.
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen()) return;
+    if (e.key === 'Escape') {
+      closeNav(true);
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const items = [toggle, ...navList.querySelectorAll('a[href], button, input')];
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   });
 }
 
@@ -133,7 +165,8 @@ function initScrollTop() {
   }, { passive: true });
 
   btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
   });
 }
 
@@ -177,6 +210,34 @@ function initContactForm() {
 
   const RECIPIENT = 'zo.siek@interia.pl';
 
+  /* Błędy walidacji pokazujemy przy polach (aria-invalid + aria-describedby),
+     toast jest tylko podsumowaniem — komunikat nie może żyć wyłącznie 4 sekundy. */
+  function setError(field, msg) {
+    const wrap = field.closest('.form__group') || field.parentElement;
+    let el = wrap.querySelector('.form__error');
+    if (!el) {
+      el = document.createElement('p');
+      el.className = 'form__error';
+      el.id = 'err-' + (field.name || 'pole');
+      wrap.appendChild(el);
+    }
+    el.textContent = msg;
+    field.setAttribute('aria-invalid', 'true');
+    field.setAttribute('aria-describedby', el.id);
+  }
+
+  function clearError(field) {
+    const wrap = field.closest('.form__group') || field.parentElement;
+    const el = wrap.querySelector('.form__error');
+    if (el) el.remove();
+    field.removeAttribute('aria-invalid');
+    field.removeAttribute('aria-describedby');
+  }
+
+  form.addEventListener('input', (e) => {
+    if (e.target.matches('.form__input, .form__textarea, [name="consent"]')) clearError(e.target);
+  });
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -184,14 +245,27 @@ function initContactForm() {
 
     // Pola wymagane (formularz ma novalidate, więc sprawdzamy ręcznie)
     const required = ['name', 'email', 'subject', 'message'];
-    const missing = required.find((k) => !String(data[k] || '').trim());
-    if (missing) {
-      showToast('Proszę uzupełnić wymagane pola.', 'error');
-      form.elements[missing]?.focus();
-      return;
+    let firstInvalid = null;
+    required.forEach((k) => {
+      const field = form.elements[k];
+      if (!field) return;
+      if (!String(data[k] || '').trim()) {
+        setError(field, 'To pole jest wymagane.');
+        if (!firstInvalid) firstInvalid = field;
+      } else {
+        clearError(field);
+      }
+    });
+    const consent = form.querySelector('[name="consent"]');
+    if (consent && !consent.checked) {
+      setError(consent, 'Wymagana jest zgoda na przetwarzanie danych osobowych.');
+      if (!firstInvalid) firstInvalid = consent;
+    } else if (consent) {
+      clearError(consent);
     }
-    if (!form.querySelector('[name="consent"]')?.checked) {
-      showToast('Proszę zaakceptować zgodę na przetwarzanie danych osobowych.', 'error');
+    if (firstInvalid) {
+      showToast('Proszę uzupełnić zaznaczone pola.', 'error');
+      firstInvalid.focus();
       return;
     }
 
@@ -250,9 +324,10 @@ function initContactMap() {
     if (essentialOnly) {
       const textEl = banner.querySelector('.cookie-banner__text');
       if (textEl) {
+        // Link relatywny — mapa (i ten re-prompt) istnieje tylko na podstronie kontakt/
         textEl.innerHTML =
           'Interaktywna mapa Google używa plików cookies Google. Zaakceptuj wszystkie, aby ją wyświetlić. ' +
-          '<a href="https://zofiasiek.pl/polityka-prywatnosci/">Dowiedz się więcej</a>.';
+          '<a href="../polityka-prywatnosci/">Dowiedz się więcej</a>.';
       }
       const acceptBtn = banner.querySelector('[data-accept]');
       if (acceptBtn) acceptBtn.textContent = 'Akceptuję wszystkie';
@@ -408,27 +483,58 @@ function initHeroSlider() {
   if (index < 0) index = 0;
   let timer = null;
 
-  // Dots
+  // WCAG 2.2.2: autoodtwarzanie musi dać się zatrzymać; przy preferencji
+  // redukcji ruchu pokaz w ogóle nie startuje sam (guzik pozwala go włączyć).
+  let userPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2.5" y="1.5" width="4" height="13" rx="1"/><rect x="9.5" y="1.5" width="4" height="13" rx="1"/></svg>';
+  const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5l11 6.5-11 6.5z"/></svg>';
+
   const dots = document.createElement('div');
   dots.className = 'hero-slider__dots';
+
+  const pauseBtn = document.createElement('button');
+  pauseBtn.type = 'button';
+  pauseBtn.className = 'hero-slider__pause';
+  function updatePauseBtn() {
+    pauseBtn.innerHTML = userPaused ? ICON_PLAY : ICON_PAUSE;
+    pauseBtn.setAttribute('aria-label', userPaused
+      ? 'Włącz automatyczne przewijanie slajdów'
+      : 'Zatrzymaj automatyczne przewijanie slajdów');
+  }
+  updatePauseBtn();
+  pauseBtn.addEventListener('click', () => {
+    userPaused = !userPaused;
+    userPaused ? stop() : start();
+    updatePauseBtn();
+  });
+  dots.appendChild(pauseBtn);
+
   slides.forEach((_, i) => {
     const dot = document.createElement('button');
+    dot.type = 'button';
     dot.className = 'hero-slider__dot' + (i === index ? ' is-active' : '');
     dot.setAttribute('aria-label', `Slajd ${i + 1}`);
+    if (i === index) dot.setAttribute('aria-current', 'true');
     dot.addEventListener('click', () => { go(i); restart(); });
     dots.appendChild(dot);
   });
   slider.appendChild(dots);
 
+  const dotEls = () => [...dots.querySelectorAll('.hero-slider__dot')];
+
   function go(i) {
+    const dl = dotEls();
     slides[index].classList.remove('is-active');
-    dots.children[index].classList.remove('is-active');
+    dl[index].classList.remove('is-active');
+    dl[index].removeAttribute('aria-current');
     index = (i + slides.length) % slides.length;
     slides[index].classList.add('is-active');
-    dots.children[index].classList.add('is-active');
+    dl[index].classList.add('is-active');
+    dl[index].setAttribute('aria-current', 'true');
   }
   function next() { go(index + 1); }
-  function start() { stop(); timer = setInterval(next, delay); }
+  function start() { stop(); if (userPaused) return; timer = setInterval(next, delay); }
   function stop() { clearInterval(timer); }
   function restart() { stop(); start(); }
 
@@ -440,16 +546,17 @@ function initHeroSlider() {
   start();
 }
 
-/* ----- Lightbox (galerie + podgalerie) ----- */
+/* ----- Lightbox (galerie + podgalerie) -----
+   Natywny <dialog> + showModal(): focus-trap, Escape, inert tła i przywrócenie
+   fokusu na kafelek po zamknięciu robi przeglądarka. */
 function initLightbox() {
   const triggers = [...document.querySelectorAll('.gallery-item[data-images]')];
   if (!triggers.length) return;
 
   // Build overlay once
-  const box = document.createElement('div');
+  const box = document.createElement('dialog');
   box.className = 'lightbox';
-  box.setAttribute('role', 'dialog');
-  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-label', 'Podgląd zdjęcia');
   box.innerHTML = `
     <button class="lightbox__close" aria-label="Zamknij">&times;</button>
     <button class="lightbox__nav lightbox__nav--prev" aria-label="Poprzednie">&#8249;</button>
@@ -458,7 +565,7 @@ function initLightbox() {
       <figcaption class="lightbox__caption"></figcaption>
     </figure>
     <button class="lightbox__nav lightbox__nav--next" aria-label="Następne">&#8250;</button>
-    <span class="lightbox__counter"></span>`;
+    <span class="lightbox__counter" aria-live="polite"></span>`;
   document.body.appendChild(box);
 
   const imgEl = box.querySelector('.lightbox__img');
@@ -485,13 +592,14 @@ function initLightbox() {
   function open(list, start) {
     slides = list; pos = start;
     document.body.style.overflow = 'hidden';
-    box.classList.add('is-open');
+    box.showModal();
     render();
   }
-  function close() {
-    box.classList.remove('is-open');
+  function close() { box.close(); }
+  // 'close' łapie każdą drogę zamknięcia (przycisk, backdrop, Escape)
+  box.addEventListener('close', () => {
     document.body.style.overflow = '';
-  }
+  });
   function move(d) { pos = (pos + d + slides.length) % slides.length; render(); }
 
   triggers.forEach(item => {
@@ -518,9 +626,8 @@ function initLightbox() {
   box.querySelector('.lightbox__nav--next').addEventListener('click', () => move(1));
   box.addEventListener('click', e => { if (e.target === box) close(); });
   document.addEventListener('keydown', e => {
-    if (!box.classList.contains('is-open')) return;
-    if (e.key === 'Escape') close();
-    else if (e.key === 'ArrowLeft') move(-1);
+    if (!box.open) return; // Escape obsługuje natywny <dialog>
+    if (e.key === 'ArrowLeft') move(-1);
     else if (e.key === 'ArrowRight') move(1);
   });
 }

@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="../css/fonts.css">
   <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
-  <link rel="stylesheet" href="../css/style.css?v=20260620v6">
+  <link rel="stylesheet" href="../css/style.css?v=20260708">
   <style>
     .rama-head { text-align: center; max-width: 720px; margin: 0 auto 2.25rem; }
     .rama-head .eyebrow {
@@ -48,18 +48,17 @@
     .rama-opt:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(60,50,38,.12); }
     .rama-opt canvas { width: 92px; height: auto; border-radius: 2px; }
     .rama-opt span { display: block; margin-top: .45rem; font-size: .8rem; color: var(--color-text); text-align: center; line-height: 1.3; }
-    .rama-opt.is-active { border-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent) inset; }
+    .rama-opt.is-active { border-color: var(--color-accent-dark); box-shadow: 0 0 0 2px var(--color-accent-dark) inset; }
     .rama-opt.is-active span { color: var(--color-accent-dark); font-weight: 700; }
 
     .rama-actions { text-align:center; margin-top:1.75rem; }
     .rama-upload-label {
       display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
-      font-size:.85rem; color:var(--color-accent-dark); border:1px dashed var(--color-accent-light);
+      font-size:.85rem; color:var(--color-accent-dark); border:1px dashed var(--color-accent-dark);
       padding:.6rem 1.1rem; border-radius:var(--border-radius); transition:background var(--transition);
     }
     .rama-upload-label:hover { background:var(--color-bg-warm); }
-    .rama-upload-label input { display:none; }
-
+    
     .rama-note {
       max-width: 720px; margin: 2.5rem auto 0; padding: 1.1rem 1.4rem;
       background: var(--color-bg-warm); border-left: 3px solid var(--color-accent-light);
@@ -68,15 +67,18 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#tresc">Przejdź do treści</a>
   <header class="header header--solid">
     <div class="header__inner">
       <a href="../" class="header__logo"><img src="../img/logo.png" alt="Zofia Siek-Mlicka"></a>
-      <nav><ul class="nav__list">
+      <nav aria-label="Główna nawigacja"><ul class="nav__list">
         <li><a href="../" class="nav__link">Strona główna</a></li>
         <li><a href="../o-mnie/" class="nav__link">O mnie</a></li>
       </ul></nav>
     </div>
   </header>
+
+  <main id="tresc">
 
   <section class="section">
     <div class="container">
@@ -94,9 +96,9 @@
 
       <div class="rama-actions">
         <label class="rama-upload-label">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"><polyline points="17 8 12 3 7 8"><line x1="12" y1="3" x2="12" y2="15"></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Wgraj własny obraz i zobacz w ramie
-          <input type="file" id="ramaUpload" accept="image/*">
+          <input type="file" id="ramaUpload" accept="image/*" class="sr-only">
         </label>
       </div>
 
@@ -107,6 +109,8 @@
     </div>
   </section>
 
-  <script src="../js/rama.js?v=20260626"></script>
+  </main>
+
+  <script src="../js/rama.js?v=20260708"></script>
 </body>
 </html>

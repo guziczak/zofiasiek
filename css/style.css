@@ -11,9 +11,10 @@
   --color-bg-dark: #3a332b;
   --color-text: #2b2b2b;
   --color-heading: #1a1a1a;
-  --color-muted: #777777;
-  --color-accent: #b8976a;
-  --color-accent-dark: #8b7355;
+  --color-muted: #666666; /* 5,7:1 na białym, 5,4:1 na --color-bg-warm (WCAG AA) */
+  --color-accent: #b8976a; /* tylko dekoracje i tekst na ciemnym tle (2,7:1 z bielą!) */
+  --color-accent-dark: #7a6449; /* tekst/CTA na jasnym tle — 5,6:1 z bielą (WCAG AA) */
+  --color-accent-darker: #66533c; /* stany hover dla accent-dark */
   --color-accent-light: #d4c4a8;
   --color-border: #e8e0d6;
   --color-footer-text: #d4c4a8;
@@ -65,8 +66,13 @@
 }
 
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -92,7 +98,7 @@ a {
 }
 
 a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-darker);
 }
 
 ul, ol {
@@ -126,7 +132,7 @@ p + p { margin-top: var(--space-sm); }
   font-size: var(--fs-sm);
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
   margin-bottom: var(--space-xs);
 }
 
@@ -197,23 +203,36 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .btn--primary {
-  background-color: var(--color-accent);
-  color: var(--color-white);
-}
-
-.btn--primary:hover {
   background-color: var(--color-accent-dark);
   color: var(--color-white);
 }
 
+.btn--primary:hover {
+  background-color: var(--color-accent-darker);
+  color: var(--color-white);
+}
+
+/* Na ciemnych tłach zostaje jasne złoto, ale z ciemnym tekstem — kontrast AA w obu kontekstach */
+.section--dark .btn--primary,
+.cookie-banner .btn--primary {
+  background-color: var(--color-accent);
+  color: #1a1a1a;
+}
+
+.section--dark .btn--primary:hover,
+.cookie-banner .btn--primary:hover {
+  background-color: var(--color-accent-light);
+  color: #1a1a1a;
+}
+
 .btn--outline {
-  border: 2px solid var(--color-accent);
-  color: var(--color-accent);
+  border: 2px solid var(--color-accent-dark);
+  color: var(--color-accent-dark);
   background: transparent;
 }
 
 .btn--outline:hover {
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
   color: var(--color-white);
 }
 
@@ -297,7 +316,7 @@ p + p { margin-top: var(--space-sm); }
   left: 0;
   width: 0;
   height: 2px;
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
   transition: width var(--transition);
 }
 
@@ -327,15 +346,18 @@ p + p { margin-top: var(--space-sm); }
 .nav__toggle {
   display: none;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
-  width: 28px;
+  width: 44px; /* cel dotykowy ≥24px (WCAG 2.5.8) */
+  height: 44px;
   padding: 0;
   z-index: 1001;
 }
 
 .nav__toggle span {
   display: block;
-  width: 100%;
+  width: 26px;
   height: 2px;
   background-color: var(--color-heading);
   transition: all var(--transition);
@@ -422,7 +444,22 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .page-header__breadcrumb a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
+}
+
+.page-header__breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.page-header__breadcrumb li + li::before {
+  content: '/';
+  margin: 0 0.5em;
+  opacity: 0.7;
 }
 
 /* ----- 8. Service Cards ----- */
@@ -535,7 +572,7 @@ p + p { margin-top: var(--space-sm); }
   font-size: var(--fs-sm);
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
   margin-bottom: var(--space-xs);
 }
 
@@ -594,7 +631,7 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .contact-info__value a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-darker);
 }
 
 .form__group {
@@ -626,7 +663,7 @@ p + p { margin-top: var(--space-sm); }
 .form__input:focus,
 .form__textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-dark);
 }
 
 .form__textarea {
@@ -644,7 +681,13 @@ p + p { margin-top: var(--space-sm); }
 
 .form__consent input[type="checkbox"] {
   margin-top: 4px;
-  accent-color: var(--color-accent);
+  accent-color: var(--color-accent-dark);
+}
+
+.form__error {
+  margin-top: 4px;
+  font-size: var(--fs-sm);
+  color: var(--color-error);
 }
 
 /* Social links */
@@ -666,8 +709,8 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .social-links a:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
   color: var(--color-white);
 }
 
@@ -839,7 +882,7 @@ p + p { margin-top: var(--space-sm); }
   right: var(--space-md);
   width: 56px;
   height: 56px;
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
   color: var(--color-white);
   border-radius: 50%;
   align-items: center;
@@ -850,7 +893,7 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .mobile-cta:hover {
-  background-color: var(--color-accent-dark);
+  background-color: var(--color-accent-darker);
   color: var(--color-white);
   transform: scale(1.1);
 }
@@ -868,7 +911,7 @@ p + p { margin-top: var(--space-sm); }
   right: var(--space-md);
   width: 44px;
   height: 44px;
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
   color: var(--color-white);
   border-radius: 50%;
   display: flex;
@@ -886,7 +929,7 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .scroll-top:hover {
-  background-color: var(--color-accent-dark);
+  background-color: var(--color-accent-darker);
   color: var(--color-white);
   transform: translateY(-3px);
 }
@@ -933,12 +976,13 @@ p + p { margin-top: var(--space-sm); }
   object-fit: cover;
 }
 
-.about-text h3 {
+.about-text h2 {
+  font-size: var(--fs-2xl); /* wizualnie jak dawne h3 — tag h2 dla poprawnej hierarchii nagłówków */
   margin-top: var(--space-lg);
   margin-bottom: var(--space-sm);
 }
 
-.about-text h3:first-child {
+.about-text h2:first-child {
   margin-top: 0;
 }
 
@@ -962,7 +1006,7 @@ p + p { margin-top: var(--space-sm); }
 .about-stat__number {
   font-family: var(--font-heading);
   font-size: var(--fs-3xl);
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
 }
 
 .about-stat__label {
@@ -1037,7 +1081,7 @@ p + p { margin-top: var(--space-sm); }
 
 .map-placeholder__hint {
   padding: 0.6em 1.4em;
-  background: var(--color-accent);
+  background: var(--color-accent-dark);
   color: var(--color-white);
   border-radius: var(--border-radius);
   font-weight: 700;
@@ -1151,7 +1195,7 @@ p + p { margin-top: var(--space-sm); }
 
   .nav__list .nav__link:hover,
   .nav__list .nav__link--active {
-    color: var(--color-accent);
+    color: var(--color-accent-dark);
   }
 
   .nav__list .nav__link--active {
@@ -1178,7 +1222,7 @@ p + p { margin-top: var(--space-sm); }
   }
 
   .nav__footer-contact a:hover {
-    color: var(--color-accent);
+    color: var(--color-accent-dark);
   }
 
   .nav__footer .social-links {
@@ -1309,30 +1353,72 @@ body {
   z-index: 1;
 }
 
+/* Kropki + pauza na scrimie (kontrast na jasnych slajdach); cele dotykowe 24px */
 .hero-slider__dots {
   position: absolute;
-  bottom: 26px;
+  bottom: 18px;
   left: 0;
   right: 0;
+  width: max-content;
+  margin: 0 auto;
   display: flex;
-  gap: 10px;
+  gap: 2px;
+  align-items: center;
   justify-content: center;
+  padding: 2px 8px;
+  background: rgba(20, 18, 15, 0.38);
+  border-radius: 100px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   z-index: 2;
 }
 
 .hero-slider__dot {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-slider__dot::before {
+  content: '';
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  background: transparent;
-  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.85);
   transition: background var(--transition), transform var(--transition);
 }
 
-.hero-slider__dot.is-active {
+.hero-slider__dot.is-active::before {
   background: #fff;
   transform: scale(1.15);
+}
+
+.hero-slider__pause {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 50%;
+}
+
+.hero-slider__pause svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+.hero-slider__pause:hover {
+  color: var(--color-accent-light);
 }
 
 /* ----- Galeria: kafelek jako przycisk + nowe elementy ----- */
@@ -1366,7 +1452,7 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(20, 18, 15, 0.68);
+  background: rgba(20, 18, 15, 0.8);
   color: var(--color-accent-light);
   font-family: var(--font-body);
   font-size: 0.72rem;
@@ -1416,11 +1502,11 @@ body {
 .art-seo__label {
   display: inline-block;
   font-family: var(--font-body);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--color-accent);
+  color: var(--color-accent-dark);
   margin-bottom: 5px;
   text-shadow: 0 0 12px rgba(184, 151, 106, 0.6); /* delikatny glow znacznika */
 }
@@ -1434,22 +1520,33 @@ body {
   color: var(--color-accent-dark);
 }
 
-.art-seo a:hover { color: var(--color-accent); }
+.art-seo a:hover { color: var(--color-accent-darker); }
 
-/* ----- Lightbox ----- */
+/* ----- Lightbox (natywny <dialog> — focus-trap, Escape i inert tła daje przeglądarka) ----- */
 .lightbox {
   position: fixed;
   inset: 0;
   z-index: 2000;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
   background: rgba(15, 13, 11, 0.94);
   display: none;
   align-items: center;
   justify-content: center;
 }
 
-.lightbox.is-open {
+.lightbox[open] {
   display: flex;
   animation: lb-fade 0.25s ease;
+}
+
+.lightbox::backdrop {
+  background: transparent;
 }
 
 @keyframes lb-fade {
@@ -1562,7 +1659,7 @@ body {
 }
 
 .expandable__toggle:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-darker);
 }
 
 /* ----- Nagłówek podstrony ze zdjęciem w tle ----- */
@@ -1597,6 +1694,10 @@ body {
   color: rgba(255, 255, 255, 0.82);
 }
 
+.page-header--image .page-header__breadcrumb a:hover {
+  color: var(--color-accent-light);
+}
+
 @media (max-width: 600px) {
   .lightbox__nav { width: 42px; height: 64px; font-size: 2rem; }
   .lightbox__caption { font-size: var(--fs-base); }
@@ -1618,7 +1719,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(38, 34, 28, 0.62);
+  background: rgba(38, 34, 28, 0.85);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
   backdrop-filter: blur(14px) saturate(1.3);
   color: #f3ece0;
@@ -1642,3 +1743,67 @@ body {
 
 .toast--error { border-left-color: var(--color-error); }
 .toast--success { border-left-color: var(--color-success); }
+
+/* ============================================================
+   DOSTĘPNOŚĆ: skip link, sr-only, fokus, redukcja ruchu
+   ============================================================ */
+
+/* Link „Przejdź do treści" — widoczny tylko po fokusie z klawiatury */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 10001;
+  background: var(--color-bg-dark);
+  color: var(--color-white);
+  padding: 0.8rem 1.4rem;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Ukrycie wizualne z zachowaniem dostępności (m.in. inputy upload — muszą być fokusowalne) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Widoczny fokus na etykiecie uploadu, gdy fokus trafia w ukryty input */
+.rama-upload-label:focus-within {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+
+/* Link w banerze cookies — hover musi być czytelny na ciemnym tle */
+.cookie-banner__text a:hover {
+  color: var(--color-white);
+}
+
+/* Redukcja ruchu: bez animacji wjazdu, crossfade'ów i płynnego przewijania */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -191,7 +191,8 @@
     }
     function paint() {
       render(canvas, img, current, fitArtW());
-      canvas.animate ? canvas.animate([{opacity:.4},{opacity:1}], {duration:200,easing:'ease'}) : null;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (canvas.animate && !reduce) canvas.animate([{opacity:.4},{opacity:1}], {duration:200,easing:'ease'});
     }
     function buildPicker() {
       picker.innerHTML = '';
@@ -228,15 +229,15 @@
 
   /* ============================================================
      Tryb 2 — galeria prac w ramach + modal przymiarki
+     Natywny <dialog> + showModal(): focus-trap, Escape, inert tła
+     i powrót fokusu po zamknięciu robi przeglądarka.
      ============================================================ */
-  let modal = null, modalImg = null, modalSpec = null, lastFocus = null;
+  let modal = null, modalImg = null, modalSpec = null;
 
   function buildModal() {
     if (modal) return modal;
-    modal = document.createElement('div');
+    modal = document.createElement('dialog');
     modal.className = 'rama-modal';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-label', 'Przymierzalnia ram');
     modal.innerHTML =
       '<div class="rama-modal__backdrop" data-close></div>' +
@@ -249,14 +250,15 @@
           '<div class="rama-modal__picker" role="group" aria-label="Style ram"></div>' +
           '<label class="rama-upload-label">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
-            ' Wgraj własny obraz<input type="file" accept="image/*"></label>' +
+            ' Wgraj własny obraz<input type="file" accept="image/*" class="sr-only"></label>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
 
     modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeModal));
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    // 'close' łapie każdą drogę zamknięcia (przycisk, backdrop, natywny Escape)
+    modal.addEventListener('close', () => {
+      document.body.style.overflow = '';
     });
     modal.querySelector('.rama-upload-label input').addEventListener('change', e => {
       const file = e.target.files[0]; if (!file) return;
@@ -270,7 +272,7 @@
     });
 
     let rt; window.addEventListener('resize', () => {
-      if (!modal.classList.contains('is-open')) return;
+      if (!modal.open) return;
       clearTimeout(rt); rt = setTimeout(paintModal, 120);
     });
     return modal;
@@ -312,18 +314,13 @@
     buildModal();
     modalImg = img; modalSpec = spec || FRAMES[0];
     modal.querySelector('.rama-modal__title').textContent = title || '';
-    lastFocus = document.activeElement;
-    modal.classList.add('is-open');                 // najpierw POKAŻ modal…
+    modal.showModal();                              // najpierw POKAŻ modal…
     document.body.style.overflow = 'hidden';
     buildModalPicker();
     requestAnimationFrame(paintModal);              // …a renderuj dopiero gdy ma layout → poprawne proporcje
-    modal.querySelector('.rama-modal__close').focus();
   }
   function closeModal() {
-    if (!modal) return;
-    modal.classList.remove('is-open');
-    document.body.style.overflow = '';
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    if (modal && modal.open) modal.close();
   }
 
   function initGallery() {
