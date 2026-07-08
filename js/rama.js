@@ -135,7 +135,9 @@
     const T = Math.round(Math.min(artW, artH) * spec.t);
     const W = artW + 2*T, H = artH + 2*T;
     canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    /* height:auto zamiast sztywnych px — gdyby jakikolwiek max-width przyciął
+       szerokość, przeglądarka skaluje proporcjonalnie (bez zgniatania obrazu) */
+    canvas.style.width = W + 'px'; canvas.style.height = 'auto';
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
@@ -280,7 +282,11 @@
 
   function fitModalArtW(spec) {
     const stage = modal.querySelector('.rama-modal__stage');
-    const availW = Math.min((stage.clientWidth || 480) - 12, 620);
+    /* clientWidth ZAWIERA padding sceny — trzeba go odjąć, inaczej canvas
+       wychodzi szerszy niż wnętrze i max-width zgniata obraz w poziomie */
+    const cs = window.getComputedStyle(stage);
+    const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    const availW = Math.min((stage.clientWidth || 480) - pad - 2, 620);
     const availH = Math.min(window.innerHeight * 0.72, 660);
     const ar = modalImg.naturalWidth / modalImg.naturalHeight;
     let artW = availW / (1 + 2 * spec.t);
