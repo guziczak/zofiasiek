@@ -68,6 +68,23 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 - [ ] `<link rel="preload">` dla krytycznych fontów woff2 (latin, 400/700)
 - [ ] Skompresować najcięższe slajdy (slide-01 768 KB, slide-02 600 KB)
 
+## SEO poza kodem (pilne po deployu — największe dźwignie widoczności)
+
+Weryfikacja live 2026-07-08: zofiasiek.pl serwuje stronę z korzenia domeny ✓, domena w indeksie ✓,
+ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
+
+- [x] **Przekierowania ze starych URL-i WP** — zrobione jako stuby w repo (foldery ze starymi nazwami + index.html: meta-refresh 0 + JS + canonical; wtyczka Redirection by nie zadziałała, bo 404 serwuje hosting, nie WP):
+  - `/konserwacja-zabytkow-i-dziel-sztuki/` → `/konserwacja/`
+  - `/portret-malzonkow-arnolfinich-jana-van-eycka/` → `/kopie-obrazow/`
+  - `/vermeer-dziewczyna-z-perla/` → `/kopie-obrazow/`
+- [ ] Opcjonalny upgrade: prawdziwe HTTP 301 w panelu hostingu (Plesk), jeśli kiedyś będzie dostęp — wtedy stuby można skasować
+- [ ] Pełną listę starych 404 pokaże Search Console (indeks może trzymać więcej niż te 3)
+- [ ] **Google Search Console**: weryfikacja domeny, zgłoszenie sitemap.xml, prośba o przeindeksowanie (indeks ma jeszcze stary title „Zofia Siek"), raport Strony/404 — zero cookies, zgodne z privacy-first
+- [ ] **Wizytówka Google (Business Profile)** dla pracowni (Siedlec 3, Krzeszowice) + systematyczne zbieranie opinii — dla fraz lokalnych pack mapowy stoi nad wynikami organicznymi
+- [ ] Linki zwrotne: strona w bio FB/IG/TikToka, katalogi lokalne, współprace (np. Muzeum w Chrzanowie), prasa lokalna
+- [ ] Treść przyrostowa: `aktualnosci/` jako blog realizacji (każda praca = wpis z unikalnym opisem) — powiązane z decyzją w P4
+- Podgląd guziczak.github.io/zofiasiek jest SEO-bezpieczny: absolutne canonicale na zofiasiek.pl skleją kopie w Google (nic nie trzeba robić)
+
 ## P2 — Formularz kontaktowy
 
 - [ ] Backend zamiast samego `mailto:` (Formspree/Web3Forms/skrypt na hostingu DirectAdmin) — mailto na desktopie bez klienta poczty kończy się niczym; mailto zostawić jako fallback
@@ -89,5 +106,5 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 
 - [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach i już się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — rozważyć prosty generator/szablonowanie albo przynajmniej checklistę „zmiana menu = 8 plików"
 - [ ] Los `aktualnosci/`: albo na produkcję (nav na wszystkich stronach + sitemap + zdjąć noindex), albo usunąć
-- [ ] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — canonicale zakładają `zofiasiek.pl/...` bez `/new1`
+- [x] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — potwierdzone live 2026-07-08 (strona odpowiada z `/`, canonicale poprawne)
 - [ ] Decyzja: analityka bez cookies (Plausible/Matomo/logi serwera)? Teraz zero danych o ruchu
