@@ -12,6 +12,34 @@
 (function () {
   'use strict';
 
+  /* ----- Teksty interfejsu przymierzalni (PL/EN) — wybór po <html lang> ----- */
+  const TXT = {
+    pl: {
+      frames: { 'zlota-zdobiona': 'Klasyczna złota', 'zlota-gladka': 'Złota gładka', 'orzech': 'Ciemny orzech', 'debowa': 'Jasny dąb', 'czarna': 'Czarna', 'bez-ramy': 'Bez ramy' },
+      frameLabel: 'Rama: ',
+      modalLabel: 'Przymierzalnia ram',
+      modalClose: 'Zamknij przymierzalnię',
+      modalLead: 'Wybierz oprawę — rysowana na żywo wokół obrazu:',
+      framesGroup: 'Style ram',
+      upload: ' Wgraj własny obraz',
+      yourPicture: 'Twój obraz',
+      tryOn: 'Przymierz ramę do pracy: '
+    },
+    en: {
+      frames: { 'zlota-zdobiona': 'Classic gold', 'zlota-gladka': 'Smooth gold', 'orzech': 'Dark walnut', 'debowa': 'Light oak', 'czarna': 'Black', 'bez-ramy': 'No frame' },
+      frameLabel: 'Frame: ',
+      modalLabel: 'Frame fitting room',
+      modalClose: 'Close the frame fitting room',
+      modalLead: 'Choose a frame — drawn live around the picture:',
+      framesGroup: 'Frame styles',
+      upload: ' Upload your own picture',
+      yourPicture: 'Your picture',
+      tryOn: 'Try a frame on: '
+    }
+  };
+  const STR = TXT[(document.documentElement.lang || 'pl').slice(0, 2)] || TXT.pl;
+  function frameName(f) { return STR.frames[f.key] || f.name; }
+
   /* --- definicje stylów ram: profil = przystanki gradientu w poprzek listwy
      (at: 0 = krawędź zewnętrzna, 1 = przy obrazie). t = grubość (ułamek krótszego boku). --- */
   const FRAMES = [
@@ -201,10 +229,10 @@
       FRAMES.forEach(f => {
         const b = document.createElement('button');
         b.className = 'rama-opt' + (f.key === current.key ? ' is-active' : '');
-        b.type = 'button'; b.setAttribute('aria-label', 'Rama: ' + f.name);
+        b.type = 'button'; b.setAttribute('aria-label', STR.frameLabel + frameName(f));
         const c = document.createElement('canvas');
         render(c, img, f, 92);
-        const span = document.createElement('span'); span.textContent = f.name;
+        const span = document.createElement('span'); span.textContent = frameName(f);
         b.appendChild(c); b.appendChild(span);
         b.addEventListener('click', () => {
           current = f; paint();
@@ -240,19 +268,19 @@
     if (modal) return modal;
     modal = document.createElement('dialog');
     modal.className = 'rama-modal';
-    modal.setAttribute('aria-label', 'Przymierzalnia ram');
+    modal.setAttribute('aria-label', STR.modalLabel);
     modal.innerHTML =
       '<div class="rama-modal__backdrop" data-close></div>' +
       '<div class="rama-modal__panel" role="document">' +
-        '<button class="rama-modal__close" type="button" aria-label="Zamknij przymierzalnię" data-close>&times;</button>' +
+        '<button class="rama-modal__close" type="button" aria-label="' + STR.modalClose + '" data-close>&times;</button>' +
         '<div class="rama-modal__stage"><canvas aria-hidden="true"></canvas></div>' +
         '<div class="rama-modal__side">' +
           '<h3 class="rama-modal__title"></h3>' +
-          '<p class="rama-modal__lead">Wybierz oprawę — rysowana na żywo wokół obrazu:</p>' +
-          '<div class="rama-modal__picker" role="group" aria-label="Style ram"></div>' +
+          '<p class="rama-modal__lead">' + STR.modalLead + '</p>' +
+          '<div class="rama-modal__picker" role="group" aria-label="' + STR.framesGroup + '"></div>' +
           '<label class="rama-upload-label">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
-            ' Wgraj własny obraz<input type="file" accept="image/*" class="sr-only"></label>' +
+            STR.upload + '<input type="file" accept="image/*" class="sr-only"></label>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -267,7 +295,7 @@
       const fr = new FileReader();
       fr.onload = () => { const im = new Image(); im.onload = () => {
         modalImg = im; modalSpec = FRAMES[0];
-        modal.querySelector('.rama-modal__title').textContent = 'Twój obraz';
+        modal.querySelector('.rama-modal__title').textContent = STR.yourPicture;
         buildModalPicker(); paintModal();
       }; im.src = fr.result; };
       fr.readAsDataURL(file);
@@ -308,9 +336,9 @@
     FRAMES.forEach(f => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'rama-opt'; b.dataset.key = f.key;
-      b.setAttribute('aria-label', 'Rama: ' + f.name);
+      b.setAttribute('aria-label', STR.frameLabel + frameName(f));
       const c = document.createElement('canvas'); renderOuter(c, modalImg, f, 78);
-      const s = document.createElement('span'); s.textContent = f.name;
+      const s = document.createElement('span'); s.textContent = frameName(f);
       b.appendChild(c); b.appendChild(s);
       b.addEventListener('click', () => { modalSpec = f; paintModal(); });
       pick.appendChild(b);
@@ -348,7 +376,7 @@
         };
         img.src = work.dataset.src;
         if (canvas) canvas.setAttribute('aria-hidden', 'true');
-        work.setAttribute('aria-label', 'Przymierz ramę do pracy: ' + title);
+        work.setAttribute('aria-label', STR.tryOn + title);
         work.addEventListener('click', () => { if (work._img) openModal(work._img, work._spec, title); });
       });
     });
@@ -357,7 +385,7 @@
       inp.addEventListener('change', e => {
         const file = e.target.files[0]; if (!file) return;
         const fr = new FileReader();
-        fr.onload = () => { const im = new Image(); im.onload = () => openModal(im, FRAMES[0], 'Twój obraz'); im.src = fr.result; };
+        fr.onload = () => { const im = new Image(); im.onload = () => openModal(im, FRAMES[0], STR.yourPicture); im.src = fr.result; };
         fr.readAsDataURL(file);
         e.target.value = '';
       });

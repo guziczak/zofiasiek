@@ -1,33 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://zofiasiek.pl/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/"/>
+    <lastmod>2026-07-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://zofiasiek.pl/kopie-obrazow/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/kopie-obrazow/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/painting-copies/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/kopie-obrazow/"/>
+    <lastmod>2026-07-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://zofiasiek.pl/konserwacja/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/konserwacja/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/conservation/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/konserwacja/"/>
+    <lastmod>2026-07-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://zofiasiek.pl/o-mnie/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/o-mnie/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/o-mnie/"/>
+    <lastmod>2026-07-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://zofiasiek.pl/kontakt/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/kontakt/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/kontakt/"/>
+    <lastmod>2026-07-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://zofiasiek.pl/en/</loc>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/"/>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zofiasiek.pl/en/painting-copies/</loc>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/kopie-obrazow/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/painting-copies/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/kopie-obrazow/"/>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zofiasiek.pl/en/conservation/</loc>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/konserwacja/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/conservation/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/konserwacja/"/>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zofiasiek.pl/en/about/</loc>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/o-mnie/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/o-mnie/"/>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://zofiasiek.pl/en/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://zofiasiek.pl/kontakt/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zofiasiek.pl/en/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zofiasiek.pl/kontakt/"/>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

@@ -2,6 +2,71 @@
    Zofia Siek-Mlicka — Main JavaScript
    ============================================================ */
 
+/* ----- Teksty interfejsu (PL/EN) — wybór po <html lang> -----
+   Strony EN leżą w /en/ i ładują ten sam plik; ścieżki względne w tekstach
+   (np. link do polityki prywatności) działają, bo podstrony obu wersji
+   są na tej samej głębokości. */
+const STR = (function () {
+  const all = {
+    pl: {
+      navOpen: 'Otwórz menu nawigacji',
+      navClose: 'Zamknij menu nawigacji',
+      formRequired: 'To pole jest wymagane.',
+      formConsent: 'Wymagana jest zgoda na przetwarzanie danych osobowych.',
+      formFill: 'Proszę uzupełnić zaznaczone pola.',
+      mailSubject: 'Zapytanie ze strony — ',
+      mailName: 'Imię i nazwisko',
+      mailEmail: 'E-mail',
+      mailPhone: 'Telefon',
+      mailOpening: 'Otwieram Twój program pocztowy…',
+      mapNeedAll: 'Aby wyświetlić interaktywną mapę Google, zaakceptuj wszystkie pliki cookies.',
+      mapNeedConsent: 'Najpierw zaakceptuj pliki cookies.',
+      mapCookieHtml: 'Interaktywna mapa Google używa plików cookies Google. Zaakceptuj wszystkie, aby ją wyświetlić. ' +
+        '<a href="../polityka-prywatnosci/">Dowiedz się więcej</a>.',
+      acceptAll: 'Akceptuję wszystkie',
+      mapTitle: 'Lokalizacja — Siedlec 3, 32-065 Krzeszowice',
+      sliderPlay: 'Włącz automatyczne przewijanie slajdów',
+      sliderPause: 'Zatrzymaj automatyczne przewijanie slajdów',
+      slide: 'Slajd',
+      lightbox: 'Podgląd zdjęcia',
+      close: 'Zamknij',
+      prev: 'Poprzednie',
+      next: 'Następne',
+      collapse: 'Zwiń',
+      readMore: 'Czytaj więcej'
+    },
+    en: {
+      navOpen: 'Open navigation menu',
+      navClose: 'Close navigation menu',
+      formRequired: 'This field is required.',
+      formConsent: 'Consent to the processing of personal data is required.',
+      formFill: 'Please fill in the highlighted fields.',
+      mailSubject: 'Inquiry from the website — ',
+      mailName: 'Full name',
+      mailEmail: 'E-mail',
+      mailPhone: 'Phone',
+      mailOpening: 'Opening your e-mail app…',
+      mapNeedAll: 'To display the interactive Google map, please accept all cookies.',
+      mapNeedConsent: 'Please accept cookies first.',
+      mapCookieHtml: 'The interactive Google map uses Google cookies. Accept all cookies to display it. ' +
+        '<a href="../privacy-policy/">Learn more</a>.',
+      acceptAll: 'Accept all',
+      mapTitle: 'Location — Siedlec 3, 32-065 Krzeszowice, Poland',
+      sliderPlay: 'Start automatic slide rotation',
+      sliderPause: 'Stop automatic slide rotation',
+      slide: 'Slide',
+      lightbox: 'Photo preview',
+      close: 'Close',
+      prev: 'Previous',
+      next: 'Next',
+      collapse: 'Collapse',
+      readMore: 'Read more'
+    }
+  };
+  const lang = (document.documentElement.lang || 'pl').slice(0, 2);
+  return all[lang] || all.pl;
+})();
+
 /* ----- Zapis pozycji przewijania -----
    Samo PRZYWRACANIE robi mały inline-skrypt na końcu <body> — uruchamia się przed
    pierwszym malowaniem i z wyłączoną płynnością, więc strona od razu jest na właściwej
@@ -78,7 +143,7 @@ function initMobileNav() {
     document.body.classList.remove('nav-open');
     document.body.style.overflow = '';
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Otwórz menu nawigacji');
+    toggle.setAttribute('aria-label', STR.navOpen);
     if (returnFocus) toggle.focus();
   }
 
@@ -89,7 +154,7 @@ function initMobileNav() {
     document.body.classList.add('nav-open');
     document.body.style.overflow = 'hidden';
     toggle.setAttribute('aria-expanded', 'true');
-    toggle.setAttribute('aria-label', 'Zamknij menu nawigacji');
+    toggle.setAttribute('aria-label', STR.navClose);
   }
 
   toggle.addEventListener('click', () => {
@@ -250,7 +315,7 @@ function initContactForm() {
       const field = form.elements[k];
       if (!field) return;
       if (!String(data[k] || '').trim()) {
-        setError(field, 'To pole jest wymagane.');
+        setError(field, STR.formRequired);
         if (!firstInvalid) firstInvalid = field;
       } else {
         clearError(field);
@@ -258,28 +323,28 @@ function initContactForm() {
     });
     const consent = form.querySelector('[name="consent"]');
     if (consent && !consent.checked) {
-      setError(consent, 'Wymagana jest zgoda na przetwarzanie danych osobowych.');
+      setError(consent, STR.formConsent);
       if (!firstInvalid) firstInvalid = consent;
     } else if (consent) {
       clearError(consent);
     }
     if (firstInvalid) {
-      showToast('Proszę uzupełnić zaznaczone pola.', 'error');
+      showToast(STR.formFill, 'error');
       firstInvalid.focus();
       return;
     }
 
     // Brak backendu — składamy wiadomość i otwieramy program pocztowy gościa.
-    const subject = `Zapytanie ze strony — ${data.subject}`;
+    const subject = STR.mailSubject + data.subject;
     const body =
-      `Imię i nazwisko: ${data.name}\n` +
-      `E-mail: ${data.email}\n` +
-      `Telefon: ${data.phone ? data.phone : '—'}\n\n` +
+      `${STR.mailName}: ${data.name}\n` +
+      `${STR.mailEmail}: ${data.email}\n` +
+      `${STR.mailPhone}: ${data.phone ? data.phone : '—'}\n\n` +
       `${data.message}\n`;
     const href =
       `mailto:${RECIPIENT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    showToast('Otwieram Twój program pocztowy…', 'success');
+    showToast(STR.mailOpening, 'success');
     window.location.href = href;
     // Celowo NIE czyścimy pól — jeśli program pocztowy nie wystartuje, wpisana treść nie przepada.
   });
@@ -307,12 +372,7 @@ function initContactMap() {
     // o zgodę na WSZYSTKIE cookies (potrzebną do mapy Google).
     const essentialOnly = localStorage.getItem('cookies-accepted') === 'essential';
 
-    showToast(
-      essentialOnly
-        ? 'Aby wyświetlić interaktywną mapę Google, zaakceptuj wszystkie pliki cookies.'
-        : 'Najpierw zaakceptuj pliki cookies.',
-      'info'
-    );
+    showToast(essentialOnly ? STR.mapNeedAll : STR.mapNeedConsent, 'info');
 
     // Mobile: tap pokazuje scrim + podpowiedź (na desktopie robi to :hover)
     if (coarse.matches) placeholder.classList.add('is-revealed');
@@ -325,12 +385,10 @@ function initContactMap() {
       const textEl = banner.querySelector('.cookie-banner__text');
       if (textEl) {
         // Link relatywny — mapa (i ten re-prompt) istnieje tylko na podstronie kontakt/
-        textEl.innerHTML =
-          'Interaktywna mapa Google używa plików cookies Google. Zaakceptuj wszystkie, aby ją wyświetlić. ' +
-          '<a href="../polityka-prywatnosci/">Dowiedz się więcej</a>.';
+        textEl.innerHTML = STR.mapCookieHtml;
       }
       const acceptBtn = banner.querySelector('[data-accept]');
-      if (acceptBtn) acceptBtn.textContent = 'Akceptuję wszystkie';
+      if (acceptBtn) acceptBtn.textContent = STR.acceptAll;
     }
 
     banner.classList.add('visible');
@@ -356,7 +414,7 @@ function loadMap(holder) {
   const iframe = document.createElement('iframe');
   iframe.src = holder.dataset.map;
   iframe.loading = 'lazy';
-  iframe.title = 'Lokalizacja — Siedlec 3, 32-065 Krzeszowice';
+  iframe.title = STR.mapTitle;
   iframe.referrerPolicy = 'no-referrer-when-downgrade';
   iframe.setAttribute('allowfullscreen', '');
   holder.innerHTML = '';
@@ -500,9 +558,7 @@ function initHeroSlider() {
   pauseBtn.className = 'hero-slider__pause';
   function updatePauseBtn() {
     pauseBtn.innerHTML = userPaused ? ICON_PLAY : ICON_PAUSE;
-    pauseBtn.setAttribute('aria-label', userPaused
-      ? 'Włącz automatyczne przewijanie slajdów'
-      : 'Zatrzymaj automatyczne przewijanie slajdów');
+    pauseBtn.setAttribute('aria-label', userPaused ? STR.sliderPlay : STR.sliderPause);
   }
   updatePauseBtn();
   pauseBtn.addEventListener('click', () => {
@@ -516,7 +572,7 @@ function initHeroSlider() {
     const dot = document.createElement('button');
     dot.type = 'button';
     dot.className = 'hero-slider__dot' + (i === index ? ' is-active' : '');
-    dot.setAttribute('aria-label', `Slajd ${i + 1}`);
+    dot.setAttribute('aria-label', `${STR.slide} ${i + 1}`);
     if (i === index) dot.setAttribute('aria-current', 'true');
     dot.addEventListener('click', () => { go(i); restart(); });
     dots.appendChild(dot);
@@ -558,15 +614,15 @@ function initLightbox() {
   // Build overlay once
   const box = document.createElement('dialog');
   box.className = 'lightbox';
-  box.setAttribute('aria-label', 'Podgląd zdjęcia');
+  box.setAttribute('aria-label', STR.lightbox);
   box.innerHTML = `
-    <button class="lightbox__close" aria-label="Zamknij">&times;</button>
-    <button class="lightbox__nav lightbox__nav--prev" aria-label="Poprzednie">&#8249;</button>
+    <button class="lightbox__close" aria-label="${STR.close}">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" aria-label="${STR.prev}">&#8249;</button>
     <figure class="lightbox__stage">
       <img class="lightbox__img" src="" alt="">
       <figcaption class="lightbox__caption"></figcaption>
     </figure>
-    <button class="lightbox__nav lightbox__nav--next" aria-label="Następne">&#8250;</button>
+    <button class="lightbox__nav lightbox__nav--next" aria-label="${STR.next}">&#8250;</button>
     <span class="lightbox__counter" aria-live="polite"></span>`;
   document.body.appendChild(box);
 
@@ -641,7 +697,7 @@ function initExpandable() {
     if (!toggle) return;
     toggle.addEventListener('click', () => {
       const open = box.classList.toggle('is-open');
-      toggle.textContent = open ? 'Zwiń' : 'Czytaj więcej';
+      toggle.textContent = open ? STR.collapse : STR.readMore;
     });
   });
 }
