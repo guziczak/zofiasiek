@@ -1283,11 +1283,13 @@ p + p { margin-top: var(--space-sm); }
     margin-top: var(--space-sm);
   }
 
-  /* Przełącznik języka w panelu mobilnym */
-  .nav__lang {
+  /* Przełącznik języka w panelu mobilnym — kolor nadpisuje biały wariant
+     z .header--transparent (panel ma jasne tło), stąd podwójny selektor */
+  .nav__list .nav__lang {
     padding: var(--space-md) 0;
     margin-top: var(--space-sm);
     border-top: 1px solid var(--color-border);
+    color: var(--color-text);
   }
 
   .mobile-nav-overlay {
