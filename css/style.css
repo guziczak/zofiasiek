@@ -383,6 +383,10 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-muted);
 }
 
+.header--solid .nav__lang-link {
+  color: var(--color-muted);
+}
+
 .header--solid .nav__lang-current {
   background: var(--color-accent-dark);
   color: var(--color-white);
@@ -396,8 +400,12 @@ p + p { margin-top: var(--space-sm); }
 
 /* Header przezroczysty (hero na home) */
 .header--transparent .nav__lang {
-  border-color: rgba(255, 255, 255, 0.55);
-  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: var(--color-white);
+}
+
+.header--transparent .nav__lang-link {
+  color: var(--color-white);
 }
 
 .header--transparent .nav__lang > *:not(:first-child) {
@@ -1323,6 +1331,7 @@ p + p { margin-top: var(--space-sm); }
 
   .nav__list .nav__lang .nav__lang-link {
     padding: 0.55rem 0.85rem; /* większe cele dotykowe w szufladzie */
+    color: var(--color-muted);
   }
 
   .nav__list .nav__lang .nav__lang-current {
