@@ -81,7 +81,7 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] Pełną listę starych 404 pokaże Search Console (indeks może trzymać więcej niż te 3)
 - [ ] **Google Search Console**: weryfikacja domeny, zgłoszenie sitemap.xml, prośba o przeindeksowanie (indeks ma jeszcze stary title „Zofia Siek"), raport Strony/404 — zero cookies, zgodne z privacy-first
 - [ ] **Po deployu (teraz!)**: w GSC „Sprawdź URL" → „Poproś o zindeksowanie" dla 4 głównych podstron + 3 starych URL-i (żeby Google szybciej zobaczył przekierowania zamiast czekać na crawl); Test wyników z elementami rozszerzonymi (Rich Results) dla schema LocalBusiness/BreadcrumbList
-- [ ] **Wersja EN (dodana 2026-07-09)**: po deployu zgłosić w GSC zaktualizowaną sitemap.xml (ma URL-e /en/ z hreflang) i poprosić o zindeksowanie /en/ + podstron EN; sprawdzić parę / ↔ /en/ walidatorem hreflang; przy okazji wizytówki Google rozważyć drugi język profilu
+- [ ] **Wersje EN + DE (2026-07-09/10)**: po deployu zgłosić w GSC zaktualizowaną sitemap.xml (15 URL-i: PL+EN+DE z hreflang ×4) i poprosić o zindeksowanie /en/ i /de/; sprawdzić trójkę / ↔ /en/ ↔ /de/ walidatorem hreflang; przy okazji wizytówki Google rozważyć dodatkowe języki profilu
 - [ ] **Bing Webmaster Tools**: weryfikacja + ta sama sitemap.xml (Bing zasila też DuckDuck; import jednym klikiem z GSC) — mały ruch, ale darmowy i 5 minut
 - [ ] **Wizytówka Google (Business Profile)** dla pracowni (Siedlec 3, Krzeszowice) + systematyczne zbieranie opinii — dla fraz lokalnych pack mapowy stoi nad wynikami organicznymi
 - [ ] **Spójność NAP** (nazwa/adres/telefon identyczne co do znaku wszędzie): strona, wizytówka Google, FB, IG, stare katalogi. Uwaga: strona ma 2 telefony (607 752 370 i 502 244 629) — ustalić JEDEN główny do NAP, żeby Google nie widział rozjazdu. Musi zgadzać się ze schema LocalBusiness (jest tam 607…)
@@ -109,7 +109,7 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 
 ## P4 — Architektura / decyzje
 
-- [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach PL + 6 EN (`en/`) i już wcześniej się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — rozważyć prosty generator/szablonowanie albo przynajmniej checklistę „zmiana menu = 14 plików, w obu językach"
+- [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach PL + 6 EN + 6 DE i już wcześniej się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — przy TRZECH językach generator/szablonowanie robi się coraz bardziej zasadne („zmiana menu = 20 plików")
 - [ ] Los `aktualnosci/`: albo na produkcję (nav na wszystkich stronach + sitemap + zdjąć noindex), albo usunąć
 - [x] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — potwierdzone live 2026-07-08 (strona odpowiada z `/`, canonicale poprawne)
 - [ ] Decyzja: analityka bez cookies (Plausible/Matomo/logi serwera)? Teraz zero danych o ruchu
