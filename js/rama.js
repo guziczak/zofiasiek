@@ -35,6 +35,17 @@
       upload: ' Upload your own picture',
       yourPicture: 'Your picture',
       tryOn: 'Try a frame on: '
+    },
+    de: {
+      frames: { 'zlota-zdobiona': 'Klassisches Gold', 'zlota-gladka': 'Glattes Gold', 'orzech': 'Dunkler Nussbaum', 'debowa': 'Helle Eiche', 'czarna': 'Schwarz', 'bez-ramy': 'Ohne Rahmen' },
+      frameLabel: 'Rahmen: ',
+      modalLabel: 'Rahmen-Anprobe',
+      modalClose: 'Rahmen-Anprobe schließen',
+      modalLead: 'Wählen Sie einen Rahmen — live um das Bild gezeichnet:',
+      framesGroup: 'Rahmenstile',
+      upload: ' Eigenes Bild hochladen',
+      yourPicture: 'Ihr Bild',
+      tryOn: 'Rahmen anprobieren: '
     }
   };
   const STR = TXT[(document.documentElement.lang || 'pl').slice(0, 2)] || TXT.pl;

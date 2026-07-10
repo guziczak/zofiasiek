@@ -61,6 +61,33 @@ const STR = (function () {
       next: 'Next',
       collapse: 'Collapse',
       readMore: 'Read more'
+    },
+    de: {
+      navOpen: 'Navigationsmenü öffnen',
+      navClose: 'Navigationsmenü schließen',
+      formRequired: 'Dieses Feld ist erforderlich.',
+      formConsent: 'Die Einwilligung in die Verarbeitung personenbezogener Daten ist erforderlich.',
+      formFill: 'Bitte füllen Sie die markierten Felder aus.',
+      mailSubject: 'Anfrage über die Website — ',
+      mailName: 'Name',
+      mailEmail: 'E-Mail',
+      mailPhone: 'Telefon',
+      mailOpening: 'Ihr E-Mail-Programm wird geöffnet…',
+      mapNeedAll: 'Um die interaktive Google-Karte anzuzeigen, akzeptieren Sie bitte alle Cookies.',
+      mapNeedConsent: 'Bitte akzeptieren Sie zuerst die Cookies.',
+      mapCookieHtml: 'Die interaktive Google-Karte verwendet Google-Cookies. Akzeptieren Sie alle Cookies, um sie anzuzeigen. ' +
+        '<a href="../datenschutz/">Mehr erfahren</a>.',
+      acceptAll: 'Alle akzeptieren',
+      mapTitle: 'Standort — Siedlec 3, 32-065 Krzeszowice, Polen',
+      sliderPlay: 'Automatischen Bildwechsel starten',
+      sliderPause: 'Automatischen Bildwechsel anhalten',
+      slide: 'Bild',
+      lightbox: 'Bildvorschau',
+      close: 'Schließen',
+      prev: 'Zurück',
+      next: 'Weiter',
+      collapse: 'Einklappen',
+      readMore: 'Weiterlesen'
     }
   };
   const lang = (document.documentElement.lang || 'pl').slice(0, 2);
