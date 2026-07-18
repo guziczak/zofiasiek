@@ -894,6 +894,19 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-accent);
 }
 
+.footer__privacy-button {
+  padding: 0;
+  font: inherit;
+  color: var(--color-muted);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.footer__privacy-button:hover {
+  color: var(--color-accent);
+}
+
 /* ----- 17. Cookie Consent ----- */
 .cookie-banner {
   position: fixed;
@@ -937,22 +950,166 @@ p + p { margin-top: var(--space-sm); }
   display: flex;
   gap: var(--space-xs);
   flex-shrink: 0;
+  align-items: center;
 }
 
-/* Pulsowanie przycisków banera, gdy użytkownik kliknie mapę bez zgody */
-@keyframes cookieBtnPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184, 151, 106, 0.45); }
-  50% { transform: scale(1.08); box-shadow: 0 0 0 7px rgba(184, 151, 106, 0); }
+.cookie-banner .btn--outline {
+  border-color: var(--color-footer-text);
+  color: var(--color-footer-text);
 }
 
-.cookie-banner__actions .btn.is-pulsing {
-  animation: cookieBtnPulse 0.6s ease 2;
+.cookie-banner .btn--outline:hover {
+  border-color: var(--color-white);
+  background: var(--color-white);
+  color: #1a1a1a;
 }
 
-/* Re-prompt po wyborze „tylko niezbędne" (klik w mapę): nie oferujemy ponownie
-   „Tylko niezbędne" — zostaje wyłącznie zgoda na wszystkie cookies. */
-.cookie-banner--accept-all [data-reject] {
-  display: none;
+.cookie-banner__settings {
+  padding: 0.5rem;
+  color: var(--color-footer-text);
+  background: transparent;
+  font-size: var(--fs-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.cookie-banner__settings:hover {
+  color: var(--color-white);
+}
+
+body.privacy-dialog-open {
+  overflow: hidden;
+}
+
+.privacy-dialog {
+  width: min(680px, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 0;
+  border: 0;
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+  background: var(--color-white);
+  box-shadow: 0 24px 70px rgba(25, 21, 17, 0.35);
+}
+
+.privacy-dialog::backdrop {
+  background: rgba(20, 18, 15, 0.65);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.privacy-dialog__panel {
+  max-height: calc(100vh - 2rem);
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+.privacy-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.privacy-dialog__header h2 {
+  margin: 0;
+}
+
+.privacy-dialog__close {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-bg-warm);
+  color: var(--color-heading);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.privacy-dialog__close:hover {
+  background: var(--color-border);
+}
+
+.privacy-dialog__intro {
+  margin: var(--space-sm) 0 var(--space-md);
+  color: var(--color-muted);
+}
+
+.privacy-dialog__intro a {
+  text-decoration: underline;
+}
+
+.privacy-options {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.privacy-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  cursor: pointer;
+}
+
+.privacy-option--locked {
+  background: var(--color-bg-warm);
+  cursor: default;
+}
+
+.privacy-option input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.15rem;
+  accent-color: var(--color-accent-dark);
+}
+
+.privacy-option__indicator {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.15rem;
+  border-radius: 3px;
+  background: var(--color-accent-dark);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.privacy-option__copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.privacy-option__copy strong {
+  color: var(--color-heading);
+}
+
+.privacy-option__copy > span {
+  color: var(--color-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.privacy-option__status {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.privacy-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
 }
 
 /* ----- 18. Mobile Phone Button ----- */
@@ -1394,6 +1551,32 @@ p + p { margin-top: var(--space-sm); }
   .cookie-banner__inner {
     flex-direction: column;
     text-align: center;
+  }
+
+  .cookie-banner__actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .privacy-dialog__panel {
+    padding: var(--space-md);
+  }
+
+  .privacy-option {
+    grid-template-columns: auto minmax(0, 1fr);
+    text-align: left;
+  }
+
+  .privacy-option__status {
+    grid-column: 2;
+  }
+
+  .privacy-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .privacy-dialog__actions .btn {
+    width: 100%;
   }
 
   /* Mobile CTA */

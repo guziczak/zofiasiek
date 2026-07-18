@@ -102,7 +102,7 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] Usunąć martwe atrybuty `data-fill="kopie|konserwacje|realizacje"` (nic ich nie czyta)
 - [x] Naprawić markup SVG: niedomknięte `<path>` na index.html, artefakty `"../>` na podstronach (zrobione razem z `aria-hidden`)
 - [x] main.js — absolutny link do polityki prywatności → relatywny (naprawione przy pakiecie dostępności)
-- [ ] Link „Ustawienia cookies" w stopce (ponowne otwarcie banera; teraz zmiana zgody wymaga czyszczenia danych przeglądarki)
+- [x] Link „Ustawienia prywatności" w stopce + osobne, wersjonowane zgody na GA4 i Mapy Google
 - [ ] Custom 404 (teraz default hostingu)
 - [ ] `apple-touch-icon` + fallback favicon PNG/ICO (jest tylko SVG)
 - [ ] Wynieść inline style z HTML do klas (drobne, przy okazji)
@@ -112,4 +112,4 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach PL + 6 EN + 6 DE i już wcześniej się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — przy TRZECH językach generator/szablonowanie robi się coraz bardziej zasadne („zmiana menu = 20 plików")
 - [ ] Los `aktualnosci/`: albo na produkcję (nav na wszystkich stronach + sitemap + zdjąć noindex), albo usunąć
 - [x] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — potwierdzone live 2026-07-08 (strona odpowiada z `/`, canonicale poprawne)
-- [ ] Decyzja: analityka bez cookies (Plausible/Matomo/logi serwera)? Teraz zero danych o ruchu
+- [x] Analityka: GA4 `G-VFS072VFK9` w Basic Consent Mode, ładowana wyłącznie po osobnej zgodzie

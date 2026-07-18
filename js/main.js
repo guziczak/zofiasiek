@@ -2,10 +2,7 @@
    Zofia Siek-Mlicka — Main JavaScript
    ============================================================ */
 
-/* ----- Teksty interfejsu (PL/EN) — wybór po <html lang> -----
-   Strony EN leżą w /en/ i ładują ten sam plik; ścieżki względne w tekstach
-   (np. link do polityki prywatności) działają, bo podstrony obu wersji
-   są na tej samej głębokości. */
+/* ----- Teksty interfejsu (PL/EN/DE) — wybór po <html lang> ----- */
 const STR = (function () {
   const all = {
     pl: {
@@ -19,11 +16,25 @@ const STR = (function () {
       mailEmail: 'E-mail',
       mailPhone: 'Telefon',
       mailOpening: 'Otwieram Twój program pocztowy…',
-      mapNeedAll: 'Aby wyświetlić interaktywną mapę Google, zaakceptuj wszystkie pliki cookies.',
-      mapNeedConsent: 'Najpierw zaakceptuj pliki cookies.',
-      mapCookieHtml: 'Interaktywna mapa Google używa plików cookies Google. Zaakceptuj wszystkie, aby ją wyświetlić. ' +
-        '<a href="../polityka-prywatnosci/">Dowiedz się więcej</a>.',
-      acceptAll: 'Akceptuję wszystkie',
+      mapNeedConsent: 'Aby wyświetlić interaktywną mapę Google, włącz kategorię „Mapa Google” w ustawieniach prywatności.',
+      privacyUrl: '/polityka-prywatnosci/',
+      learnMore: 'Dowiedz się więcej',
+      cookieIntro: 'Używamy niezbędnej pamięci przeglądarki. Możesz osobno zezwolić na Google Analytics 4 i interaktywną Mapę Google.',
+      acceptAll: 'Akceptuj wszystkie',
+      rejectOptional: 'Odrzuć opcjonalne',
+      settings: 'Ustawienia',
+      privacySettings: 'Ustawienia prywatności',
+      privacyDescription: 'Wybierz, na które opcjonalne usługi zezwalasz. Ustawienia możesz później zmienić w stopce strony.',
+      essentialTitle: 'Niezbędne',
+      essentialDescription: 'Zapamiętują decyzję o prywatności i pozycję przewijania. Nie można ich wyłączyć.',
+      alwaysActive: 'Zawsze aktywne',
+      analyticsTitle: 'Analityka',
+      analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) pomaga nam zrozumieć, jak używana jest strona. Ładuje się dopiero po Twojej zgodzie.',
+      mapsTitle: 'Mapa Google',
+      mapsDescription: 'Pozwala wyświetlić interaktywną mapę na stronie Kontakt. Bez zgody pozostaje lokalny obraz mapy.',
+      saveSettings: 'Zapisz ustawienia',
+      cancel: 'Anuluj',
+      settingsSaved: 'Ustawienia prywatności zostały zapisane.',
       mapTitle: 'Lokalizacja — Siedlec 3, 32-065 Krzeszowice',
       sliderPlay: 'Włącz automatyczne przewijanie slajdów',
       sliderPause: 'Zatrzymaj automatyczne przewijanie slajdów',
@@ -46,11 +57,25 @@ const STR = (function () {
       mailEmail: 'E-mail',
       mailPhone: 'Phone',
       mailOpening: 'Opening your e-mail app…',
-      mapNeedAll: 'To display the interactive Google map, please accept all cookies.',
-      mapNeedConsent: 'Please accept cookies first.',
-      mapCookieHtml: 'The interactive Google map uses Google cookies. Accept all cookies to display it. ' +
-        '<a href="../privacy-policy/">Learn more</a>.',
+      mapNeedConsent: 'To display the interactive Google map, enable “Google Maps” in the privacy settings.',
+      privacyUrl: '/en/privacy-policy/',
+      learnMore: 'Learn more',
+      cookieIntro: 'We use essential browser storage. You can separately allow Google Analytics 4 and the interactive Google Map.',
       acceptAll: 'Accept all',
+      rejectOptional: 'Reject optional',
+      settings: 'Settings',
+      privacySettings: 'Privacy settings',
+      privacyDescription: 'Choose which optional services you allow. You can change these settings later in the website footer.',
+      essentialTitle: 'Essential',
+      essentialDescription: 'Remembers your privacy decision and scroll position. It cannot be disabled.',
+      alwaysActive: 'Always active',
+      analyticsTitle: 'Analytics',
+      analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) helps us understand how the website is used. It loads only after you consent.',
+      mapsTitle: 'Google Maps',
+      mapsDescription: 'Displays the interactive map on the Contact page. Without consent, a locally hosted map image remains visible.',
+      saveSettings: 'Save settings',
+      cancel: 'Cancel',
+      settingsSaved: 'Your privacy settings have been saved.',
       mapTitle: 'Location — Siedlec 3, 32-065 Krzeszowice, Poland',
       sliderPlay: 'Start automatic slide rotation',
       sliderPause: 'Stop automatic slide rotation',
@@ -73,11 +98,25 @@ const STR = (function () {
       mailEmail: 'E-Mail',
       mailPhone: 'Telefon',
       mailOpening: 'Ihr E-Mail-Programm wird geöffnet…',
-      mapNeedAll: 'Um die interaktive Google-Karte anzuzeigen, akzeptieren Sie bitte alle Cookies.',
-      mapNeedConsent: 'Bitte akzeptieren Sie zuerst die Cookies.',
-      mapCookieHtml: 'Die interaktive Google-Karte verwendet Google-Cookies. Akzeptieren Sie alle Cookies, um sie anzuzeigen. ' +
-        '<a href="../datenschutz/">Mehr erfahren</a>.',
+      mapNeedConsent: 'Um die interaktive Google-Karte anzuzeigen, aktivieren Sie „Google Maps“ in den Datenschutzeinstellungen.',
+      privacyUrl: '/de/datenschutz/',
+      learnMore: 'Mehr erfahren',
+      cookieIntro: 'Wir verwenden notwendige Browser-Speicherfunktionen. Sie können Google Analytics 4 und die interaktive Google-Karte getrennt zulassen.',
       acceptAll: 'Alle akzeptieren',
+      rejectOptional: 'Optionale Dienste ablehnen',
+      settings: 'Einstellungen',
+      privacySettings: 'Datenschutzeinstellungen',
+      privacyDescription: 'Wählen Sie aus, welche optionalen Dienste Sie zulassen. Sie können diese Einstellungen später in der Fußzeile ändern.',
+      essentialTitle: 'Notwendig',
+      essentialDescription: 'Speichert Ihre Datenschutzentscheidung und Scrollposition. Diese Funktion kann nicht deaktiviert werden.',
+      alwaysActive: 'Immer aktiv',
+      analyticsTitle: 'Analyse',
+      analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) hilft uns zu verstehen, wie die Website genutzt wird. Der Dienst lädt erst nach Ihrer Einwilligung.',
+      mapsTitle: 'Google Maps',
+      mapsDescription: 'Zeigt die interaktive Karte auf der Kontaktseite. Ohne Einwilligung bleibt ein lokal gespeichertes Kartenbild sichtbar.',
+      saveSettings: 'Einstellungen speichern',
+      cancel: 'Abbrechen',
+      settingsSaved: 'Ihre Datenschutzeinstellungen wurden gespeichert.',
       mapTitle: 'Standort — Siedlec 3, 32-065 Krzeszowice, Polen',
       sliderPlay: 'Automatischen Bildwechsel starten',
       sliderPause: 'Automatischen Bildwechsel anhalten',
@@ -93,6 +132,30 @@ const STR = (function () {
   const lang = (document.documentElement.lang || 'pl').slice(0, 2);
   return all[lang] || all.pl;
 })();
+
+/* ----- Prywatność i Google Analytics 4 -----
+   Basic Consent Mode: przed zgodą nie pobieramy gtag.js i nie wysyłamy
+   żadnych żądań do Google. Stary klucz „cookies-accepted” dotyczył wyłącznie
+   Map Google, dlatego nie jest migrowany na zgodę analityczną. */
+const GA_MEASUREMENT_ID = 'G-VFS072VFK9';
+const PRIVACY_CONSENT_KEY = 'zofiasiek-privacy-consent-v2';
+const PRIVACY_CONSENT_VERSION = 2;
+const GA_ALLOWED_HOSTS = new Set(['zofiasiek.pl', 'www.zofiasiek.pl']);
+
+window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+window.gtag('consent', 'default', {
+  analytics_storage: 'denied',
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied'
+});
+
+let privacyConsent = readPrivacyConsent();
+let privacyBanner = null;
+let privacyDialog = null;
+let privacyDialogReturnFocus = null;
+let privacyBannerWasVisible = false;
 
 /* ----- Zapis pozycji przewijania -----
    Samo PRZYWRACANIE robi mały inline-skrypt na końcu <body> — uruchamia się przed
@@ -227,24 +290,247 @@ function initCookieConsent() {
   const banner = document.querySelector('.cookie-banner');
   if (!banner) return;
 
-  banner.querySelector('[data-accept]')?.addEventListener('click', () => {
-    localStorage.setItem('cookies-accepted', 'true');
-    banner.classList.remove('visible');
-    // Zgoda na cookies → załaduj interaktywną mapę Google (jeśli jest na stronie)
+  privacyBanner = banner;
+  removeLegacyConsent();
+  renderPrivacyBanner();
+  createPrivacyDialog();
+  createPrivacySettingsButton();
+  setPrivacyBannerVisible(false);
+  window.addEventListener('storage', (event) => {
+    if (event.key === PRIVACY_CONSENT_KEY) window.location.reload();
+  });
+
+  banner.querySelector('[data-consent-accept-all]')?.addEventListener('click', () => {
+    savePrivacyConsent({ analytics: true, maps: true });
+  });
+  banner.querySelector('[data-consent-reject]')?.addEventListener('click', () => {
+    savePrivacyConsent({ analytics: false, maps: false });
+  });
+  banner.querySelector('[data-consent-settings]')?.addEventListener('click', (event) => {
+    openPrivacySettings(null, event.currentTarget);
+  });
+
+  if (privacyConsent) {
+    applyPrivacyConsent(privacyConsent);
+  } else {
+    setTimeout(() => setPrivacyBannerVisible(true), 800);
+  }
+}
+
+function renderPrivacyBanner() {
+  if (!privacyBanner) return;
+  privacyBanner.setAttribute('role', 'region');
+  privacyBanner.setAttribute('aria-label', STR.privacySettings);
+  privacyBanner.innerHTML = `
+    <div class="cookie-banner__inner">
+      <p class="cookie-banner__text">${STR.cookieIntro} <a href="${STR.privacyUrl}">${STR.learnMore}</a>.</p>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn--primary btn--small" data-consent-accept-all>${STR.acceptAll}</button>
+        <button type="button" class="btn btn--outline btn--small" data-consent-reject>${STR.rejectOptional}</button>
+        <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
+      </div>
+    </div>`;
+}
+
+function setPrivacyBannerVisible(visible) {
+  if (!privacyBanner) return;
+  privacyBanner.classList.toggle('visible', visible);
+  privacyBanner.setAttribute('aria-hidden', String(!visible));
+  privacyBanner.inert = !visible;
+}
+
+function createPrivacyDialog() {
+  if (document.querySelector('[data-privacy-dialog]')) {
+    privacyDialog = document.querySelector('[data-privacy-dialog]');
+    return;
+  }
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'privacy-dialog';
+  dialog.setAttribute('data-privacy-dialog', '');
+  dialog.setAttribute('aria-labelledby', 'privacy-dialog-title');
+  dialog.innerHTML = `
+    <form class="privacy-dialog__panel" data-privacy-form>
+      <div class="privacy-dialog__header">
+        <h2 id="privacy-dialog-title">${STR.privacySettings}</h2>
+        <button type="button" class="privacy-dialog__close" data-privacy-close aria-label="${STR.close}">&times;</button>
+      </div>
+      <p class="privacy-dialog__intro">${STR.privacyDescription} <a href="${STR.privacyUrl}">${STR.learnMore}</a>.</p>
+      <fieldset class="privacy-options">
+        <legend class="sr-only">${STR.privacySettings}</legend>
+        <label class="privacy-option privacy-option--locked">
+          <span class="privacy-option__indicator" aria-hidden="true">&#10003;</span>
+          <span class="privacy-option__copy">
+            <strong>${STR.essentialTitle}</strong>
+            <span>${STR.essentialDescription}</span>
+          </span>
+          <span class="privacy-option__status">${STR.alwaysActive}</span>
+        </label>
+        <label class="privacy-option">
+          <input type="checkbox" data-consent-category="analytics" aria-describedby="privacy-analytics-description">
+          <span class="privacy-option__copy">
+            <strong>${STR.analyticsTitle}</strong>
+            <span id="privacy-analytics-description">${STR.analyticsDescription}</span>
+          </span>
+        </label>
+        <label class="privacy-option">
+          <input type="checkbox" data-consent-category="maps" aria-describedby="privacy-maps-description">
+          <span class="privacy-option__copy">
+            <strong>${STR.mapsTitle}</strong>
+            <span id="privacy-maps-description">${STR.mapsDescription}</span>
+          </span>
+        </label>
+      </fieldset>
+      <div class="privacy-dialog__actions">
+        <button type="button" class="btn btn--outline btn--small" data-privacy-close>${STR.cancel}</button>
+        <button type="submit" class="btn btn--primary btn--small">${STR.saveSettings}</button>
+      </div>
+    </form>`;
+  document.body.appendChild(dialog);
+  privacyDialog = dialog;
+
+  dialog.querySelectorAll('[data-privacy-close]').forEach((button) => {
+    button.addEventListener('click', () => dialog.close());
+  });
+  dialog.querySelector('[data-privacy-form]')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const analytics = dialog.querySelector('[data-consent-category="analytics"]')?.checked || false;
+    const maps = dialog.querySelector('[data-consent-category="maps"]')?.checked || false;
+    savePrivacyConsent({ analytics, maps }, true);
+  });
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener('close', () => {
+    document.body.classList.remove('privacy-dialog-open');
+    if (!privacyConsent && privacyBannerWasVisible) setPrivacyBannerVisible(true);
+    if (privacyDialogReturnFocus instanceof HTMLElement) privacyDialogReturnFocus.focus();
+    privacyDialogReturnFocus = null;
+  });
+}
+
+function createPrivacySettingsButton() {
+  const footer = document.querySelector('.footer__bottom');
+  if (!footer || footer.querySelector('[data-open-privacy-settings]')) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'footer__privacy-button';
+  button.setAttribute('data-open-privacy-settings', '');
+  button.textContent = STR.privacySettings;
+  button.addEventListener('click', (event) => openPrivacySettings(null, event.currentTarget));
+  footer.appendChild(button);
+}
+
+function openPrivacySettings(focusCategory, trigger) {
+  if (!privacyDialog) return;
+  const current = privacyConsent || { analytics: false, maps: false };
+  const analyticsInput = privacyDialog.querySelector('[data-consent-category="analytics"]');
+  const mapsInput = privacyDialog.querySelector('[data-consent-category="maps"]');
+  if (analyticsInput) analyticsInput.checked = current.analytics;
+  if (mapsInput) mapsInput.checked = current.maps;
+
+  privacyDialogReturnFocus = trigger || document.activeElement;
+  privacyBannerWasVisible = privacyBanner?.classList.contains('visible') || false;
+  setPrivacyBannerVisible(false);
+  document.body.classList.add('privacy-dialog-open');
+  privacyDialog.showModal();
+
+  const target = focusCategory === 'maps' ? mapsInput :
+    (focusCategory === 'analytics' ? analyticsInput : analyticsInput);
+  setTimeout(() => target?.focus(), 0);
+}
+
+function readPrivacyConsent() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PRIVACY_CONSENT_KEY) || 'null');
+    if (!stored || stored.version !== PRIVACY_CONSENT_VERSION) return null;
+    if (typeof stored.analytics !== 'boolean' || typeof stored.maps !== 'boolean') return null;
+    return stored;
+  } catch (error) {
+    return null;
+  }
+}
+
+function removeLegacyConsent() {
+  try { localStorage.removeItem('cookies-accepted'); } catch (error) {}
+}
+
+function savePrivacyConsent(selection, announce = false) {
+  const previous = privacyConsent;
+  const next = {
+    version: PRIVACY_CONSENT_VERSION,
+    analytics: Boolean(selection.analytics),
+    maps: Boolean(selection.maps),
+    decidedAt: new Date().toISOString()
+  };
+
+  try { localStorage.setItem(PRIVACY_CONSENT_KEY, JSON.stringify(next)); } catch (error) {}
+  privacyConsent = next;
+  setPrivacyBannerVisible(false);
+  if (privacyDialog?.open) privacyDialog.close();
+
+  const analyticsRevoked = previous?.analytics && !next.analytics;
+  const mapsRevoked = previous?.maps && !next.maps;
+  if (analyticsRevoked) clearGoogleAnalyticsCookies();
+
+  // Przeładowanie usuwa już załadowany skrypt GA lub iframe mapy z dokumentu.
+  // Po starcie nowej strony odrzucone usługi nie są w ogóle pobierane.
+  if (analyticsRevoked || mapsRevoked) {
+    applyPrivacyConsent(next);
+    window.location.reload();
+    return;
+  }
+
+  applyPrivacyConsent(next);
+  if (announce) showToast(STR.settingsSaved, 'success');
+}
+
+function applyPrivacyConsent(consent) {
+  window.gtag('consent', 'update', {
+    analytics_storage: consent.analytics ? 'granted' : 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied'
+  });
+
+  if (consent.analytics) loadGoogleAnalytics();
+  if (consent.maps) {
     const holder = document.querySelector('.map-container[data-map]');
     if (holder) loadMap(holder);
-  });
-
-  banner.querySelector('[data-reject]')?.addEventListener('click', () => {
-    localStorage.setItem('cookies-accepted', 'essential');
-    banner.classList.remove('visible');
-  });
-
-  // Baner zostaje w DOM (żeby dało się go pokazać ponownie po kliknięciu w mapę);
-  // pokazujemy go tylko, gdy użytkownik jeszcze nie zdecydował.
-  if (!localStorage.getItem('cookies-accepted')) {
-    setTimeout(() => banner.classList.add('visible'), 1000);
   }
+}
+
+function loadGoogleAnalytics() {
+  if (!GA_ALLOWED_HOSTS.has(window.location.hostname)) return;
+  if (document.getElementById('google-analytics-tag')) return;
+
+  const script = document.createElement('script');
+  script.id = 'google-analytics-tag';
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_MEASUREMENT_ID)}`;
+  window.gtag('js', new Date());
+  window.gtag('config', GA_MEASUREMENT_ID, {
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false
+  });
+  document.head.appendChild(script);
+}
+
+function clearGoogleAnalyticsCookies() {
+  const names = document.cookie.split(';')
+    .map((item) => item.split('=')[0].trim())
+    .filter((name) => /^(_ga|_gid|_gat|_gac_)/.test(name));
+  if (!names.length) return;
+
+  const host = window.location.hostname;
+  const rootDomain = host.split('.').slice(-2).join('.');
+  const domains = ['', host, `.${host}`, rootDomain, `.${rootDomain}`];
+  names.forEach((name) => {
+    [...new Set(domains)].forEach((domain) => {
+      const domainPart = domain ? `; domain=${domain}` : '';
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainPart}; SameSite=Lax`;
+    });
+  });
 }
 
 /* ----- Scroll to Top ----- */
@@ -377,54 +663,26 @@ function initContactForm() {
   });
 }
 
-/* ----- Mapa kontaktowa (mapa Google dopiero po zgodzie na cookies) -----
+/* ----- Mapa kontaktowa (mapa Google dopiero po osobnej zgodzie) -----
    Domyślnie statyczny obrazek img/mapa-kontakt.png (z naszego hostingu — zero Google,
    zero cookies) — pełnoprawna, czysta mapa. Na hover/focus przyciemnia się (scrim).
-   Interaktywną mapę Google ładujemy po akceptacji cookies w banerze.
-   Klik w mapę bez zgody = toast z prośbą o akceptację + pulsujące guziki banera (mapy NIE ładuje). */
+   Klik w mapę bez zgody otwiera ustawienia bez zaznaczania zgody za użytkownika. */
 function initContactMap() {
   const holder = document.querySelector('.map-container[data-map]');
   if (!holder) return;
 
-  if (localStorage.getItem('cookies-accepted') === 'true') {
+  if (privacyConsent?.maps) {
     loadMap(holder);
     return;
   }
   const placeholder = holder.querySelector('[data-load-map]');
   const coarse = window.matchMedia('(hover: none)'); // ekran dotykowy (bez kursora)
 
-  placeholder?.addEventListener('click', () => {
-    const banner = document.querySelector('.cookie-banner');
-    // Po wyborze „tylko niezbędne" nie pytamy o to ponownie — chodzi już tylko
-    // o zgodę na WSZYSTKIE cookies (potrzebną do mapy Google).
-    const essentialOnly = localStorage.getItem('cookies-accepted') === 'essential';
-
-    showToast(essentialOnly ? STR.mapNeedAll : STR.mapNeedConsent, 'info');
-
+  placeholder?.addEventListener('click', (event) => {
+    showToast(STR.mapNeedConsent, 'info');
     // Mobile: tap pokazuje scrim + podpowiedź (na desktopie robi to :hover)
     if (coarse.matches) placeholder.classList.add('is-revealed');
-
-    if (!banner) return;
-
-    // Tryb „tylko wszystkie": chowa guzik „Tylko niezbędne", dopasowuje tekst i etykietę
-    banner.classList.toggle('cookie-banner--accept-all', essentialOnly);
-    if (essentialOnly) {
-      const textEl = banner.querySelector('.cookie-banner__text');
-      if (textEl) {
-        // Link relatywny — mapa (i ten re-prompt) istnieje tylko na podstronie kontakt/
-        textEl.innerHTML = STR.mapCookieHtml;
-      }
-      const acceptBtn = banner.querySelector('[data-accept]');
-      if (acceptBtn) acceptBtn.textContent = STR.acceptAll;
-    }
-
-    banner.classList.add('visible');
-    // Pulsnij widocznymi przyciskami banera (2×), żeby zwrócić uwagę, gdzie kliknąć
-    banner.querySelectorAll('.btn').forEach((b) => {
-      b.classList.remove('is-pulsing');
-      void b.offsetWidth; // reflow → restart animacji przy kolejnym kliknięciu
-      b.classList.add('is-pulsing');
-    });
+    openPrivacySettings('maps', event.currentTarget);
   });
 
   // Mobile: tap poza mapą chowa scrim + podpowiedź; ponowny tap w mapę znów je pokaże
