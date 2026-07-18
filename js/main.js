@@ -433,7 +433,7 @@ function openPrivacySettings(focusCategory, trigger) {
   privacyBannerWasVisible = privacyBanner?.classList.contains('visible') || false;
   setPrivacyBannerVisible(false);
   document.body.classList.add('privacy-dialog-open');
-  privacyDialog.showModal();
+  if (!privacyDialog.open) privacyDialog.showModal();
 
   const target = focusCategory === 'maps' ? mapsInput :
     (focusCategory === 'analytics' ? analyticsInput : analyticsInput);
@@ -445,6 +445,7 @@ function readPrivacyConsent() {
     const stored = JSON.parse(localStorage.getItem(PRIVACY_CONSENT_KEY) || 'null');
     if (!stored || stored.version !== PRIVACY_CONSENT_VERSION) return null;
     if (typeof stored.analytics !== 'boolean' || typeof stored.maps !== 'boolean') return null;
+    if (typeof stored.decidedAt !== 'string' || Number.isNaN(Date.parse(stored.decidedAt))) return null;
     return stored;
   } catch (error) {
     return null;
