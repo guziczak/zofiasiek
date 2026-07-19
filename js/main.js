@@ -1020,6 +1020,8 @@ function initLightbox() {
   const centerTrack = () => {
     track.classList.remove('is-animated', 'is-snapping');
     track.style.transform = 'translate3d(-100%, 0, 0)';
+    track.style.removeProperty('--lightbox-slide-duration');
+    track.style.removeProperty('--lightbox-slide-easing');
   };
 
   function preloadImage(src) {
@@ -1088,7 +1090,7 @@ function initLightbox() {
     });
   }
 
-  function updateFilmstrip(behavior = 'auto') {
+  function updateFilmstrip(behavior = 'auto', shouldCenter = true) {
     thumbButtons.forEach((button, index) => {
       if (index === pos) {
         button.setAttribute('aria-current', 'true');
@@ -1096,7 +1098,7 @@ function initLightbox() {
         button.removeAttribute('aria-current');
       }
     });
-    centerActiveThumbnail(behavior);
+    if (shouldCenter) centerActiveThumbnail(behavior);
   }
 
   function buildFilmstrip() {
@@ -1132,17 +1134,17 @@ function initLightbox() {
     countEl.textContent = slides.length > 1 ? `${pos + 1} / ${slides.length}` : '';
   }
 
-  function render(thumbnailBehavior = 'auto') {
+  function render(thumbnailBehavior = 'auto', centerThumbnail = true) {
     renderSlots();
     updateMeta();
-    updateFilmstrip(thumbnailBehavior);
+    updateFilmstrip(thumbnailBehavior, centerThumbnail);
     navButtons.forEach(button => {
       button.style.display = slides.length > 1 ? '' : 'none';
     });
     preloadNeighbours();
   }
 
-  function waitForTrackTransition() {
+  function waitForTrackTransition(duration = 280) {
     return new Promise(resolve => {
       let finished = false;
       const finish = () => {
@@ -1155,7 +1157,7 @@ function initLightbox() {
       const onEnd = event => {
         if (event.target === track && event.propertyName === 'transform') finish();
       };
-      const timeout = window.setTimeout(finish, 420);
+      const timeout = window.setTimeout(finish, duration + 160);
       track.addEventListener('transitionend', onEnd);
     });
   }
@@ -1174,28 +1176,39 @@ function initLightbox() {
     });
   }
 
-  function commitMove(targetPosition) {
+  function commitMove(
+    targetPosition,
+    thumbnailBehavior = 'smooth',
+    centerThumbnail = true
+  ) {
     pos = targetPosition;
     centerTrack();
-    render('smooth');
+    render(thumbnailBehavior, centerThumbnail);
   }
 
-  async function navigateTo(targetPosition, direction) {
-    if (drag) clearDrag(true);
-    animating = true;
+  async function animateStep(
+    targetPosition,
+    direction,
+    {
+      duration = 280,
+      easing = 'cubic-bezier(0.22, 1, 0.36, 1)',
+      thumbnailBehavior = 'smooth',
+      centerThumbnail = true
+    } = {}
+  ) {
     const token = sessionToken;
     await preloadImage(slides[targetPosition].src);
 
-    if (token !== sessionToken || !box.open) return;
+    if (token !== sessionToken || !box.open) return false;
 
     if (reduceMotion.matches) {
-      commitMove(targetPosition);
-      animating = false;
-      runQueuedNavigation();
-      return;
+      commitMove(targetPosition, 'auto', centerThumbnail);
+      return true;
     }
 
     renderSlot(direction > 0 ? 2 : 0, targetPosition, false);
+    track.style.setProperty('--lightbox-slide-duration', `${duration}ms`);
+    track.style.setProperty('--lightbox-slide-easing', easing);
     track.classList.remove('is-snapping');
     track.classList.add('is-animated');
     void track.offsetWidth;
@@ -1203,10 +1216,19 @@ function initLightbox() {
       ? 'translate3d(-200%, 0, 0)'
       : 'translate3d(0, 0, 0)';
 
-    await waitForTrackTransition();
-    if (token !== sessionToken || !box.open) return;
+    await waitForTrackTransition(duration);
+    if (token !== sessionToken || !box.open) return false;
 
-    commitMove(targetPosition);
+    commitMove(targetPosition, thumbnailBehavior, centerThumbnail);
+    return true;
+  }
+
+  async function navigateTo(targetPosition, direction) {
+    if (drag) clearDrag(true);
+    animating = true;
+    const completed = await animateStep(targetPosition, direction);
+    if (!completed) return;
+
     animating = false;
     runQueuedNavigation();
   }
@@ -1223,6 +1245,58 @@ function initLightbox() {
     void navigateTo(wrap(pos + normalizedDirection), normalizedDirection);
   }
 
+  async function rollTo(targetPosition) {
+    if (drag) clearDrag(true);
+    animating = true;
+    const token = sessionToken;
+    const startPosition = pos;
+    const direction = targetPosition > startPosition ? 1 : -1;
+    const distance = Math.abs(targetPosition - startPosition);
+    const sequence = Array.from(
+      { length: distance },
+      (_, index) => startPosition + direction * (index + 1)
+    );
+
+    await Promise.all(sequence.map(index => preloadImage(slides[index].src)));
+    if (token !== sessionToken || !box.open) return;
+
+    if (reduceMotion.matches) {
+      commitMove(targetPosition, 'auto', true);
+      animating = false;
+      runQueuedNavigation();
+      return;
+    }
+
+    const totalDuration = Math.min(900, 240 + (distance - 1) * 80);
+    const stepDuration = Math.max(45, Math.round(totalDuration / distance));
+    if (distance > 1) countEl.setAttribute('aria-live', 'off');
+
+    for (let index = 0; index < sequence.length; index += 1) {
+      const isFirst = index === 0;
+      const isLast = index === sequence.length - 1;
+      const easing = distance === 1
+        ? 'cubic-bezier(0.22, 1, 0.36, 1)'
+        : isFirst
+          ? 'cubic-bezier(0.4, 0, 1, 1)'
+          : isLast
+            ? 'cubic-bezier(0, 0, 0.2, 1)'
+            : 'linear';
+
+      if (isLast) countEl.setAttribute('aria-live', 'polite');
+      const completed = await animateStep(sequence[index], direction, {
+        duration: stepDuration,
+        easing,
+        thumbnailBehavior: isLast ? 'smooth' : 'auto',
+        centerThumbnail: isLast
+      });
+      if (!completed) return;
+    }
+
+    countEl.setAttribute('aria-live', 'polite');
+    animating = false;
+    runQueuedNavigation();
+  }
+
   function goTo(index) {
     if (!box.open || slides.length < 2) return;
     const targetPosition = wrap(index);
@@ -1237,8 +1311,7 @@ function initLightbox() {
       return;
     }
 
-    const direction = targetPosition > pos ? 1 : -1;
-    void navigateTo(targetPosition, direction);
+    void rollTo(targetPosition);
   }
 
   async function snapTrackBack() {
@@ -1252,7 +1325,7 @@ function initLightbox() {
     track.classList.add('is-animated', 'is-snapping');
     void track.offsetWidth;
     track.style.transform = 'translate3d(-100%, 0, 0)';
-    await waitForTrackTransition();
+    await waitForTrackTransition(180);
 
     if (token !== sessionToken || !box.open) return;
     centerTrack();
@@ -1278,6 +1351,7 @@ function initLightbox() {
     queuedNavigation = null;
     clearDrag(false);
     centerTrack();
+    countEl.setAttribute('aria-live', 'polite');
     buildFilmstrip();
     render();
     document.body.style.overflow = 'hidden';
@@ -1293,6 +1367,7 @@ function initLightbox() {
     queuedNavigation = null;
     clearDrag(false);
     centerTrack();
+    countEl.setAttribute('aria-live', 'polite');
     document.body.style.overflow = '';
   });
 

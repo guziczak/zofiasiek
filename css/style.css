@@ -1988,11 +1988,15 @@ body {
 }
 
 .lightbox__track.is-animated {
-  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform
+    var(--lightbox-slide-duration, 280ms)
+    var(--lightbox-slide-easing, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .lightbox__track.is-snapping {
   transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lightbox__slide {
