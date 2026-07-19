@@ -2238,7 +2238,12 @@ body {
   .lightbox__nav { width: 44px; height: 64px; font-size: 2rem; }
   .lightbox__caption { font-size: var(--fs-base); }
   .lightbox__filmstrip { min-height: 72px; }
-  .lightbox__film-reel { min-height: 70px; padding-inline: 8px; }
+  .lightbox__film-reel {
+    min-height: 70px;
+    padding-inline: 8px;
+    background-size: 16px 7px;
+    background-position: 0 1px, 8px calc(100% - 1px);
+  }
   .lightbox__thumb { flex-basis: 56px; width: 56px; height: 44px; }
 }
 

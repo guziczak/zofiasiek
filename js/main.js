@@ -1430,7 +1430,7 @@ function initLightbox() {
     const startSlot = path.indexOf(startPosition);
     const targetSlot = path.indexOf(targetPosition);
     const durationPerSlide = window.matchMedia('(max-width: 600px)').matches
-      ? 130
+      ? 100
       : 110;
     const duration = distance * durationPerSlide;
     element.className = 'lightbox__journey-track';
