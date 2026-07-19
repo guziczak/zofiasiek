@@ -2060,11 +2060,7 @@ body {
 }
 
 .lightbox__counter {
-  position: absolute;
-  z-index: 2;
-  bottom: 18px;
-  left: 0;
-  right: 0;
+  flex: 0 0 auto;
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
   font-size: var(--fs-sm);

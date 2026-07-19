@@ -994,8 +994,8 @@ function initLightbox() {
       </div>
       <div class="lightbox__filmstrip" role="group" aria-label="${STR.lightbox}"></div>
       <figcaption class="lightbox__caption"></figcaption>
-    </figure>
-    <span class="lightbox__counter" aria-live="polite" aria-atomic="true"></span>`;
+      <span class="lightbox__counter" aria-live="polite" aria-atomic="true"></span>
+    </figure>`;
   document.body.appendChild(box);
 
   const viewport = box.querySelector('.lightbox__viewport');
