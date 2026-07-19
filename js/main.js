@@ -991,6 +991,7 @@ function initLightbox() {
           <div class="lightbox__slide" aria-hidden="true"><img class="lightbox__img" src="" alt="" draggable="false"></div>
         </div>
       </div>
+      <div class="lightbox__filmstrip" aria-label="${STR.lightbox}"></div>
       <figcaption class="lightbox__caption"></figcaption>
     </figure>
     <button class="lightbox__nav lightbox__nav--next" aria-label="${STR.next}">&#8250;</button>
@@ -999,6 +1000,7 @@ function initLightbox() {
 
   const viewport = box.querySelector('.lightbox__viewport');
   const track = box.querySelector('.lightbox__track');
+  const filmstrip = box.querySelector('.lightbox__filmstrip');
   const slideEls = [...box.querySelectorAll('.lightbox__slide')];
   const imageEls = slideEls.map(slide => slide.querySelector('.lightbox__img'));
   const capEl = box.querySelector('.lightbox__caption');
@@ -1009,9 +1011,10 @@ function initLightbox() {
   let slides = [];
   let pos = 0;
   let animating = false;
-  let queuedDirection = 0;
+  let queuedNavigation = null;
   let sessionToken = 0;
   let drag = null;
+  let thumbButtons = [];
 
   const wrap = index => (index + slides.length) % slides.length;
   const centerTrack = () => {
