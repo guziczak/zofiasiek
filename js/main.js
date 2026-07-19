@@ -1277,15 +1277,17 @@ function initLightbox() {
       (_, index) => firstPosition + index
     );
 
-    await Promise.all(path.map(index => preloadImage(slides[index].src)));
-    if (token !== sessionToken || !box.open) return;
-
     if (reduceMotion.matches) {
+      await preloadImage(slides[targetPosition].src);
+      if (token !== sessionToken || !box.open) return;
       commitMove(targetPosition, 'auto', true);
       animating = false;
       runQueuedNavigation();
       return;
     }
+
+    await Promise.all(path.map(index => preloadImage(slides[index].src)));
+    if (token !== sessionToken || !box.open) return;
 
     if (distance === 1) {
       const completed = await animateStep(
