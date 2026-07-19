@@ -982,19 +982,19 @@ function initLightbox() {
   box.setAttribute('aria-label', STR.lightbox);
   box.innerHTML = `
     <button class="lightbox__close" aria-label="${STR.close}">&times;</button>
-    <button class="lightbox__nav lightbox__nav--prev" aria-label="${STR.prev}">&#8249;</button>
     <figure class="lightbox__stage">
       <div class="lightbox__viewport">
+        <button class="lightbox__nav lightbox__nav--prev" aria-label="${STR.prev}">&#8249;</button>
         <div class="lightbox__track">
           <div class="lightbox__slide" aria-hidden="true"><img class="lightbox__img" src="" alt="" draggable="false"></div>
           <div class="lightbox__slide"><img class="lightbox__img" src="" alt="" draggable="false"></div>
           <div class="lightbox__slide" aria-hidden="true"><img class="lightbox__img" src="" alt="" draggable="false"></div>
         </div>
+        <button class="lightbox__nav lightbox__nav--next" aria-label="${STR.next}">&#8250;</button>
       </div>
-      <div class="lightbox__filmstrip" aria-label="${STR.lightbox}"></div>
+      <div class="lightbox__filmstrip" role="group" aria-label="${STR.lightbox}"></div>
       <figcaption class="lightbox__caption"></figcaption>
     </figure>
-    <button class="lightbox__nav lightbox__nav--next" aria-label="${STR.next}">&#8250;</button>
     <span class="lightbox__counter" aria-live="polite" aria-atomic="true"></span>`;
   document.body.appendChild(box);
 
@@ -1053,21 +1053,77 @@ function initLightbox() {
     void preloadImage(slides[wrap(pos + 1)].src);
   }
 
-  function renderSlots() {
-    const indexes = [wrap(pos - 1), pos, wrap(pos + 1)];
-    slideEls.forEach((slideEl, slot) => {
-      const slide = slides[indexes[slot]];
-      const imageEl = imageEls[slot];
-      if (imageEl.getAttribute('src') !== slide.src) imageEl.src = slide.src;
+  function renderSlot(slot, slideIndex, isCurrent) {
+    const slideEl = slideEls[slot];
+    const imageEl = imageEls[slot];
+    const slide = slides[slideIndex];
+    if (imageEl.getAttribute('src') !== slide.src) imageEl.src = slide.src;
 
-      if (slot === 1) {
-        slideEl.removeAttribute('aria-hidden');
-        imageEl.alt = slide.title || '';
+    if (isCurrent) {
+      slideEl.removeAttribute('aria-hidden');
+      imageEl.alt = slide.title || '';
+    } else {
+      slideEl.setAttribute('aria-hidden', 'true');
+      imageEl.alt = '';
+    }
+  }
+
+  function renderSlots() {
+    renderSlot(0, wrap(pos - 1), false);
+    renderSlot(1, pos, true);
+    renderSlot(2, wrap(pos + 1), false);
+  }
+
+  function centerActiveThumbnail(behavior = 'auto') {
+    const active = thumbButtons[pos];
+    if (!active || filmstrip.hidden) return;
+
+    requestAnimationFrame(() => {
+      if (!box.open || thumbButtons[pos] !== active) return;
+      const left = active.offsetLeft - (filmstrip.clientWidth - active.offsetWidth) / 2;
+      filmstrip.scrollTo({
+        left: Math.max(0, left),
+        behavior: reduceMotion.matches ? 'auto' : behavior
+      });
+    });
+  }
+
+  function updateFilmstrip(behavior = 'auto') {
+    thumbButtons.forEach((button, index) => {
+      if (index === pos) {
+        button.setAttribute('aria-current', 'true');
       } else {
-        slideEl.setAttribute('aria-hidden', 'true');
-        imageEl.alt = '';
+        button.removeAttribute('aria-current');
       }
     });
+    centerActiveThumbnail(behavior);
+  }
+
+  function buildFilmstrip() {
+    const fragment = document.createDocumentFragment();
+    thumbButtons = slides.map((slide, index) => {
+      const button = document.createElement('button');
+      const image = new Image();
+      button.type = 'button';
+      button.className = 'lightbox__thumb';
+      button.setAttribute(
+        'aria-label',
+        `${STR.slide} ${index + 1}${slide.title ? `: ${slide.title}` : ''}`
+      );
+      image.src = slide.src;
+      image.alt = '';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.draggable = false;
+      button.appendChild(image);
+      button.addEventListener('click', () => { void goTo(index); });
+      fragment.appendChild(button);
+      return button;
+    });
+
+    filmstrip.replaceChildren(fragment);
+    filmstrip.hidden = slides.length < 2;
+    box.classList.toggle('has-filmstrip', slides.length > 1);
   }
 
   function updateMeta() {
@@ -1076,9 +1132,10 @@ function initLightbox() {
     countEl.textContent = slides.length > 1 ? `${pos + 1} / ${slides.length}` : '';
   }
 
-  function render() {
+  function render(thumbnailBehavior = 'auto') {
     renderSlots();
     updateMeta();
+    updateFilmstrip(thumbnailBehavior);
     navButtons.forEach(button => {
       button.style.display = slides.length > 1 ? '' : 'none';
     });
@@ -1103,54 +1160,85 @@ function initLightbox() {
     });
   }
 
-  function runQueuedMove() {
-    const direction = queuedDirection;
-    queuedDirection = 0;
-    if (direction) requestAnimationFrame(() => move(direction));
+  function runQueuedNavigation() {
+    const queued = queuedNavigation;
+    queuedNavigation = null;
+    if (!queued) return;
+
+    requestAnimationFrame(() => {
+      if (queued.type === 'absolute') {
+        void goTo(queued.index);
+      } else {
+        void move(queued.direction);
+      }
+    });
   }
 
-  function commitMove(direction) {
-    pos = wrap(pos + direction);
+  function commitMove(targetPosition) {
+    pos = targetPosition;
     centerTrack();
-    render();
+    render('smooth');
   }
 
-  async function move(direction) {
-    if (!box.open || slides.length < 2) return;
-    const normalizedDirection = direction < 0 ? -1 : 1;
-
-    if (animating) {
-      queuedDirection = normalizedDirection;
-      return;
-    }
-
+  async function navigateTo(targetPosition, direction) {
     if (drag) clearDrag(true);
     animating = true;
     const token = sessionToken;
-    await preloadImage(slides[wrap(pos + normalizedDirection)].src);
+    await preloadImage(slides[targetPosition].src);
 
     if (token !== sessionToken || !box.open) return;
 
     if (reduceMotion.matches) {
-      commitMove(normalizedDirection);
+      commitMove(targetPosition);
       animating = false;
-      runQueuedMove();
+      runQueuedNavigation();
       return;
     }
 
+    renderSlot(direction > 0 ? 2 : 0, targetPosition, false);
     track.classList.remove('is-snapping');
     track.classList.add('is-animated');
     void track.offsetWidth;
-    track.style.transform = normalizedDirection > 0
+    track.style.transform = direction > 0
       ? 'translate3d(-200%, 0, 0)'
       : 'translate3d(0, 0, 0)';
 
     await waitForTrackTransition();
     if (token !== sessionToken || !box.open) return;
 
-    commitMove(normalizedDirection);
+    commitMove(targetPosition);
     animating = false;
-    runQueuedMove();
+    runQueuedNavigation();
+  }
+
+  function move(direction) {
+    if (!box.open || slides.length < 2) return;
+    const normalizedDirection = direction < 0 ? -1 : 1;
+
+    if (animating) {
+      queuedNavigation = { type: 'relative', direction: normalizedDirection };
+      return;
+    }
+
+    void navigateTo(wrap(pos + normalizedDirection), normalizedDirection);
+  }
+
+  function goTo(index) {
+    if (!box.open || slides.length < 2) return;
+    const targetPosition = wrap(index);
+
+    if (targetPosition === pos) {
+      centerActiveThumbnail('smooth');
+      return;
+    }
+
+    if (animating) {
+      queuedNavigation = { type: 'absolute', index: targetPosition };
+      return;
+    }
+
+    const direction = targetPosition > pos ? 1 : -1;
+    void navigateTo(targetPosition, direction);
   }
 
   async function snapTrackBack() {
@@ -1169,7 +1257,7 @@ function initLightbox() {
     if (token !== sessionToken || !box.open) return;
     centerTrack();
     animating = false;
-    runQueuedMove();
+    runQueuedNavigation();
   }
 
   function clearDrag(resetTrack) {
@@ -1187,9 +1275,10 @@ function initLightbox() {
     slides = list;
     pos = (start + slides.length) % slides.length;
     animating = false;
-    queuedDirection = 0;
+    queuedNavigation = null;
     clearDrag(false);
     centerTrack();
+    buildFilmstrip();
     render();
     document.body.style.overflow = 'hidden';
     box.showModal();
@@ -1201,7 +1290,7 @@ function initLightbox() {
   box.addEventListener('close', () => {
     sessionToken += 1;
     animating = false;
-    queuedDirection = 0;
+    queuedNavigation = null;
     clearDrag(false);
     centerTrack();
     document.body.style.overflow = '';
