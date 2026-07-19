@@ -1304,8 +1304,8 @@ function initLightbox() {
     const startSlot = path.indexOf(startPosition);
     const targetSlot = path.indexOf(targetPosition);
     const durationPerSlide = window.matchMedia('(max-width: 600px)').matches
-      ? 300
-      : 260;
+      ? 190
+      : 170;
     const duration = distance * durationPerSlide;
     element.className = 'lightbox__journey-track';
     element.setAttribute('aria-hidden', 'true');
