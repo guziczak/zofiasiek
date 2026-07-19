@@ -1016,7 +1016,6 @@ function initLightbox() {
   let drag = null;
   let thumbButtons = [];
   let journeyTrack = null;
-  let journeyProgressFrame = 0;
 
   const wrap = index => (index + slides.length) % slides.length;
   const centerTrack = () => {
@@ -1158,13 +1157,18 @@ function initLightbox() {
         finished = true;
         window.clearTimeout(timeout);
         element.removeEventListener('transitionend', onEnd);
+        element.removeEventListener('transitioncancel', onCancel);
         resolve();
       };
       const onEnd = event => {
         if (event.target === element && event.propertyName === 'transform') finish();
       };
+      const onCancel = event => {
+        if (event.target === element && event.propertyName === 'transform') finish();
+      };
       const timeout = window.setTimeout(finish, duration + 160);
       element.addEventListener('transitionend', onEnd);
+      element.addEventListener('transitioncancel', onCancel);
     });
   }
 
@@ -1174,49 +1178,8 @@ function initLightbox() {
 
     if (journeyTrack === element) {
       journeyTrack = null;
-      window.cancelAnimationFrame(journeyProgressFrame);
-      journeyProgressFrame = 0;
       track.classList.remove('is-obscured');
     }
-  }
-
-  function readTranslateX(element) {
-    const transform = window.getComputedStyle(element).transform;
-    if (!transform || transform === 'none') return 0;
-
-    try {
-      return new DOMMatrixReadOnly(transform).m41;
-    } catch (error) {
-      const values = transform
-        .slice(transform.indexOf('(') + 1, -1)
-        .split(',')
-        .map(Number);
-      return transform.startsWith('matrix3d(') ? (values[12] || 0) : (values[4] || 0);
-    }
-  }
-
-  function followJourneyProgress(element, path, token) {
-    const update = () => {
-      if (journeyTrack !== element || token !== sessionToken || !box.open) return;
-
-      const width = Math.max(1, viewport.clientWidth);
-      const slot = Math.max(
-        0,
-        Math.min(path.length - 1, Math.round(-readTranslateX(element) / width))
-      );
-      const visiblePosition = path[slot];
-
-      if (visiblePosition !== pos) {
-        pos = visiblePosition;
-        updateMeta();
-        updateFilmstrip('auto', false);
-      }
-
-      journeyProgressFrame = requestAnimationFrame(update);
-    };
-
-    window.cancelAnimationFrame(journeyProgressFrame);
-    journeyProgressFrame = requestAnimationFrame(update);
   }
 
   function runQueuedNavigation() {
@@ -1343,8 +1306,10 @@ function initLightbox() {
     element.setAttribute('aria-hidden', 'true');
     element.style.setProperty('--lightbox-journey-duration', `${duration}ms`);
     element.style.transform = `translate3d(${-startSlot * 100}%, 0, 0)`;
+    element.style.visibility = 'hidden';
 
     const fragment = document.createDocumentFragment();
+    const journeyImages = [];
     path.forEach(index => {
       const slide = document.createElement('div');
       const image = new Image();
@@ -1353,6 +1318,7 @@ function initLightbox() {
       image.src = slides[index].src;
       image.alt = '';
       image.draggable = false;
+      journeyImages.push(image);
       slide.appendChild(image);
       fragment.appendChild(slide);
     });
@@ -1360,12 +1326,28 @@ function initLightbox() {
 
     journeyTrack = element;
     viewport.appendChild(element);
+
+    await Promise.all(journeyImages.map(image => (
+      typeof image.decode === 'function' ? image.decode().catch(() => {}) : Promise.resolve()
+    )));
+    if (token !== sessionToken || !box.open || journeyTrack !== element) {
+      cleanupJourney(element);
+      return;
+    }
+
+    element.style.visibility = '';
     track.classList.add('is-obscured');
     countEl.setAttribute('aria-live', 'off');
 
-    void element.offsetWidth;
+    await new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    if (token !== sessionToken || !box.open || journeyTrack !== element) {
+      cleanupJourney(element);
+      return;
+    }
+
     element.classList.add('is-animated');
-    followJourneyProgress(element, path, token);
     element.style.transform = `translate3d(${-targetSlot * 100}%, 0, 0)`;
 
     await waitForTransformTransition(element, duration);
@@ -1375,10 +1357,10 @@ function initLightbox() {
     }
 
     pos = targetPosition;
+    countEl.setAttribute('aria-live', 'polite');
     centerTrack();
     render('smooth', true);
     cleanupJourney(element);
-    countEl.setAttribute('aria-live', 'polite');
     animating = false;
     runQueuedNavigation();
   }
