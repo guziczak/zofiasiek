@@ -1889,7 +1889,8 @@ body {
 }
 
 .lightbox__filmstrip {
-  width: min(100%, 960px);
+  width: max-content;
+  max-width: min(100%, 960px);
   min-height: 78px;
   display: flex;
   align-items: center;
@@ -1912,13 +1913,6 @@ body {
   background-position: 0 1px, 7px calc(100% - 1px);
   touch-action: pan-x pinch-zoom;
   -webkit-overflow-scrolling: touch;
-}
-
-.lightbox__filmstrip::before,
-.lightbox__filmstrip::after {
-  content: '';
-  flex: 1 0 0;
-  min-width: 0;
 }
 
 .lightbox__filmstrip[hidden] {
