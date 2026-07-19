@@ -225,8 +225,87 @@ function initMobileNav() {
   toggle.setAttribute('aria-expanded', 'false');
 
   const isOpen = () => navList.classList.contains('open');
+  const DOUBLE_TAP_DELAY = 350;
+  const DOUBLE_TAP_DISTANCE = 32;
+  const TAP_MOVE_TOLERANCE = 12;
+  const TAP_MAX_DURATION = 500;
+  const INTERACTIVE = 'a, button, input, select, textarea, label, summary, [contenteditable="true"], [role="button"], [role="link"], [tabindex]:not([tabindex="-1"])';
+  let activeTouch = null;
+  let lastTap = null;
+
+  const isInteractive = target =>
+    target instanceof Element && Boolean(target.closest(INTERACTIVE));
+
+  function resetDoubleTapGuard() {
+    activeTouch = null;
+    lastTap = null;
+  }
+
+  navList.addEventListener('touchstart', event => {
+    if (!isOpen() || event.touches.length !== 1 || isInteractive(event.target)) {
+      resetDoubleTapGuard();
+      return;
+    }
+
+    const touch = event.touches[0];
+    activeTouch = {
+      id: touch.identifier,
+      x: touch.clientX,
+      y: touch.clientY,
+      startedAt: performance.now()
+    };
+  }, { passive: true });
+
+  navList.addEventListener('touchmove', event => {
+    if (!activeTouch || event.touches.length !== 1) {
+      resetDoubleTapGuard();
+      return;
+    }
+
+    const touch = event.touches[0];
+    if (
+      touch.identifier !== activeTouch.id ||
+      Math.hypot(touch.clientX - activeTouch.x, touch.clientY - activeTouch.y) > TAP_MOVE_TOLERANCE
+    ) {
+      resetDoubleTapGuard();
+    }
+  }, { passive: true });
+
+  navList.addEventListener('touchcancel', resetDoubleTapGuard, { passive: true });
+
+  navList.addEventListener('touchend', event => {
+    const current = activeTouch;
+    activeTouch = null;
+
+    if (!isOpen() || !current || event.touches.length !== 0 || isInteractive(event.target)) {
+      lastTap = null;
+      return;
+    }
+
+    const touch = Array.from(event.changedTouches)
+      .find(item => item.identifier === current.id);
+    const now = performance.now();
+
+    if (!touch || now - current.startedAt > TAP_MAX_DURATION) {
+      lastTap = null;
+      return;
+    }
+
+    const isDoubleTap = lastTap &&
+      now - lastTap.endedAt <= DOUBLE_TAP_DELAY &&
+      Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) <= DOUBLE_TAP_DISTANCE;
+
+    if (isDoubleTap) {
+      if (event.cancelable) event.preventDefault();
+      lastTap = null;
+      return;
+    }
+
+    lastTap = { endedAt: now, x: touch.clientX, y: touch.clientY };
+  }, { passive: false });
 
   function closeNav(returnFocus) {
+    resetDoubleTapGuard();
     toggle.classList.remove('active');
     navList.classList.remove('open');
     if (overlay) overlay.classList.remove('visible');

@@ -71,7 +71,8 @@ html {
 
 html,
 body,
-.nav__list {
+.nav__list,
+.nav__list * {
   /* Prevent iOS double-tap zoom while preserving scroll and pinch-to-zoom. */
   touch-action: manipulation;
 }
