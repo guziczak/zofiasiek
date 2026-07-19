@@ -1001,9 +1001,12 @@ function initLightbox() {
   const viewport = box.querySelector('.lightbox__viewport');
   const track = box.querySelector('.lightbox__track');
   const filmstrip = box.querySelector('.lightbox__filmstrip');
+  const filmReel = document.createElement('div');
+  filmReel.className = 'lightbox__film-reel';
   const thumbWindow = document.createElement('span');
   thumbWindow.className = 'lightbox__thumb-window';
   thumbWindow.setAttribute('aria-hidden', 'true');
+  filmstrip.appendChild(filmReel);
   const slideEls = [...box.querySelectorAll('.lightbox__slide')];
   const imageEls = slideEls.map(slide => slide.querySelector('.lightbox__img'));
   const capEl = box.querySelector('.lightbox__caption');
@@ -1226,7 +1229,7 @@ function initLightbox() {
 
     thumbWindow.classList.remove('is-ready', 'is-animated');
     thumbWindow.removeAttribute('style');
-    filmstrip.replaceChildren(fragment, thumbWindow);
+    filmReel.replaceChildren(fragment, thumbWindow);
     filmstrip.scrollLeft = 0;
     filmstrip.hidden = slides.length < 2;
     box.classList.toggle('has-filmstrip', slides.length > 1);
