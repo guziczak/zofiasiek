@@ -67,6 +67,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Prevent iOS double-tap zoom while preserving scroll and pinch-to-zoom. */
+  touch-action: manipulation;
 }
 
 @media (prefers-reduced-motion: no-preference) {
