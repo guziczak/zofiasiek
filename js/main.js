@@ -1015,6 +1015,8 @@ function initLightbox() {
   let sessionToken = 0;
   let drag = null;
   let thumbButtons = [];
+  let journeyTrack = null;
+  let journeyProgressFrame = 0;
 
   const wrap = index => (index + slides.length) % slides.length;
   const centerTrack = () => {
@@ -1145,21 +1147,76 @@ function initLightbox() {
   }
 
   function waitForTrackTransition(duration = 280) {
+    return waitForTransformTransition(track, duration);
+  }
+
+  function waitForTransformTransition(element, duration) {
     return new Promise(resolve => {
       let finished = false;
       const finish = () => {
         if (finished) return;
         finished = true;
         window.clearTimeout(timeout);
-        track.removeEventListener('transitionend', onEnd);
+        element.removeEventListener('transitionend', onEnd);
         resolve();
       };
       const onEnd = event => {
-        if (event.target === track && event.propertyName === 'transform') finish();
+        if (event.target === element && event.propertyName === 'transform') finish();
       };
       const timeout = window.setTimeout(finish, duration + 160);
-      track.addEventListener('transitionend', onEnd);
+      element.addEventListener('transitionend', onEnd);
     });
+  }
+
+  function cleanupJourney(element = journeyTrack) {
+    if (!element) return;
+    element.remove();
+
+    if (journeyTrack === element) {
+      journeyTrack = null;
+      window.cancelAnimationFrame(journeyProgressFrame);
+      journeyProgressFrame = 0;
+      track.classList.remove('is-obscured');
+    }
+  }
+
+  function readTranslateX(element) {
+    const transform = window.getComputedStyle(element).transform;
+    if (!transform || transform === 'none') return 0;
+
+    try {
+      return new DOMMatrixReadOnly(transform).m41;
+    } catch (error) {
+      const values = transform
+        .slice(transform.indexOf('(') + 1, -1)
+        .split(',')
+        .map(Number);
+      return transform.startsWith('matrix3d(') ? (values[12] || 0) : (values[4] || 0);
+    }
+  }
+
+  function followJourneyProgress(element, path, token) {
+    const update = () => {
+      if (journeyTrack !== element || token !== sessionToken || !box.open) return;
+
+      const width = Math.max(1, viewport.clientWidth);
+      const slot = Math.max(
+        0,
+        Math.min(path.length - 1, Math.round(-readTranslateX(element) / width))
+      );
+      const visiblePosition = path[slot];
+
+      if (visiblePosition !== pos) {
+        pos = visiblePosition;
+        updateMeta();
+        updateFilmstrip('auto', false);
+      }
+
+      journeyProgressFrame = requestAnimationFrame(update);
+    };
+
+    window.cancelAnimationFrame(journeyProgressFrame);
+    journeyProgressFrame = requestAnimationFrame(update);
   }
 
   function runQueuedNavigation() {
@@ -1250,14 +1307,14 @@ function initLightbox() {
     animating = true;
     const token = sessionToken;
     const startPosition = pos;
-    const direction = targetPosition > startPosition ? 1 : -1;
     const distance = Math.abs(targetPosition - startPosition);
-    const sequence = Array.from(
-      { length: distance },
-      (_, index) => startPosition + direction * (index + 1)
+    const firstPosition = Math.min(startPosition, targetPosition);
+    const path = Array.from(
+      { length: distance + 1 },
+      (_, index) => firstPosition + index
     );
 
-    await Promise.all(sequence.map(index => preloadImage(slides[index].src)));
+    await Promise.all(path.map(index => preloadImage(slides[index].src)));
     if (token !== sessionToken || !box.open) return;
 
     if (reduceMotion.matches) {
@@ -1267,37 +1324,60 @@ function initLightbox() {
       return;
     }
 
-    const totalDuration = Math.min(900, 240 + (distance - 1) * 80);
-    const stepDuration = Math.max(45, Math.round(totalDuration / distance));
-    if (distance > 1) countEl.setAttribute('aria-live', 'off');
-
-    for (let index = 0; index < sequence.length; index += 1) {
-      const isFirst = index === 0;
-      const isLast = index === sequence.length - 1;
-      const easing = distance === 1
-        ? 'cubic-bezier(0.22, 1, 0.36, 1)'
-        : isFirst
-          ? 'cubic-bezier(0.4, 0, 1, 1)'
-          : isLast
-            ? 'cubic-bezier(0, 0, 0.2, 1)'
-            : 'linear';
-
-      if (isLast) countEl.setAttribute('aria-live', 'polite');
-      const completed = await animateStep(sequence[index], direction, {
-        duration: stepDuration,
-        easing,
-        thumbnailBehavior: isLast ? 'smooth' : 'auto',
-        centerThumbnail: isLast
-      });
+    if (distance === 1) {
+      const completed = await animateStep(
+        targetPosition,
+        targetPosition > startPosition ? 1 : -1
+      );
       if (!completed) return;
-      if (!isLast) {
-        await new Promise(resolve => {
-          requestAnimationFrame(() => requestAnimationFrame(resolve));
-        });
-        if (token !== sessionToken || !box.open) return;
-      }
+      animating = false;
+      runQueuedNavigation();
+      return;
     }
 
+    const element = document.createElement('div');
+    const startSlot = path.indexOf(startPosition);
+    const targetSlot = path.indexOf(targetPosition);
+    const duration = Math.min(1600, 260 + distance * 125);
+    element.className = 'lightbox__journey-track';
+    element.setAttribute('aria-hidden', 'true');
+    element.style.setProperty('--lightbox-journey-duration', `${duration}ms`);
+    element.style.transform = `translate3d(${-startSlot * 100}%, 0, 0)`;
+
+    const fragment = document.createDocumentFragment();
+    path.forEach(index => {
+      const slide = document.createElement('div');
+      const image = new Image();
+      slide.className = 'lightbox__journey-slide';
+      image.className = 'lightbox__img';
+      image.src = slides[index].src;
+      image.alt = '';
+      image.draggable = false;
+      slide.appendChild(image);
+      fragment.appendChild(slide);
+    });
+    element.appendChild(fragment);
+
+    journeyTrack = element;
+    viewport.appendChild(element);
+    track.classList.add('is-obscured');
+    countEl.setAttribute('aria-live', 'off');
+
+    void element.offsetWidth;
+    element.classList.add('is-animated');
+    followJourneyProgress(element, path, token);
+    element.style.transform = `translate3d(${-targetSlot * 100}%, 0, 0)`;
+
+    await waitForTransformTransition(element, duration);
+    if (token !== sessionToken || !box.open || journeyTrack !== element) {
+      cleanupJourney(element);
+      return;
+    }
+
+    pos = targetPosition;
+    centerTrack();
+    render('smooth', true);
+    cleanupJourney(element);
     countEl.setAttribute('aria-live', 'polite');
     animating = false;
     runQueuedNavigation();
@@ -1351,6 +1431,7 @@ function initLightbox() {
 
   function open(list, start) {
     sessionToken += 1;
+    cleanupJourney();
     slides = list;
     pos = (start + slides.length) % slides.length;
     animating = false;
@@ -1369,6 +1450,7 @@ function initLightbox() {
   // 'close' łapie każdą drogę zamknięcia (przycisk, backdrop, Escape)
   box.addEventListener('close', () => {
     sessionToken += 1;
+    cleanupJourney();
     animating = false;
     queuedNavigation = null;
     clearDrag(false);
