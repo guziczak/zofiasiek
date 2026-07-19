@@ -1290,6 +1290,12 @@ function initLightbox() {
         centerThumbnail: isLast
       });
       if (!completed) return;
+      if (!isLast) {
+        await new Promise(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+        if (token !== sessionToken || !box.open) return;
+      }
     }
 
     countEl.setAttribute('aria-live', 'polite');
