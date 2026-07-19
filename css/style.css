@@ -1930,6 +1930,7 @@ body {
 
 .lightbox__close {
   position: absolute;
+  z-index: 3;
   top: 16px;
   right: 24px;
   font-size: 2.6rem;
@@ -1940,6 +1941,7 @@ body {
 
 .lightbox__nav {
   position: absolute;
+  z-index: 2;
   top: 50%;
   transform: translateY(-50%);
   font-size: 2.6rem;
@@ -1963,6 +1965,7 @@ body {
 
 .lightbox__counter {
   position: absolute;
+  z-index: 2;
   bottom: 18px;
   left: 0;
   right: 0;
@@ -1970,6 +1973,7 @@ body {
   color: rgba(255, 255, 255, 0.7);
   font-size: var(--fs-sm);
   letter-spacing: 1px;
+  pointer-events: none;
 }
 
 /* ----- Rozwijany tekst ----- */

@@ -1112,7 +1112,7 @@ function initLightbox() {
     render();
   }
 
-  async function move(direction, fromDrag = false) {
+  async function move(direction) {
     if (!box.open || slides.length < 2) return;
     const normalizedDirection = direction < 0 ? -1 : 1;
 
@@ -1268,7 +1268,7 @@ function initLightbox() {
     clearDrag(false);
 
     if (shouldMove) {
-      void move(direction, true);
+      void move(direction);
     } else if (completedDrag.horizontal) {
       void snapTrackBack();
     }
