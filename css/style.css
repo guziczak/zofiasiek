@@ -1889,6 +1889,7 @@ body {
 }
 
 .lightbox__filmstrip {
+  position: relative;
   width: max-content;
   max-width: min(100%, 960px);
   min-height: 78px;
@@ -1913,6 +1914,10 @@ body {
   background-position: 0 1px, 7px calc(100% - 1px);
   touch-action: pan-x pinch-zoom;
   -webkit-overflow-scrolling: touch;
+}
+
+.lightbox__filmstrip.is-window-travelling {
+  scroll-snap-type: none;
 }
 
 .lightbox__filmstrip[hidden] {
@@ -1957,12 +1962,45 @@ body {
 }
 
 .lightbox__thumb[aria-current="true"] {
-  border-color: var(--color-accent-light);
+  opacity: 1;
+  transform: none;
+}
+
+.lightbox__filmstrip.is-window-travelling .lightbox__thumb {
+  opacity: 0.56;
+  transform: none;
+}
+
+.lightbox__filmstrip.is-window-travelling .lightbox__thumb[aria-current="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.lightbox__thumb-window {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: 2px solid var(--color-accent-light);
+  border-radius: 2px;
   box-shadow:
     0 0 0 1px var(--color-accent-light),
     0 5px 16px rgba(0, 0, 0, 0.42);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.lightbox__thumb-window.is-ready {
   opacity: 1;
-  transform: translateY(-1px);
+}
+
+.lightbox__thumb-window.is-animated {
+  transition:
+    transform
+    var(--lightbox-window-duration, 280ms)
+    var(--lightbox-window-easing, linear);
 }
 
 .lightbox__thumb:focus-visible {

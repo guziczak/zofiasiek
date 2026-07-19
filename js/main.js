@@ -1001,6 +1001,9 @@ function initLightbox() {
   const viewport = box.querySelector('.lightbox__viewport');
   const track = box.querySelector('.lightbox__track');
   const filmstrip = box.querySelector('.lightbox__filmstrip');
+  const thumbWindow = document.createElement('span');
+  thumbWindow.className = 'lightbox__thumb-window';
+  thumbWindow.setAttribute('aria-hidden', 'true');
   const slideEls = [...box.querySelectorAll('.lightbox__slide')];
   const imageEls = slideEls.map(slide => slide.querySelector('.lightbox__img'));
   const capEl = box.querySelector('.lightbox__caption');
@@ -1016,6 +1019,8 @@ function initLightbox() {
   let drag = null;
   let thumbButtons = [];
   let journeyTrack = null;
+  let thumbWindowSyncFrame = 0;
+  let filmstripScrollFrame = 0;
 
   const wrap = index => (index + slides.length) % slides.length;
   const centerTrack = () => {
@@ -1077,6 +1082,100 @@ function initLightbox() {
     renderSlot(2, wrap(pos + 1), false);
   }
 
+  function stopThumbWindowMotion() {
+    window.cancelAnimationFrame(thumbWindowSyncFrame);
+    window.cancelAnimationFrame(filmstripScrollFrame);
+    thumbWindowSyncFrame = 0;
+    filmstripScrollFrame = 0;
+    thumbWindow.classList.remove('is-animated');
+    filmstrip.classList.remove('is-window-travelling');
+    thumbButtons.forEach((button, index) => {
+      if (index === pos) {
+        button.setAttribute('aria-current', 'true');
+      } else {
+        button.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  function setThumbWindowGeometry(index) {
+    const button = thumbButtons[index];
+    if (!button || !button.offsetWidth) return false;
+
+    thumbWindow.style.width = `${button.offsetWidth}px`;
+    thumbWindow.style.height = `${button.offsetHeight}px`;
+    thumbWindow.style.transform =
+      `translate3d(${button.offsetLeft}px, ${button.offsetTop}px, 0)`;
+    thumbWindow.classList.add('is-ready');
+    return true;
+  }
+
+  function syncThumbWindow(index = pos) {
+    stopThumbWindowMotion();
+    thumbWindowSyncFrame = requestAnimationFrame(() => {
+      thumbWindowSyncFrame = 0;
+      if (!box.open || !setThumbWindowGeometry(index)) return;
+    });
+  }
+
+  function animateFilmstripProgress(fromIndex, targetIndex, targetButton, duration) {
+    const maxScroll = Math.max(0, filmstrip.scrollWidth - filmstrip.clientWidth);
+    const targetScroll = Math.max(
+      0,
+      Math.min(
+        maxScroll,
+        targetButton.offsetLeft - (filmstrip.clientWidth - targetButton.offsetWidth) / 2
+      )
+    );
+    const startScroll = filmstrip.scrollLeft;
+    const scrollDistance = targetScroll - startScroll;
+    let visibleIndex = fromIndex;
+
+    const startedAt = performance.now();
+    const step = now => {
+      if (!filmstrip.classList.contains('is-window-travelling')) return;
+      const progress = Math.min(1, (now - startedAt) / duration);
+      filmstrip.scrollLeft = startScroll + scrollDistance * progress;
+
+      const nextVisibleIndex = Math.round(
+        fromIndex + (targetIndex - fromIndex) * progress
+      );
+      if (nextVisibleIndex !== visibleIndex) {
+        visibleIndex = nextVisibleIndex;
+        thumbButtons.forEach((button, index) => {
+          if (index === visibleIndex) {
+            button.setAttribute('aria-current', 'true');
+          } else {
+            button.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      if (progress < 1) {
+        filmstripScrollFrame = requestAnimationFrame(step);
+      } else {
+        filmstripScrollFrame = 0;
+      }
+    };
+    filmstripScrollFrame = requestAnimationFrame(step);
+  }
+
+  function animateThumbWindow(fromIndex, targetIndex, duration, easing = 'linear') {
+    const targetButton = thumbButtons[targetIndex];
+    if (!targetButton || filmstrip.hidden) return;
+
+    stopThumbWindowMotion();
+    if (!setThumbWindowGeometry(fromIndex)) return;
+    void thumbWindow.offsetWidth;
+
+    thumbWindow.style.setProperty('--lightbox-window-duration', `${duration}ms`);
+    thumbWindow.style.setProperty('--lightbox-window-easing', easing);
+    thumbWindow.classList.add('is-animated');
+    filmstrip.classList.add('is-window-travelling');
+    setThumbWindowGeometry(targetIndex);
+    animateFilmstripProgress(fromIndex, targetIndex, targetButton, duration);
+  }
+
   function centerActiveThumbnail(behavior = 'auto') {
     const active = thumbButtons[pos];
     if (!active || filmstrip.hidden) return;
@@ -1099,6 +1198,7 @@ function initLightbox() {
         button.removeAttribute('aria-current');
       }
     });
+    syncThumbWindow(pos);
     if (shouldCenter) centerActiveThumbnail(behavior);
   }
 
@@ -1124,7 +1224,10 @@ function initLightbox() {
       return button;
     });
 
-    filmstrip.replaceChildren(fragment);
+    thumbWindow.classList.remove('is-ready', 'is-animated');
+    thumbWindow.removeAttribute('style');
+    filmstrip.replaceChildren(fragment, thumbWindow);
+    filmstrip.scrollLeft = 0;
     filmstrip.hidden = slides.length < 2;
     box.classList.toggle('has-filmstrip', slides.length > 1);
   }
@@ -1232,6 +1335,9 @@ function initLightbox() {
     track.classList.remove('is-snapping');
     track.classList.add('is-animated');
     void track.offsetWidth;
+    if (Math.abs(targetPosition - pos) === 1) {
+      animateThumbWindow(pos, targetPosition, duration, easing);
+    }
     track.style.transform = direction > 0
       ? 'translate3d(-200%, 0, 0)'
       : 'translate3d(0, 0, 0)';
@@ -1305,7 +1411,7 @@ function initLightbox() {
     const targetSlot = path.indexOf(targetPosition);
     const durationPerSlide = window.matchMedia('(max-width: 600px)').matches
       ? 190
-      : 170;
+      : 110;
     const duration = distance * durationPerSlide;
     element.className = 'lightbox__journey-track';
     element.setAttribute('aria-hidden', 'true');
@@ -1353,6 +1459,7 @@ function initLightbox() {
     }
 
     element.classList.add('is-animated');
+    animateThumbWindow(startPosition, targetPosition, duration, 'linear');
     element.style.transform = `translate3d(${-targetSlot * 100}%, 0, 0)`;
 
     await waitForTransformTransition(element, duration);
@@ -1418,6 +1525,7 @@ function initLightbox() {
 
   function open(list, start) {
     sessionToken += 1;
+    stopThumbWindowMotion();
     cleanupJourney();
     slides = list;
     pos = (start + slides.length) % slides.length;
@@ -1437,6 +1545,7 @@ function initLightbox() {
   // 'close' łapie każdą drogę zamknięcia (przycisk, backdrop, Escape)
   box.addEventListener('close', () => {
     sessionToken += 1;
+    stopThumbWindowMotion();
     cleanupJourney();
     animating = false;
     queuedNavigation = null;
@@ -1544,6 +1653,11 @@ function initLightbox() {
   box.querySelector('.lightbox__nav--prev').addEventListener('click', () => { void move(-1); });
   box.querySelector('.lightbox__nav--next').addEventListener('click', () => { void move(1); });
   box.addEventListener('click', e => { if (e.target === box) close(); });
+  window.addEventListener('resize', () => {
+    if (!box.open || animating) return;
+    syncThumbWindow(pos);
+    centerActiveThumbnail('auto');
+  });
   document.addEventListener('keydown', e => {
     if (!box.open) return; // Escape obsługuje natywny <dialog>
     if (e.key === 'ArrowLeft') {
