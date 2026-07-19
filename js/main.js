@@ -1294,7 +1294,19 @@ function initLightbox() {
       if (queued.type === 'absolute') {
         void goTo(queued.index);
       } else {
-        void move(queued.direction);
+        const steps = queued.steps;
+        const rawTarget = pos + steps;
+
+        if (rawTarget >= 0 && rawTarget < slides.length && Math.abs(steps) > 1) {
+          void rollTo(rawTarget);
+        } else {
+          const direction = steps < 0 ? -1 : 1;
+          const remainingSteps = steps - direction;
+          if (remainingSteps) {
+            queuedNavigation = { type: 'relative', steps: remainingSteps };
+          }
+          void move(direction);
+        }
       }
     });
   }
@@ -1364,7 +1376,12 @@ function initLightbox() {
     const normalizedDirection = direction < 0 ? -1 : 1;
 
     if (animating) {
-      queuedNavigation = { type: 'relative', direction: normalizedDirection };
+      if (queuedNavigation?.type === 'absolute') {
+        queuedNavigation.index = wrap(queuedNavigation.index + normalizedDirection);
+      } else {
+        const steps = (queuedNavigation?.steps || 0) + normalizedDirection;
+        queuedNavigation = steps ? { type: 'relative', steps } : null;
+      }
       return;
     }
 
@@ -1515,12 +1532,13 @@ function initLightbox() {
 
   function clearDrag(resetTrack) {
     if (!drag) return;
+    const queuedGesture = drag.queued;
     try {
       if (viewport.hasPointerCapture(drag.id)) viewport.releasePointerCapture(drag.id);
     } catch (error) {}
     drag = null;
     viewport.classList.remove('is-dragging');
-    if (resetTrack) centerTrack();
+    if (resetTrack && !queuedGesture) centerTrack();
   }
 
   function open(list, start) {
@@ -1563,7 +1581,6 @@ function initLightbox() {
     if (
       event.pointerType !== 'touch' ||
       !event.isPrimary ||
-      animating ||
       slides.length < 2
     ) return;
 
@@ -1575,7 +1592,8 @@ function initLightbox() {
       lastTime: performance.now(),
       deltaX: 0,
       velocity: 0,
-      horizontal: false
+      horizontal: false,
+      queued: animating
     };
   });
 
@@ -1602,6 +1620,7 @@ function initLightbox() {
     drag.lastX = event.clientX;
     drag.lastTime = now;
     drag.deltaX = Math.max(-viewport.clientWidth, Math.min(viewport.clientWidth, deltaX));
+    if (drag.queued) return;
     track.classList.remove('is-animated', 'is-snapping');
     track.style.transform = `translate3d(calc(-100% + ${drag.deltaX}px), 0, 0)`;
   }, { passive: false });
@@ -1620,7 +1639,7 @@ function initLightbox() {
 
     if (shouldMove) {
       void move(direction);
-    } else if (completedDrag.horizontal) {
+    } else if (completedDrag.horizontal && !completedDrag.queued) {
       void snapTrackBack();
     }
   });
