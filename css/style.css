@@ -2092,7 +2092,7 @@ body {
   width: max-content;
   max-width: min(100%, 960px);
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 2px;
 }
 
 .lightbox__filmstrip-shell[hidden] {
@@ -2104,8 +2104,8 @@ body {
   content: '';
   position: absolute;
   z-index: 3;
-  top: 1px;
-  bottom: 1px;
+  top: 0;
+  bottom: 0;
   width: 34px;
   opacity: 0;
   pointer-events: none;
@@ -2113,12 +2113,12 @@ body {
 }
 
 .lightbox__filmstrip-shell::before {
-  left: 1px;
+  left: 0;
   background: linear-gradient(90deg, rgba(5, 4, 3, 0.94), rgba(5, 4, 3, 0));
 }
 
 .lightbox__filmstrip-shell::after {
-  right: 1px;
+  right: 0;
   background: linear-gradient(270deg, rgba(5, 4, 3, 0.94), rgba(5, 4, 3, 0));
 }
 
@@ -2130,7 +2130,7 @@ body {
 .lightbox__filmstrip {
   width: max-content;
   max-width: 100%;
-  min-height: 78px;
+  min-height: 76px;
   display: block;
   overflow-x: auto;
   overflow-y: hidden;
@@ -2138,8 +2138,8 @@ body {
   scroll-snap-type: x proximity;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  border: 1px solid rgba(229, 211, 173, 0.18);
-  border-radius: 6px;
+  border: 0;
+  border-radius: 2px;
   background: rgba(5, 4, 3, 0.34);
   touch-action: pan-x pinch-zoom;
   -webkit-overflow-scrolling: touch;
@@ -2466,7 +2466,7 @@ body {
 @media (max-width: 600px) {
   .lightbox__nav { width: 44px; height: 64px; font-size: 2rem; }
   .lightbox__caption { font-size: var(--fs-base); }
-  .lightbox__filmstrip { min-height: 72px; }
+  .lightbox__filmstrip { min-height: 70px; }
   .lightbox__film-reel {
     min-height: 70px;
     padding-inline: 8px;
