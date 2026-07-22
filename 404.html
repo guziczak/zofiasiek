@@ -15,7 +15,7 @@
   </script>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=20260722seo404">
+  <link rel="stylesheet" href="css/style.css?v=20260722seo404lang">
 </head>
 <body>
 
@@ -87,7 +87,27 @@
         </section>
 
         <p class="error-page__contact">Nie wiesz, gdzie przejść? Zadzwoń: <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>.</p>
-        <p class="error-page__languages"><span lang="en">English:</span> <a href="en/" hreflang="en" lang="en">go to the English website</a><span aria-hidden="true"> · </span><span lang="de">Deutsch:</span> <a href="de/" hreflang="de" lang="de">zur deutschen Website</a></p>
+        <nav class="error-page__languages" aria-labelledby="error-languages-title">
+          <p class="error-page__languages-title" id="error-languages-title">Wybierz inną wersję językową</p>
+          <div class="error-page__language-list">
+            <a class="error-page__language" href="en/" hreflang="en" lang="en">
+              <span class="error-page__language-code" aria-hidden="true">EN</span>
+              <span class="error-page__language-copy">
+                <strong>English</strong>
+                <span>Open the English website</span>
+              </span>
+              <span class="error-page__language-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="error-page__language" href="de/" hreflang="de" lang="de">
+              <span class="error-page__language-code" aria-hidden="true">DE</span>
+              <span class="error-page__language-copy">
+                <strong>Deutsch</strong>
+                <span>Deutsche Website öffnen</span>
+              </span>
+              <span class="error-page__language-arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </nav>
       </div>
     </section>
   </main>
