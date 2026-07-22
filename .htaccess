@@ -1,0 +1,18 @@
+# Fallback for Plesk installations where requests are handled by Apache.
+# Rules are exact; only the confirmed feed of the recovered article is redirected.
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Known pages moved from the previous WordPress website.
+  RewriteRule ^konserwacja-zabytkow-i-dziel-sztuki(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
+  RewriteRule ^konserwacja-obrazu(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
+  RewriteRule ^konserwacja-obrazu/feed(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
+  RewriteRule ^portret-malzonkow-arnolfinich-jana-van-eycka(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
+  RewriteRule ^vermeer-dziewczyna-z-perla(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
+
+  # Keep one canonical host and preserve the requested path and query string.
+  RewriteCond %{HTTP_HOST} ^www\.zofiasiek\.pl$ [NC]
+  RewriteRule ^ https://zofiasiek.pl%{REQUEST_URI} [R=301,L,NE]
+</IfModule>
