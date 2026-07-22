@@ -998,7 +998,9 @@ function initLightbox() {
         </div>
         <button class="lightbox__nav lightbox__nav--next" aria-label="${STR.next}">&#8250;</button>
       </div>
-      <div class="lightbox__filmstrip" role="group" aria-label="${STR.lightbox}"></div>
+      <div class="lightbox__filmstrip-shell">
+        <div class="lightbox__filmstrip" role="group" aria-label="${STR.lightbox}"></div>
+      </div>
       <figcaption class="lightbox__caption"></figcaption>
       <span class="lightbox__counter" aria-live="polite" aria-atomic="true"></span>
     </figure>`;
@@ -1006,6 +1008,7 @@ function initLightbox() {
 
   const viewport = box.querySelector('.lightbox__viewport');
   const track = box.querySelector('.lightbox__track');
+  const filmstripShell = box.querySelector('.lightbox__filmstrip-shell');
   const filmstrip = box.querySelector('.lightbox__filmstrip');
   const filmReel = document.createElement('div');
   filmReel.className = 'lightbox__film-reel';
@@ -1030,6 +1033,7 @@ function initLightbox() {
   let journeyTrack = null;
   let thumbWindowSyncFrame = 0;
   let filmstripScrollFrame = 0;
+  let filmstripCueFrame = 0;
 
   const wrap = index => (index + slides.length) % slides.length;
   const centerTrack = () => {
@@ -1038,6 +1042,36 @@ function initLightbox() {
     track.style.removeProperty('--lightbox-slide-duration');
     track.style.removeProperty('--lightbox-slide-easing');
   };
+
+  function updateFilmstripCues() {
+    filmstripCueFrame = 0;
+    if (!box.open || filmstrip.hidden) {
+      filmstripShell.classList.remove('can-scroll-left', 'can-scroll-right');
+      return;
+    }
+
+    const maxScroll = Math.max(0, filmstrip.scrollWidth - filmstrip.clientWidth);
+    const edgeTolerance = 2;
+    filmstripShell.classList.toggle(
+      'can-scroll-left',
+      maxScroll > edgeTolerance && filmstrip.scrollLeft > edgeTolerance
+    );
+    filmstripShell.classList.toggle(
+      'can-scroll-right',
+      maxScroll > edgeTolerance && filmstrip.scrollLeft < maxScroll - edgeTolerance
+    );
+  }
+
+  function scheduleFilmstripCues() {
+    if (filmstripCueFrame) return;
+    filmstripCueFrame = requestAnimationFrame(updateFilmstripCues);
+  }
+
+  function clearFilmstripCues() {
+    window.cancelAnimationFrame(filmstripCueFrame);
+    filmstripCueFrame = 0;
+    filmstripShell.classList.remove('can-scroll-left', 'can-scroll-right');
+  }
 
   function preloadImage(src) {
     if (imageReady.has(src)) return imageReady.get(src);
@@ -1238,6 +1272,8 @@ function initLightbox() {
     filmReel.replaceChildren(fragment, thumbWindow);
     filmstrip.scrollLeft = 0;
     filmstrip.hidden = slides.length < 2;
+    filmstripShell.hidden = slides.length < 2;
+    clearFilmstripCues();
     box.classList.toggle('has-filmstrip', slides.length > 1);
   }
 
@@ -1602,6 +1638,7 @@ function initLightbox() {
     render();
     document.body.style.overflow = 'hidden';
     box.showModal();
+    scheduleFilmstripCues();
   }
 
   function close() { box.close(); }
@@ -1614,6 +1651,7 @@ function initLightbox() {
     animating = false;
     queuedNavigation = null;
     clearDrag(false);
+    clearFilmstripCues();
     centerTrack();
     countEl.setAttribute('aria-live', 'polite');
     document.body.style.overflow = '';
@@ -1718,10 +1756,12 @@ function initLightbox() {
   box.querySelector('.lightbox__nav--prev').addEventListener('click', () => { void move(-1); });
   box.querySelector('.lightbox__nav--next').addEventListener('click', () => { void move(1); });
   box.addEventListener('click', e => { if (e.target === box) close(); });
+  filmstrip.addEventListener('scroll', scheduleFilmstripCues, { passive: true });
   window.addEventListener('resize', () => {
     if (!box.open || animating) return;
     syncThumbWindow(pos);
     centerActiveThumbnail('auto');
+    scheduleFilmstripCues();
   });
   document.addEventListener('keydown', e => {
     if (!box.open) return; // Escape obsługuje natywny <dialog>
@@ -1733,6 +1773,7 @@ function initLightbox() {
       void move(1);
     }
   });
+
 }
 
 /* ----- Rozwijany tekst ----- */

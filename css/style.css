@@ -2087,18 +2087,57 @@ body {
   height: min(66vh, calc(100dvh - 224px));
 }
 
-.lightbox__filmstrip {
+.lightbox__filmstrip-shell {
   position: relative;
   width: max-content;
   max-width: min(100%, 960px);
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.lightbox__filmstrip-shell[hidden] {
+  display: none;
+}
+
+.lightbox__filmstrip-shell::before,
+.lightbox__filmstrip-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 1px;
+  bottom: 1px;
+  width: 34px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.lightbox__filmstrip-shell::before {
+  left: 1px;
+  background: linear-gradient(90deg, rgba(5, 4, 3, 0.94), rgba(5, 4, 3, 0));
+}
+
+.lightbox__filmstrip-shell::after {
+  right: 1px;
+  background: linear-gradient(270deg, rgba(5, 4, 3, 0.94), rgba(5, 4, 3, 0));
+}
+
+.lightbox__filmstrip-shell.can-scroll-left::before,
+.lightbox__filmstrip-shell.can-scroll-right::after {
+  opacity: 1;
+}
+
+.lightbox__filmstrip {
+  width: max-content;
+  max-width: 100%;
   min-height: 78px;
   display: block;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(229, 211, 173, 0.56) rgba(0, 0, 0, 0.28);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   border: 1px solid rgba(229, 211, 173, 0.18);
   border-radius: 6px;
   background: rgba(5, 4, 3, 0.34);
@@ -2132,16 +2171,7 @@ body {
 }
 
 .lightbox__filmstrip::-webkit-scrollbar {
-  height: 4px;
-}
-
-.lightbox__filmstrip::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.lightbox__filmstrip::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(229, 211, 173, 0.56);
+  display: none;
 }
 
 .lightbox__thumb {
