@@ -1278,6 +1278,26 @@ function initLightbox() {
     });
   }
 
+  function waitForImageDecode(image) {
+    if (!image) return Promise.resolve();
+    if (typeof image.decode === 'function') {
+      return image.decode().catch(() => {});
+    }
+    if (image.complete) return Promise.resolve();
+
+    return new Promise(resolve => {
+      const finish = () => resolve();
+      image.addEventListener('load', finish, { once: true });
+      image.addEventListener('error', finish, { once: true });
+    });
+  }
+
+  function waitForPaint() {
+    return new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+  }
+
   function cleanupJourney(element = journeyTrack) {
     if (!element) return;
     element.remove();
@@ -1470,9 +1490,7 @@ function initLightbox() {
     track.classList.add('is-obscured');
     countEl.setAttribute('aria-live', 'off');
 
-    await new Promise(resolve => {
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-    });
+    await waitForPaint();
     if (token !== sessionToken || !box.open || journeyTrack !== element) {
       cleanupJourney(element);
       return;
@@ -1492,6 +1510,25 @@ function initLightbox() {
     countEl.setAttribute('aria-live', 'polite');
     centerTrack();
     render('smooth', true);
+
+    // The journey layer still covers the viewport while the real centre slot
+    // receives and decodes the target image. Revealing that slot immediately
+    // can briefly expose its previous bitmap on some browsers.
+    await waitForImageDecode(imageEls[1]);
+    if (token !== sessionToken || !box.open || journeyTrack !== element) {
+      cleanupJourney(element);
+      return;
+    }
+
+    // Paint the prepared base track behind the journey layer, then remove the
+    // covering layer only after the browser has committed the target frame.
+    track.classList.remove('is-obscured');
+    await waitForPaint();
+    if (token !== sessionToken || !box.open || journeyTrack !== element) {
+      cleanupJourney(element);
+      return;
+    }
+
     cleanupJourney(element);
     animating = false;
     runQueuedNavigation();
