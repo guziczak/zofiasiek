@@ -3,15 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nie znaleziono strony (404) — Zofia Siek-Mlicka</title>
+  <title>404 — Zofia Siek-Mlicka</title>
   <meta name="description" content="Nie znaleziono strony. Przejdź do konserwacji dzieł sztuki, kopii obrazów lub skontaktuj się z pracownią Zofii Siek-Mlickiej.">
   <meta name="robots" content="noindex, follow">
 
+  <style>html.error-page--localizing body{visibility:hidden}</style>
   <base id="site-base" href="/">
   <script>
-    if (window.location.hostname === 'guziczak.github.io') {
-      document.getElementById('site-base').setAttribute('href', '/zofiasiek/');
-    }
+    (function () {
+      var root = document.documentElement;
+      var base = document.getElementById('site-base');
+      if (window.location.hostname === 'guziczak.github.io') {
+        base.setAttribute('href', '/zofiasiek/');
+      }
+
+      var baseUrl = new URL(base.href, window.location.href);
+      var basePath = baseUrl.pathname;
+      var relativePath = window.location.pathname.indexOf(basePath) === 0
+        ? window.location.pathname.slice(basePath.length)
+        : window.location.pathname.replace(/^\/+/, '');
+      var firstSegment = (relativePath.split('/')[0] || '').toLowerCase();
+      var language = firstSegment === 'en' || firstSegment === 'de' ? firstSegment : 'pl';
+
+      root.lang = language;
+      root.classList.add('error-page--localizing');
+      window.__ZOFIA_404_CONTEXT__ = { language: language, siteRoot: baseUrl.href };
+      window.__ZOFIA_404_REVEAL_TIMER__ = window.setTimeout(function () {
+        root.classList.remove('error-page--localizing');
+      }, 1500);
+    }());
   </script>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
@@ -19,23 +39,23 @@
 </head>
 <body>
 
-  <a class="skip-link" href="#tresc">Przejdź do treści</a>
+  <a class="skip-link" href="#tresc" data-i18n="skip">Przejdź do treści</a>
 
   <header class="header header--solid">
     <div class="header__inner">
-      <a href="./" class="header__logo"><img src="img/logo.png" alt="Zofia Siek-Mlicka"></a>
-      <nav aria-label="Główna nawigacja">
-        <button type="button" class="nav__toggle" aria-label="Otwórz menu nawigacji"><span></span><span></span><span></span></button>
+      <a href="./" class="header__logo" data-route="home"><img src="img/logo.png" alt="Zofia Siek-Mlicka"></a>
+      <nav aria-label="Główna nawigacja" data-i18n-aria="mainNav">
+        <button type="button" class="nav__toggle" aria-label="Otwórz menu nawigacji" data-i18n-aria="navOpen"><span></span><span></span><span></span></button>
         <ul class="nav__list">
-          <li><a href="kopie-obrazow/" class="nav__link">Kopie obrazów</a></li>
-          <li><a href="konserwacja/" class="nav__link">Konserwacja</a></li>
-          <li><a href="o-mnie/" class="nav__link">O mnie</a></li>
-          <li><a href="kontakt/" class="nav__link">Kontakt</a></li>
-          <li class="nav__lang"><span class="nav__lang-current" aria-current="true">PL</span><span class="nav__lang-sep" aria-hidden="true">/</span><a href="en/" class="nav__lang-link" hreflang="en" lang="en">EN</a><span class="nav__lang-sep" aria-hidden="true">/</span><a href="de/" class="nav__lang-link" hreflang="de" lang="de">DE</a></li>
+          <li><a href="kopie-obrazow/" class="nav__link" data-route="copies" data-i18n="copies">Kopie obrazów</a></li>
+          <li><a href="konserwacja/" class="nav__link" data-route="conservation" data-i18n="conservation">Konserwacja</a></li>
+          <li><a href="o-mnie/" class="nav__link" data-route="about" data-i18n="about">O mnie</a></li>
+          <li><a href="kontakt/" class="nav__link" data-route="contact" data-i18n="contact">Kontakt</a></li>
+          <li class="nav__lang" data-language-nav><span class="nav__lang-current" aria-current="true">PL</span><span class="nav__lang-sep" aria-hidden="true">/</span><a href="en/" class="nav__lang-link" hreflang="en" lang="en">EN</a><span class="nav__lang-sep" aria-hidden="true">/</span><a href="de/" class="nav__lang-link" hreflang="de" lang="de">DE</a></li>
           <li class="nav__footer">
             <div class="nav__footer-contact">
               <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>
-              <a href="mailto:zo.siek@interia.pl?subject=Zapytanie%20ze%20strony%20%E2%80%94%20wycena&amp;body=Dzie%C5%84%20dobry%2C%0A%0Apoprosz%C4%99%20o%20wycen%C4%99.%0A%0APozdrawiam%2C">zo.siek@interia.pl</a>
+              <a href="mailto:zo.siek@interia.pl?subject=Zapytanie%20ze%20strony%20%E2%80%94%20wycena&amp;body=Dzie%C5%84%20dobry%2C%0A%0Apoprosz%C4%99%20o%20wycen%C4%99.%0A%0APozdrawiam%2C" data-mail-link>zo.siek@interia.pl</a>
             </div>
             <div class="social-links">
               <a href="https://www.facebook.com/share/15gsfSCKKnL/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
@@ -53,43 +73,43 @@
     <section class="error-page" aria-labelledby="error-title">
       <div class="container container--narrow error-page__inner">
         <p class="error-page__code" aria-hidden="true">404</p>
-        <p class="section-subtitle">Nie znaleziono strony</p>
-        <h1 class="error-page__title" id="error-title">Ten adres już tu nie prowadzi</h1>
-        <p class="error-page__description">Strona mogła zostać przeniesiona podczas przebudowy witryny. Najważniejsze treści pracowni nadal są dostępne — wybierz jedną z poniższych sekcji.</p>
+        <p class="section-subtitle" data-i18n="notFound">Nie znaleziono strony</p>
+        <h1 class="error-page__title" id="error-title" data-i18n="errorTitle">Ten adres już tu nie prowadzi</h1>
+        <p class="error-page__description" data-i18n="errorDescription">Strona mogła zostać przeniesiona podczas przebudowy witryny. Najważniejsze treści pracowni nadal są dostępne — wybierz jedną z poniższych sekcji.</p>
 
         <div class="error-page__actions">
-          <a href="./" class="btn btn--primary">Strona główna</a>
-          <a href="kontakt/" class="btn btn--outline">Skontaktuj się</a>
+          <a href="./" class="btn btn--primary" data-route="home" data-i18n="home">Strona główna</a>
+          <a href="kontakt/" class="btn btn--outline" data-route="contact" data-i18n="contactAction">Skontaktuj się</a>
         </div>
 
         <section class="error-page__routes" aria-labelledby="error-routes-title">
-          <h2 id="error-routes-title">Być może szukasz</h2>
+          <h2 id="error-routes-title" data-i18n="routesTitle">Być może szukasz</h2>
           <ul class="error-page__route-list">
             <li>
-              <a class="error-page__route" href="konserwacja/">
-                <strong>Konserwacja</strong>
-                <span>Prace konserwatorskie oraz fotografie obiektów przed i po zabiegach.</span>
+              <a class="error-page__route" href="konserwacja/" data-route="conservation">
+                <strong data-i18n="conservation">Konserwacja</strong>
+                <span data-i18n="conservationDescription">Prace konserwatorskie oraz fotografie obiektów przed i po zabiegach.</span>
               </a>
             </li>
             <li>
-              <a class="error-page__route" href="kopie-obrazow/">
-                <strong>Kopie obrazów</strong>
-                <span>Ręcznie malowane kopie dzieł dawnych mistrzów.</span>
+              <a class="error-page__route" href="kopie-obrazow/" data-route="copies">
+                <strong data-i18n="copies">Kopie obrazów</strong>
+                <span data-i18n="copiesDescription">Ręcznie malowane kopie dzieł dawnych mistrzów.</span>
               </a>
             </li>
             <li>
-              <a class="error-page__route" href="o-mnie/">
-                <strong>O pracowni</strong>
-                <span>Doświadczenie, twórczość i pracownia Zofii Siek-Mlickiej.</span>
+              <a class="error-page__route" href="o-mnie/" data-route="about">
+                <strong data-i18n="aboutRoute">O pracowni</strong>
+                <span data-i18n="aboutDescription">Doświadczenie, twórczość i pracownia Zofii Siek-Mlickiej.</span>
               </a>
             </li>
           </ul>
         </section>
 
-        <p class="error-page__contact">Nie wiesz, gdzie przejść? Zadzwoń: <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>.</p>
+        <p class="error-page__contact"><span data-i18n="callPrompt">Nie wiesz, gdzie przejść? Zadzwoń:</span> <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>.</p>
         <nav class="error-page__languages" aria-labelledby="error-languages-title">
-          <p class="error-page__languages-title" id="error-languages-title">Wybierz inną wersję językową</p>
-          <div class="error-page__language-list">
+          <p class="error-page__languages-title" id="error-languages-title" data-i18n="languagesTitle">Wybierz inną wersję językową</p>
+          <div class="error-page__language-list" data-language-cards>
             <a class="error-page__language" href="en/" hreflang="en" lang="en">
               <span class="error-page__language-code" aria-hidden="true">EN</span>
               <span class="error-page__language-copy">
@@ -117,7 +137,7 @@
       <div class="footer__grid">
         <div>
           <div class="footer__brand">Zofia Siek-Mlicka</div>
-          <p class="footer__description">Kopie obrazów, konserwacja zabytków i dzieł sztuki. Pracownia w Siedlcu koło Krzeszowic — Małopolska, pod Krakowem.</p>
+          <p class="footer__description" data-i18n="footerDescription">Kopie obrazów, konserwacja zabytków i dzieł sztuki. Pracownia w Siedlcu koło Krzeszowic — Małopolska, pod Krakowem.</p>
           <div class="social-links">
             <a href="https://www.facebook.com/share/15gsfSCKKnL/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
             <a href="https://www.instagram.com/zofia.siekmlicka" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5"/></svg></a>
@@ -125,54 +145,44 @@
           </div>
         </div>
         <div>
-          <h2 class="footer__heading">Menu</h2>
+          <h2 class="footer__heading" data-i18n="footerMenu">Menu</h2>
           <ul class="footer__links">
-            <li><a href="kopie-obrazow/">Kopie obrazów</a></li>
-            <li><a href="konserwacja/">Konserwacja</a></li>
+            <li><a href="kopie-obrazow/" data-route="copies" data-i18n="copies">Kopie obrazów</a></li>
+            <li><a href="konserwacja/" data-route="conservation" data-i18n="conservation">Konserwacja</a></li>
           </ul>
         </div>
         <div>
-          <h2 class="footer__heading">Informacje</h2>
+          <h2 class="footer__heading" data-i18n="information">Informacje</h2>
           <ul class="footer__links">
-            <li><a href="o-mnie/">O mnie</a></li>
-            <li><a href="kontakt/">Kontakt</a></li>
-            <li><a href="polityka-prywatnosci/">Polityka prywatności</a></li>
+            <li><a href="o-mnie/" data-route="about" data-i18n="about">O mnie</a></li>
+            <li><a href="kontakt/" data-route="contact" data-i18n="contact">Kontakt</a></li>
+            <li><a href="polityka-prywatnosci/" data-route="privacy" data-i18n="privacy">Polityka prywatności</a></li>
           </ul>
         </div>
         <div>
-          <h2 class="footer__heading">Kontakt</h2>
+          <h2 class="footer__heading" data-i18n="contact">Kontakt</h2>
           <ul class="footer__links">
             <li><a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a></li>
             <li><a href="tel:+48502244629">+48&nbsp;502&nbsp;244&nbsp;629</a></li>
-            <li><a href="mailto:zo.siek@interia.pl?subject=Zapytanie%20ze%20strony%20%E2%80%94%20wycena&amp;body=Dzie%C5%84%20dobry%2C%0A%0Apoprosz%C4%99%20o%20wycen%C4%99.%0A%0APozdrawiam%2C">zo.siek@interia.pl</a></li>
-            <li>Siedlec 3, 32-065 Krzeszowice</li>
+            <li><a href="mailto:zo.siek@interia.pl?subject=Zapytanie%20ze%20strony%20%E2%80%94%20wycena&amp;body=Dzie%C5%84%20dobry%2C%0A%0Apoprosz%C4%99%20o%20wycen%C4%99.%0A%0APozdrawiam%2C" data-mail-link>zo.siek@interia.pl</a></li>
+            <li data-i18n="address">Siedlec 3, 32-065 Krzeszowice</li>
             <li>Kraków · Krzeszowice · Małopolska</li>
           </ul>
         </div>
       </div>
       <div class="footer__bottom">
-        <span>&copy; 2026 Zofia Siek-Mlicka. Wszelkie prawa zastrzeżone.</span>
-        <a href="polityka-prywatnosci/">Polityka prywatności</a>
+        <span data-i18n="copyright">&copy; 2026 Zofia Siek-Mlicka. Wszelkie prawa zastrzeżone.</span>
+        <a href="polityka-prywatnosci/" data-route="privacy" data-i18n="privacy">Polityka prywatności</a>
       </div>
     </div>
   </footer>
 
-  <div class="cookie-banner" role="dialog" aria-label="Informacja o plikach cookies">
-    <div class="cookie-banner__inner">
-      <p class="cookie-banner__text">Ta strona korzysta z plików cookies w celu zapewnienia prawidłowego działania. <a href="polityka-prywatnosci/">Dowiedz się więcej</a>.</p>
-      <div class="cookie-banner__actions">
-        <button type="button" class="btn btn--primary btn--small" data-accept>Akceptuję</button>
-        <button type="button" class="btn btn--outline btn--small" data-reject>Tylko niezbędne</button>
-      </div>
-    </div>
-  </div>
+  <div class="cookie-banner" aria-hidden="true" inert></div>
 
-  <a href="tel:+48607752370" class="mobile-cta" aria-label="Zadzwoń"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></a>
-  <button type="button" class="scroll-top" aria-label="Wróć na górę"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"/></svg></button>
+  <a href="tel:+48607752370" class="mobile-cta" aria-label="Zadzwoń" data-i18n-aria="call"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></a>
+  <button type="button" class="scroll-top" aria-label="Wróć na górę" data-i18n-aria="scrollTop"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"/></svg></button>
 
-  <script>
-    document.querySelector('.skip-link').setAttribute('href', window.location.href.split('#')[0] + '#tresc');
-  </script>
-  <script src="js/main.js?v=20260722film13"></script>
+  <script src="js/404.js?v=20260722i18n1"></script>
+  <script src="js/main.js?v=20260722film14"></script>
 </body>
 </html>

@@ -396,13 +396,19 @@ function initCookieConsent() {
   }
 }
 
+function resolveSiteUrl(path) {
+  const explicitBase = document.querySelector('base')?.href;
+  const siteRoot = explicitBase || new URL('/', window.location.origin).href;
+  return new URL(path.replace(/^\/+/, ''), siteRoot).href;
+}
+
 function renderPrivacyBanner() {
   if (!privacyBanner) return;
   privacyBanner.setAttribute('role', 'region');
   privacyBanner.setAttribute('aria-label', STR.privacySettings);
   privacyBanner.innerHTML = `
     <div class="cookie-banner__inner">
-      <p class="cookie-banner__text">${STR.cookieIntro} <a href="${STR.privacyUrl}">${STR.learnMore}</a>.</p>
+      <p class="cookie-banner__text">${STR.cookieIntro} <a href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>.</p>
       <div class="cookie-banner__actions">
         <button type="button" class="btn btn--primary btn--small" data-consent-accept-all>${STR.acceptAll}</button>
         <button type="button" class="btn btn--outline btn--small" data-consent-reject>${STR.rejectOptional}</button>
@@ -434,7 +440,7 @@ function createPrivacyDialog() {
         <h2 id="privacy-dialog-title">${STR.privacySettings}</h2>
         <button type="button" class="privacy-dialog__close" data-privacy-close aria-label="${STR.close}">&times;</button>
       </div>
-      <p class="privacy-dialog__intro">${STR.privacyDescription} <a href="${STR.privacyUrl}">${STR.learnMore}</a>.</p>
+      <p class="privacy-dialog__intro">${STR.privacyDescription} <a href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>.</p>
       <fieldset class="privacy-options">
         <legend class="sr-only">${STR.privacySettings}</legend>
         <label class="privacy-option privacy-option--locked">
