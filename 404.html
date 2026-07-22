@@ -7,9 +7,15 @@
   <meta name="description" content="Nie znaleziono strony. Przejdź do konserwacji dzieł sztuki, kopii obrazów lub skontaktuj się z pracownią Zofii Siek-Mlickiej.">
   <meta name="robots" content="noindex, follow">
 
-  <link rel="stylesheet" href="/css/fonts.css">
-  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
-  <link rel="stylesheet" href="/css/style.css?v=20260722seo404">
+  <base id="site-base" href="/">
+  <script>
+    if (window.location.hostname === 'guziczak.github.io') {
+      document.getElementById('site-base').setAttribute('href', '/zofiasiek/');
+    }
+  </script>
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=20260722seo404">
 </head>
 <body>
 
@@ -17,15 +23,15 @@
 
   <header class="header header--solid">
     <div class="header__inner">
-      <a href="/" class="header__logo"><img src="/img/logo.png" alt="Zofia Siek-Mlicka"></a>
+      <a href="./" class="header__logo"><img src="img/logo.png" alt="Zofia Siek-Mlicka"></a>
       <nav aria-label="Główna nawigacja">
         <button type="button" class="nav__toggle" aria-label="Otwórz menu nawigacji"><span></span><span></span><span></span></button>
         <ul class="nav__list">
-          <li><a href="/kopie-obrazow/" class="nav__link">Kopie obrazów</a></li>
-          <li><a href="/konserwacja/" class="nav__link">Konserwacja</a></li>
-          <li><a href="/o-mnie/" class="nav__link">O mnie</a></li>
-          <li><a href="/kontakt/" class="nav__link">Kontakt</a></li>
-          <li class="nav__lang"><span class="nav__lang-current" aria-current="true">PL</span><span class="nav__lang-sep" aria-hidden="true">/</span><a href="/en/" class="nav__lang-link" hreflang="en" lang="en">EN</a><span class="nav__lang-sep" aria-hidden="true">/</span><a href="/de/" class="nav__lang-link" hreflang="de" lang="de">DE</a></li>
+          <li><a href="kopie-obrazow/" class="nav__link">Kopie obrazów</a></li>
+          <li><a href="konserwacja/" class="nav__link">Konserwacja</a></li>
+          <li><a href="o-mnie/" class="nav__link">O mnie</a></li>
+          <li><a href="kontakt/" class="nav__link">Kontakt</a></li>
+          <li class="nav__lang"><span class="nav__lang-current" aria-current="true">PL</span><span class="nav__lang-sep" aria-hidden="true">/</span><a href="en/" class="nav__lang-link" hreflang="en" lang="en">EN</a><span class="nav__lang-sep" aria-hidden="true">/</span><a href="de/" class="nav__lang-link" hreflang="de" lang="de">DE</a></li>
           <li class="nav__footer">
             <div class="nav__footer-contact">
               <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>
@@ -52,27 +58,27 @@
         <p class="error-page__description">Strona mogła zostać przeniesiona podczas przebudowy witryny. Najważniejsze treści pracowni nadal są dostępne — wybierz jedną z poniższych sekcji.</p>
 
         <div class="error-page__actions">
-          <a href="/" class="btn btn--primary">Strona główna</a>
-          <a href="/kontakt/" class="btn btn--outline">Skontaktuj się</a>
+          <a href="./" class="btn btn--primary">Strona główna</a>
+          <a href="kontakt/" class="btn btn--outline">Skontaktuj się</a>
         </div>
 
         <section class="error-page__routes" aria-labelledby="error-routes-title">
           <h2 id="error-routes-title">Być może szukasz</h2>
           <ul class="error-page__route-list">
             <li>
-              <a class="error-page__route" href="/konserwacja/">
+              <a class="error-page__route" href="konserwacja/">
                 <strong>Konserwacja</strong>
                 <span>Prace konserwatorskie oraz fotografie obiektów przed i po zabiegach.</span>
               </a>
             </li>
             <li>
-              <a class="error-page__route" href="/kopie-obrazow/">
+              <a class="error-page__route" href="kopie-obrazow/">
                 <strong>Kopie obrazów</strong>
                 <span>Ręcznie malowane kopie dzieł dawnych mistrzów.</span>
               </a>
             </li>
             <li>
-              <a class="error-page__route" href="/o-mnie/">
+              <a class="error-page__route" href="o-mnie/">
                 <strong>O pracowni</strong>
                 <span>Doświadczenie, twórczość i pracownia Zofii Siek-Mlickiej.</span>
               </a>
@@ -81,7 +87,7 @@
         </section>
 
         <p class="error-page__contact">Nie wiesz, gdzie przejść? Zadzwoń: <a href="tel:+48607752370">+48&nbsp;607&nbsp;752&nbsp;370</a>.</p>
-        <p class="error-page__languages"><span lang="en">English:</span> <a href="/en/" hreflang="en" lang="en">go to the English website</a><span aria-hidden="true"> · </span><span lang="de">Deutsch:</span> <a href="/de/" hreflang="de" lang="de">zur deutschen Website</a></p>
+        <p class="error-page__languages"><span lang="en">English:</span> <a href="en/" hreflang="en" lang="en">go to the English website</a><span aria-hidden="true"> · </span><span lang="de">Deutsch:</span> <a href="de/" hreflang="de" lang="de">zur deutschen Website</a></p>
       </div>
     </section>
   </main>
@@ -101,16 +107,16 @@
         <div>
           <h2 class="footer__heading">Menu</h2>
           <ul class="footer__links">
-            <li><a href="/kopie-obrazow/">Kopie obrazów</a></li>
-            <li><a href="/konserwacja/">Konserwacja</a></li>
+            <li><a href="kopie-obrazow/">Kopie obrazów</a></li>
+            <li><a href="konserwacja/">Konserwacja</a></li>
           </ul>
         </div>
         <div>
           <h2 class="footer__heading">Informacje</h2>
           <ul class="footer__links">
-            <li><a href="/o-mnie/">O mnie</a></li>
-            <li><a href="/kontakt/">Kontakt</a></li>
-            <li><a href="/polityka-prywatnosci/">Polityka prywatności</a></li>
+            <li><a href="o-mnie/">O mnie</a></li>
+            <li><a href="kontakt/">Kontakt</a></li>
+            <li><a href="polityka-prywatnosci/">Polityka prywatności</a></li>
           </ul>
         </div>
         <div>
@@ -126,14 +132,14 @@
       </div>
       <div class="footer__bottom">
         <span>&copy; 2026 Zofia Siek-Mlicka. Wszelkie prawa zastrzeżone.</span>
-        <a href="/polityka-prywatnosci/">Polityka prywatności</a>
+        <a href="polityka-prywatnosci/">Polityka prywatności</a>
       </div>
     </div>
   </footer>
 
   <div class="cookie-banner" role="dialog" aria-label="Informacja o plikach cookies">
     <div class="cookie-banner__inner">
-      <p class="cookie-banner__text">Ta strona korzysta z plików cookies w celu zapewnienia prawidłowego działania. <a href="/polityka-prywatnosci/">Dowiedz się więcej</a>.</p>
+      <p class="cookie-banner__text">Ta strona korzysta z plików cookies w celu zapewnienia prawidłowego działania. <a href="polityka-prywatnosci/">Dowiedz się więcej</a>.</p>
       <div class="cookie-banner__actions">
         <button type="button" class="btn btn--primary btn--small" data-accept>Akceptuję</button>
         <button type="button" class="btn btn--outline btn--small" data-reject>Tylko niezbędne</button>
@@ -144,6 +150,9 @@
   <a href="tel:+48607752370" class="mobile-cta" aria-label="Zadzwoń"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></a>
   <button type="button" class="scroll-top" aria-label="Wróć na górę"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"/></svg></button>
 
-  <script src="/js/main.js?v=20260719film12"></script>
+  <script>
+    document.querySelector('.skip-link').setAttribute('href', window.location.href.split('#')[0] + '#tresc');
+  </script>
+  <script src="js/main.js?v=20260719film12"></script>
 </body>
 </html>
