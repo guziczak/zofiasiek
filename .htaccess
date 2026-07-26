@@ -9,6 +9,7 @@ ErrorDocument 404 /404.html
   RewriteRule ^konserwacja-zabytkow-i-dziel-sztuki(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
   RewriteRule ^konserwacja-obrazu(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
   RewriteRule ^konserwacja-obrazu/feed(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
+  RewriteRule ^stol-dublazowy(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
   RewriteRule ^portret-malzonkow-arnolfinich-jana-van-eycka(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
   RewriteRule ^vermeer-dziewczyna-z-perla(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
 
