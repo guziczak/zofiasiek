@@ -115,6 +115,18 @@ Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego pro
 - [x] Poprawić błędy i kalki o wysokiej pewności w PL/EN/DE; ujednolicić angielski do wariantu brytyjskiego (`en_GB`)
 - [ ] Przed płatną kampanią EN/DE wykonać końcowy przegląd z native speakerem znającym terminologię konserwatorską
 
+## P2D — FAQ, publikacje, opinie i szkolenia
+
+- [x] Dodać do polskiej strony „O mnie” publikację *Opus vitae: Jan Siek: rzeźba* z rolą opisaną dokładnie jako „przygotowanie” oraz odnośnikiem do wykazu Biblioteki Narodowej
+- [x] Dodać po polsku osobne FAQ do stron konserwacji i kopii obrazów; odpowiedzi oparto wyłącznie na informacjach obecnych już w ofercie
+- [x] Po akceptacji polskich treści przetłumaczyć publikację i oba FAQ na EN/DE
+- [x] Zidentyfikować publiczny Profil Firmy Google po zgodnych danych: nazwa, Siedlec 3, telefon 607 752 370, domena zofiasiek.pl; Place ID `ChIJK-5dgyn3FkcRWT9VxU1_Rtg`
+- [x] Dodać na stronach kontaktowych PL/EN/DE link do właściwego profilu i opinii w Mapach Google
+- [ ] Właścicielka profilu: skopiować z panelu bezpośredni link „Więcej opinii” i porównać go z przygotowanym adresem `https://search.google.com/local/writereview?placeid=ChIJK-5dgyn3FkcRWT9VxU1_Rtg`
+- [ ] Po zakończonej realizacji wysyłać bez zachęty finansowej: „Dziękuję za powierzenie mi pracy. Jeśli zechce Pani/Pan podzielić się swoim doświadczeniem, opinię można dodać tutaj: [LINK DO OPINII GOOGLE]. Oczywiście nie ma takiego obowiązku.”
+- [ ] Po uzyskaniu zgody klientów wybrać 3–6 autentycznych cytatów do pokazania na stronie; nie dodawać własnego `AggregateRating` ani sztucznych gwiazdek
+- [ ] Jeśli istnieją dodatkowe szkolenia warte publikacji, zebrać dla każdego: nazwę, organizatora, rok i zakres. Bez tej listy nie tworzyć pustej sekcji ani skanów „dla SEO”
+
 ## P3 — Porządki w kodzie
 
 - [ ] Usunąć osierocony duplikat `img/kopie/paysage-de-juan-les-pins-pablo-picasso/` (5 plików; zastąpiony przez `pablo-picasso-pejzaz-z-lodkami/`)
