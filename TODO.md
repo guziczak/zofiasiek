@@ -62,11 +62,15 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 
 ## P1 — Wydajność
 
-- [ ] Hero: pierwszy slajd jako `<img fetchpriority="high">` (albo `<link rel="preload">`), pozostałe 4 slajdy doładowywane lazy/po loadzie — teraz 2,3 MB backgroundów ładuje się od razu (index.html:88-92)
-- [ ] Miniatury dla strony głównej i aktualności — kafelki używają pełnych zdjęć 100–450 KB; konwencja `thumb.jpg` już istnieje w kopiach/konserwacjach
+- [x] Hero: pierwszy slajd jako responsywny `<picture>` z `fetchpriority="high"`; pozostałe slajdy są hydraturowane po idle lub na żądanie, dopiero przed przełączeniem
+- [x] Miniatury dla pięciu kopii na stronie głównej: wersjonowane AVIF/WebP o maksymalnym rozmiarze 800×1000 z pełnym JPEG-em pozostawionym wyłącznie jako fallback/lightbox
+- [ ] Miniatury dla osieroconej strony `aktualnosci/` — dopiero po decyzji, czy strona ma zostać rozwinięta, czy usunięta
 - [ ] WebP/AVIF + `srcset/sizes` dla galerii (60 MB JPG → ~40–50% mniej)
 - [ ] `<link rel="preload">` dla krytycznych fontów woff2 (latin, 400/700)
-- [ ] Skompresować najcięższe slajdy (slide-01 768 KB, slide-02 600 KB)
+- [x] Slider: wersjonowane AVIF/WebP 960 px i pełne rozdzielczości z JPEG fallbackiem; start mobilny spadł z 2,3 MB do ok. 188 KB
+- [x] Logo: wersjonowany PNG 526×200 z wymiarami w HTML; 193,6 KB → 22,7 KB
+- [x] Apache fallback cache w `.htaccess` dla HTML, CSS/JS/fontów i obrazów
+- [ ] Skopiować równoważne nagłówki cache do ustawień Nginx/Plesk — produkcyjny Nginx może omijać `.htaccess` dla plików statycznych
 
 ## SEO poza kodem (pilne po deployu — największe dźwignie widoczności)
 
@@ -90,10 +94,26 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] Favicon w wynikach Google: dziś jest tylko SVG — Google do wyników wymaga też PNG/ICO (min. 48×48) pod stałym URL-em; powiązane z pozycją favicon w P3
 - Podgląd guziczak.github.io/zofiasiek jest SEO-bezpieczny: absolutne canonicale na zofiasiek.pl skleją kopie w Google (nic nie trzeba robić)
 
-## P2 — Formularz kontaktowy
+## P2 — Kontakt i pomiar
 
-- [ ] Backend zamiast samego `mailto:` (Formspree/Web3Forms/skrypt na hostingu DirectAdmin) — mailto na desktopie bez klienta poczty kończy się niczym; mailto zostawić jako fallback
-- [ ] Ochrona antyspamowa (honeypot wystarczy)
+- [x] Decyzja właściciela: formularz celowo przygotowuje wiadomość i otwiera aplikację pocztową; nie dodajemy backendu ani uploadu plików na stronie
+- [x] CTA przekazują rodzaj usługi do formularza, a formularz wstępnie uzupełnia temat i treść wiadomości
+- [x] Pomiar rozróżnia kliknięcie CTA, kliknięcie telefonu/e-maila oraz przekazanie poprawnego formularza do aplikacji pocztowej; żadnego z nich nie nazywa potwierdzonym leadem
+- [ ] Po wdrożeniu sprawdzić zdarzenia `cta_select`, `contact_link_click` i `form_mailto_handoff` w GA4 Realtime/DebugView po wyrażeniu zgody
+
+## P2B — Opisane realizacje
+
+Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego procesu usługi nie wolno przypisywać konkretnemu obiektowi bez potwierdzenia.
+
+- [ ] Dla 3–5 konserwacji zebrać: typ/autorstwo/datowanie, materiał i wymiary, stan początkowy, diagnozę, zatwierdzony zakres, wykonane zabiegi, rok/czas, rezultat, zalecenia, opis etapów zdjęć i zgodę na publikację
+- [ ] Dla 2–3 kopii zebrać: format, podłoże, technikę, rok/czas, założenia zamówienia, etapy, najtrudniejszy element, wykończenie oraz zgodę klienta na opis kontekstu
+- [ ] Po zebraniu danych utworzyć osobne, unikalne strony realizacji i połączyć je z usługą oraz formularzem z odpowiednim tematem
+- [ ] Kandydaci z najbogatszą dokumentacją: Tetmajer, Madonna Sykstyńska, dekoracja ścienna oraz kopie mające po 8 zdjęć
+
+## P2C — Języki
+
+- [x] Poprawić błędy i kalki o wysokiej pewności w PL/EN/DE; ujednolicić angielski do wariantu brytyjskiego (`en_GB`)
+- [ ] Przed płatną kampanią EN/DE wykonać końcowy przegląd z native speakerem znającym terminologię konserwatorską
 
 ## P3 — Porządki w kodzie
 

@@ -24,7 +24,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://zofiasiek.pl/img/slider/slide-01.jpg">
   <meta property="og:locale" content="pl_PL">
-  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="en_GB">
   <meta property="og:locale:alternate" content="de_DE">
   <meta property="og:site_name" content="Zofia Siek-Mlicka">
 
@@ -32,14 +32,16 @@
   <link rel="stylesheet" href="css/fonts.css">
 
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=20260719film12">
+  <link rel="stylesheet" href="css/style.css?v=20260807campaign1">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Zofia Siek-Mlicka — Kopie obrazów i konserwacja",
+    "@id": "https://zofiasiek.pl/#business",
+    "name": "Pracownia konserwatorsko-artystyczna Zofia Siek-Mlicka",
+    "alternateName": "Zofia Siek-Mlicka — Kopie obrazów i konserwacja",
     "description": "Ręcznie malowane kopie obrazów, konserwacja zabytków i dzieł sztuki",
     "url": "https://zofiasiek.pl",
     "telephone": "+48607752370",
@@ -67,7 +69,7 @@
   <!-- Header -->
   <header class="header header--transparent">
     <div class="header__inner">
-      <a href="./" class="header__logo"><img src="img/logo.png" alt="Zofia Siek-Mlicka"></a>
+      <a href="./" class="header__logo"><img src="img/logo-526x200-v1.png" width="526" height="200" alt="Zofia Siek-Mlicka"></a>
       <nav aria-label="Główna nawigacja">
         <button class="nav__toggle" aria-label="Otwórz menu nawigacji">
           <span></span><span></span><span></span>
@@ -99,16 +101,58 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-slider" data-autoplay="5000" role="region" aria-roledescription="karuzela" aria-label="Prezentacja wybranych realizacji">
-      <div class="hero-slider__slide is-active" style="background-image:url('img/slider/slide-01.jpg');background-position:center 65%" role="img" aria-label="Czerwona parasolka — Józef Mehoffer"></div>
-      <div class="hero-slider__slide" style="background-image:url('img/slider/slide-02.jpg');background-position:center 20%" role="img" aria-label="Matka Boska Paczółtowska"></div>
-      <div class="hero-slider__slide" style="background-image:url('img/slider/slide-03.jpg');background-position:center 35%" role="img" aria-label="Matka Boska"></div>
-      <div class="hero-slider__slide" style="background-image:url('img/slider/slide-04.jpg')" role="img" aria-label="Pasja Turyńska — Hans Memling"></div>
-      <div class="hero-slider__slide" style="background-image:url('img/slider/slide-05.jpg');background-position:center 38%" role="img" aria-label="Portret małżonków Arnolfinich — Jan van Eyck"></div>
+      <div class="hero-slider__slide is-active" style="--slide-position:center 65%" role="img" aria-label="Czerwona parasolka — Józef Mehoffer">
+        <picture class="hero-slider__picture">
+          <source type="image/avif" srcset="img/slider/slide-01-960w-v1.avif 960w, img/slider/slide-01-1396w-v1.avif 1396w" sizes="100vw">
+          <source type="image/webp" srcset="img/slider/slide-01-960w-v1.webp 960w, img/slider/slide-01-1396w-v1.webp 1396w" sizes="100vw">
+          <img class="hero-slider__image" src="img/slider/slide-01.jpg" width="1396" height="1920" alt="" decoding="async" fetchpriority="high">
+        </picture>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 20%" role="img" aria-label="Matka Boska Paczółtowska" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="img/slider/slide-02-960w-v1.avif 960w, img/slider/slide-02-1324w-v1.avif 1324w" sizes="100vw">
+            <source type="image/webp" srcset="img/slider/slide-02-960w-v1.webp 960w, img/slider/slide-02-1324w-v1.webp 1324w" sizes="100vw">
+            <img class="hero-slider__image" src="img/slider/slide-02.jpg" width="1324" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 35%" role="img" aria-label="Matka Boska" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="img/slider/slide-03-960w-v1.avif 960w, img/slider/slide-03-1465w-v1.avif 1465w" sizes="100vw">
+            <source type="image/webp" srcset="img/slider/slide-03-960w-v1.webp 960w, img/slider/slide-03-1465w-v1.webp 1465w" sizes="100vw">
+            <img class="hero-slider__image" src="img/slider/slide-03.jpg" width="1465" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" role="img" aria-label="Pasja Turyńska — Hans Memling" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="img/slider/slide-04-699w-v1.avif 699w" sizes="100vw">
+            <source type="image/webp" srcset="img/slider/slide-04-699w-v1.webp 699w" sizes="100vw">
+            <img class="hero-slider__image" src="img/slider/slide-04.jpg" width="699" height="435" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 38%" role="img" aria-label="Portret małżonków Arnolfinich — Jan van Eyck" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="img/slider/slide-05-960w-v1.avif 960w, img/slider/slide-05-1280w-v1.avif 1280w" sizes="100vw">
+            <source type="image/webp" srcset="img/slider/slide-05-960w-v1.webp 960w, img/slider/slide-05-1280w-v1.webp 1280w" sizes="100vw">
+            <img class="hero-slider__image" src="img/slider/slide-05.jpg" width="1280" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
     </div>
     <div class="hero__content">
       <p class="hero__subtitle">Zofia Siek-Mlicka</p>
       <h1 class="hero__title">Kopie obrazów, konserwacja zabytków i&nbsp;dzieł sztuki</h1>
       <p class="hero__description">Ręcznie malowane reprodukcje dzieł wielkich mistrzów oraz profesjonalna konserwacja zabytków i&nbsp;dzieł sztuki — w&nbsp;duchu tradycyjnych technik dawnych mistrzów.</p>
+      <div class="hero__actions" aria-label="Szybki kontakt">
+        <a href="kontakt/?topic=conservation#contact-form" class="btn btn--primary" data-analytics-cta="home-conservation" data-contact-topic="conservation">Zapytaj o konserwację</a>
+        <a href="kontakt/?topic=painting-copy#contact-form" class="btn btn--outline" data-analytics-cta="home-painting-copy" data-contact-topic="painting-copy">Zapytaj o kopię obrazu</a>
+      </div>
     </div>
   </section>
 
@@ -131,33 +175,35 @@
 
       <div class="gallery-grid reveal">
         <button class="gallery-item" data-images="img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" data-title="Czerwona parasolka — Józef Mehoffer" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" alt="Czerwona parasolka — Józef Mehoffer" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="img/home-thumbs/czerwona-parasolka-jozef-mehoffer-800x1000-v1.avif"><source type="image/webp" srcset="img/home-thumbs/czerwona-parasolka-jozef-mehoffer-800x1000-v1.webp"><img class="gallery-item__img" src="img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" width="800" height="1000" alt="Czerwona parasolka — Józef Mehoffer" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Czerwona parasolka</span><span class="gallery-item__meta">wg Józefa Mehoffera</span></span>
         </button>
         <button class="gallery-item" data-images="img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" data-title="Dama z Łasiczką — Leonardo da Vinci" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" alt="Dama z Łasiczką — Leonardo da Vinci" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="img/home-thumbs/dama-z-lasiczka-leonardo-da-vinci-800x1000-v1.avif"><source type="image/webp" srcset="img/home-thumbs/dama-z-lasiczka-leonardo-da-vinci-800x1000-v1.webp"><img class="gallery-item__img" src="img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" width="800" height="1000" alt="Dama z Łasiczką — Leonardo da Vinci" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Dama z Łasiczką</span><span class="gallery-item__meta">wg Leonarda da Vinci</span></span>
         </button>
         <button class="gallery-item" data-images="img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" data-title="Gwiaździsta noc — Vincent van Gogh" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" alt="Gwiaździsta noc — Vincent van Gogh" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="img/home-thumbs/gwiazdzista-noc-vincenta-van-gogh-800x1000-v1.avif"><source type="image/webp" srcset="img/home-thumbs/gwiazdzista-noc-vincenta-van-gogh-800x1000-v1.webp"><img class="gallery-item__img" src="img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" width="800" height="1000" alt="Gwiaździsta noc — Vincent van Gogh" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Gwiaździsta noc</span><span class="gallery-item__meta">wg Vincenta van Gogha</span></span>
         </button>
         <button class="gallery-item" data-images="img/realizacje/pocalunek-gustav-klimt.jpg" data-title="Pocałunek — Gustav Klimt" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/pocalunek-gustav-klimt.jpg" alt="Pocałunek — Gustav Klimt" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="img/home-thumbs/pocalunek-gustav-klimt-800x1000-v1.avif"><source type="image/webp" srcset="img/home-thumbs/pocalunek-gustav-klimt-800x1000-v1.webp"><img class="gallery-item__img" src="img/realizacje/pocalunek-gustav-klimt.jpg" width="800" height="1000" alt="Pocałunek — Gustav Klimt" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Pocałunek</span><span class="gallery-item__meta">wg Gustava Klimta</span></span>
         </button>
         <button class="gallery-item" data-images="img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" data-title="Szał uniesień — Władysław Podkowiński" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" alt="Szał uniesień — Władysław Podkowiński" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="img/home-thumbs/szal-uniesien-wladyslaw-podkowinski-800x1000-v1.avif"><source type="image/webp" srcset="img/home-thumbs/szal-uniesien-wladyslaw-podkowinski-800x1000-v1.webp"><img class="gallery-item__img" src="img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" width="800" height="1000" alt="Szał uniesień — Władysław Podkowiński" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Szał uniesień</span><span class="gallery-item__meta">wg Władysława Podkowińskiego</span></span>
         </button>
-        <button class="gallery-item" data-images="img/realizacje/portret-malzonkow-arnolfinich-jan-van-eyck.jpg" data-title="Portret małżonków Arnolfinich — Jan van Eyck" data-meta="Wybrana realizacja">
-          <img class="gallery-item__img" src="img/realizacje/portret-malzonkow-arnolfinich-jan-van-eyck.jpg" alt="Portret małżonków Arnolfinich — Jan van Eyck" loading="lazy">
-          <span class="gallery-item__info"><span class="gallery-item__title">Portret małżonków Arnolfinich</span><span class="gallery-item__meta">wg Jana van Eycka</span></span>
+        <button class="gallery-item gallery-item--ba" data-images="img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/00.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/01.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/02.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/03.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/04.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/05.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/06.jpg|img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/07.jpg" data-title="Włodzimierz Tetmajer — Kobieta z gałęziami" data-meta="Konserwacja — przed i po">
+          <span class="ba"><img src="img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/thumb.jpg" alt="Kobieta z gałęziami Włodzimierza Tetmajera po konserwacji" loading="lazy"><img src="img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/thumb-b.jpg" alt="Kobieta z gałęziami Włodzimierza Tetmajera przed konserwacją" loading="lazy"></span>
+          <span class="gallery-item__info"><span class="gallery-item__title">Kobieta z gałęziami — Włodzimierz Tetmajer</span><span class="gallery-item__meta">Konserwacja — przed i po</span></span>
+          <span class="gallery-item__badge">8 zdjęć</span>
         </button>
       </div>
 
-      <div style="margin-top: var(--space-xl);">
-        <a href="kopie-obrazow/" class="btn btn--primary reveal">Zobacz pozostałe</a>
+      <div class="portfolio-actions reveal" style="margin-top: var(--space-xl);">
+        <a href="kopie-obrazow/" class="btn btn--primary">Zobacz wszystkie kopie</a>
+        <a href="konserwacja/" class="btn btn--outline">Zobacz konserwacje przed i po</a>
       </div>
     </div>
   </section>
@@ -167,7 +213,7 @@
     <div class="container">
       <p class="section-subtitle reveal">Oferta</p>
       <h2 class="section-title reveal">Czym się zajmuję</h2>
-      <p class="section-description reveal">Łączę tradycyjne techniki malarskie z wieloletnim doświadczeniem w konserwacji, tworząc prace najwyższej jakości.</p>
+      <p class="section-description reveal">Łączę tradycyjne techniki malarskie z wieloletnim doświadczeniem konserwatorskim, dobierając sposób pracy do charakteru dzieła i potrzeb zamawiającego.</p>
 
       <div class="grid grid--2" style="max-width: 820px; margin: var(--space-xl) auto 0;">
         <!-- Kopie -->
@@ -207,7 +253,7 @@
     <div class="container">
       <h2 class="cta__title reveal">Masz pytanie lub chcesz złożyć zamówienie?</h2>
       <p class="cta__text reveal">Skontaktuj się ze mną — chętnie porozmawiam o Twoim projekcie i przygotuję indywidualną wycenę.</p>
-      <a href="kontakt/" class="btn btn--primary reveal">Skontaktuj się</a>
+      <a href="kontakt/#contact-form" class="btn btn--primary reveal" data-analytics-cta="home-contact">Skontaktuj się</a>
     </div>
   </section>
 
@@ -303,6 +349,6 @@
       } catch (e) {}
     })();
   </script>
-  <script src="js/main.js?v=20260722film14"></script>
+  <script src="js/main.js?v=20260807campaign1"></script>
 </body>
 </html>

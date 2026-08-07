@@ -512,6 +512,61 @@ p + p { margin-top: var(--space-sm); }
   opacity: 0.9;
 }
 
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.hero__actions .btn {
+  min-width: 210px;
+}
+
+.hero .btn--primary {
+  background-color: var(--color-accent);
+  color: #1a1a1a;
+}
+
+.hero .btn--primary:hover {
+  background-color: var(--color-accent-light);
+  color: #1a1a1a;
+}
+
+.hero .btn--outline {
+  border-color: rgba(255, 255, 255, 0.92);
+  color: var(--color-white);
+  background-color: rgba(20, 18, 15, 0.28);
+}
+
+.hero .btn--outline:hover {
+  border-color: var(--color-white);
+  background-color: var(--color-white);
+  color: #1a1a1a;
+}
+
+.service-intro__action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.service-intro__hint {
+  flex: 1 1 240px;
+  color: var(--color-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+.portfolio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
 /* Page header (subpages) */
 .page-header {
   padding: calc(var(--header-height) + var(--space-xl)) 0 var(--space-xl);
@@ -800,6 +855,12 @@ p + p { margin-top: var(--space-sm); }
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
+}
+
+.gallery-item__picture {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 
 .gallery-item:hover img {
@@ -1839,11 +1900,29 @@ body {
 .hero-slider__slide {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-position: center;
   opacity: 0;
   transition: opacity 1.2s ease;
   will-change: opacity;
+}
+
+.hero-slider__picture,
+.hero-slider__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slider__picture {
+  display: block;
+}
+
+.hero-slider__image {
+  display: block;
+  object-fit: cover;
+  object-position: var(--slide-position, center);
+  pointer-events: none;
+  user-select: none;
 }
 
 .hero-slider__slide.is-active {
@@ -2464,6 +2543,24 @@ body {
 }
 
 @media (max-width: 600px) {
+  .hero__actions,
+  .service-intro__action,
+  .portfolio-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hero__actions .btn,
+  .service-intro__action .btn,
+  .portfolio-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .service-intro__hint {
+    flex-basis: auto;
+  }
+
   .lightbox__nav { width: 44px; height: 64px; font-size: 2rem; }
   .lightbox__caption { font-size: var(--fs-base); }
   .lightbox__filmstrip { min-height: 70px; }

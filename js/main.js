@@ -9,6 +9,7 @@ const STR = (function () {
       navOpen: 'Otwórz menu nawigacji',
       navClose: 'Zamknij menu nawigacji',
       formRequired: 'To pole jest wymagane.',
+      formEmail: 'Wpisz poprawny adres e-mail.',
       formConsent: 'Wymagana jest zgoda na przetwarzanie danych osobowych.',
       formFill: 'Proszę uzupełnić zaznaczone pola.',
       mailSubject: 'Zapytanie ze strony — ',
@@ -16,6 +17,16 @@ const STR = (function () {
       mailEmail: 'E-mail',
       mailPhone: 'Telefon',
       mailOpening: 'Otwieram Twój program pocztowy…',
+      contactTopics: {
+        conservation: {
+          subject: 'Zapytanie o konserwację dzieła sztuki',
+          message: 'Dzień dobry,\n\nchcę zapytać o konserwację dzieła sztuki.\n\nRodzaj obiektu:\nStan lub uszkodzenia:\nWymiary:\n'
+        },
+        'painting-copy': {
+          subject: 'Zapytanie o kopię obrazu',
+          message: 'Dzień dobry,\n\nchcę zapytać o wykonanie kopii obrazu.\n\nTytuł lub autor oryginału:\nPreferowany format:\n'
+        }
+      },
       mapNeedConsent: 'Aby wyświetlić interaktywną mapę Google, włącz kategorię „Mapa Google” w ustawieniach prywatności.',
       privacyUrl: '/polityka-prywatnosci/',
       learnMore: 'Dowiedz się więcej',
@@ -50,6 +61,7 @@ const STR = (function () {
       navOpen: 'Open navigation menu',
       navClose: 'Close navigation menu',
       formRequired: 'This field is required.',
+      formEmail: 'Enter a valid email address.',
       formConsent: 'Consent to the processing of personal data is required.',
       formFill: 'Please fill in the highlighted fields.',
       mailSubject: 'Inquiry from the website — ',
@@ -57,6 +69,16 @@ const STR = (function () {
       mailEmail: 'E-mail',
       mailPhone: 'Phone',
       mailOpening: 'Opening your e-mail app…',
+      contactTopics: {
+        conservation: {
+          subject: 'Art conservation inquiry',
+          message: 'Hello,\n\nI would like to ask about the conservation of a work of art.\n\nType of object:\nCondition or damage:\nDimensions:\n'
+        },
+        'painting-copy': {
+          subject: 'Painting copy inquiry',
+          message: 'Hello,\n\nI would like to ask about commissioning a hand-painted copy.\n\nOriginal title or artist:\nPreferred size:\n'
+        }
+      },
       mapNeedConsent: 'To display the interactive Google map, enable “Google Maps” in the privacy settings.',
       privacyUrl: '/en/privacy-policy/',
       learnMore: 'Learn more',
@@ -91,6 +113,7 @@ const STR = (function () {
       navOpen: 'Navigationsmenü öffnen',
       navClose: 'Navigationsmenü schließen',
       formRequired: 'Dieses Feld ist erforderlich.',
+      formEmail: 'Geben Sie eine gültige E-Mail-Adresse ein.',
       formConsent: 'Die Einwilligung in die Verarbeitung personenbezogener Daten ist erforderlich.',
       formFill: 'Bitte füllen Sie die markierten Felder aus.',
       mailSubject: 'Anfrage über die Website — ',
@@ -98,7 +121,17 @@ const STR = (function () {
       mailEmail: 'E-Mail',
       mailPhone: 'Telefon',
       mailOpening: 'Ihr E-Mail-Programm wird geöffnet…',
-      mapNeedConsent: 'Um die interaktive Google-Karte anzuzeigen, aktivieren Sie „Google Maps“ in den Datenschutzeinstellungen.',
+      contactTopics: {
+        conservation: {
+          subject: 'Anfrage zur Restaurierung eines Kunstwerks',
+          message: 'Guten Tag,\n\nich möchte mich nach der Restaurierung eines Kunstwerks erkundigen.\n\nArt des Objekts:\nZustand oder Schäden:\nMaße:\n'
+        },
+        'painting-copy': {
+          subject: 'Anfrage zu einer Gemäldekopie',
+          message: 'Guten Tag,\n\nich möchte mich nach der Anfertigung einer Gemäldekopie erkundigen.\n\nTitel oder Künstler des Originals:\nGewünschtes Format:\n'
+        }
+      },
+      mapNeedConsent: 'Um die interaktive Google-Karte anzuzeigen, aktivieren Sie „Google Maps” in den Datenschutzeinstellungen.',
       privacyUrl: '/de/datenschutz/',
       learnMore: 'Mehr erfahren',
       cookieIntro: 'Wir verwenden notwendige Browser-Speicherfunktionen. Sie können Google Analytics 4 und die interaktive Google-Karte getrennt zulassen.',
@@ -179,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
   initCookieConsent();
+  initAnalyticsEvents();
   initScrollTop();
   initRevealAnimations();
   initContactForm();
@@ -602,6 +636,139 @@ function loadGoogleAnalytics() {
   document.head.appendChild(script);
 }
 
+/* ----- Pomiar działań kontaktowych -----
+   Mierzymy wyłącznie działania interfejsu, nie potwierdzone kontakty. Zdarzenia
+   nie zawierają adresów e-mail, numerów telefonów, parametrów mailto ani danych
+   wpisanych do formularza. Bez zgody lub poza produkcją nawigacja działa od razu. */
+function canSendAnalyticsEvents() {
+  return Boolean(
+    privacyConsent?.analytics &&
+    GA_ALLOWED_HOSTS.has(window.location.hostname)
+  );
+}
+
+function sendAnalyticsEvent(name, parameters = {}, onComplete) {
+  if (!canSendAnalyticsEvents()) return false;
+
+  const payload = {
+    ...parameters,
+    page_language: (document.documentElement.lang || 'pl').slice(0, 2),
+    send_to: GA_MEASUREMENT_ID
+  };
+
+  if (typeof onComplete === 'function') {
+    payload.event_callback = onComplete;
+    payload.event_timeout = 400;
+  }
+
+  window.gtag('event', name, payload);
+  return true;
+}
+
+function navigateAfterAnalytics(name, parameters, destination) {
+  let navigated = false;
+  const navigate = () => {
+    if (navigated) return;
+    navigated = true;
+    window.location.href = destination;
+  };
+
+  if (!sendAnalyticsEvent(name, parameters, navigate)) {
+    navigate();
+    return;
+  }
+
+  // Blokada reklam lub wolny tag nie mogą zatrzymać telefonu, poczty ani CTA.
+  window.setTimeout(navigate, 500);
+}
+
+function analyticsPlacement(element) {
+  if (element.classList.contains('mobile-cta')) return 'mobile_floating';
+  if (element.closest('.header')) return 'header';
+  if (element.closest('.footer')) return 'footer';
+  if (element.closest('.contact-info')) return 'contact_details';
+  if (element.closest('.error-page')) return 'error_page';
+  return 'content';
+}
+
+function analyticsRouteId(pathname) {
+  const id = pathname
+    .replace(/^\/+|\/+$/g, '')
+    .replace(/[^a-z0-9]+/gi, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+  return id || 'home';
+}
+
+function analyticsTopic(value) {
+  return value === 'conservation' || value === 'painting-copy'
+    ? value
+    : 'general';
+}
+
+function initAnalyticsEvents() {
+  document.addEventListener('click', (event) => {
+    const link = event.target instanceof Element
+      ? event.target.closest('a[href]')
+      : null;
+    if (!link) return;
+
+    const rawHref = link.getAttribute('href') || '';
+    let eventName = '';
+    let parameters = null;
+
+    if (/^tel:/i.test(rawHref)) {
+      const digits = rawHref.replace(/\D/g, '');
+      eventName = 'contact_link_click';
+      parameters = {
+        contact_method: 'phone',
+        contact_placement: analyticsPlacement(link),
+        contact_id: digits.endsWith('502244629') ? 'secondary' : 'primary'
+      };
+    } else if (/^mailto:/i.test(rawHref)) {
+      eventName = 'contact_link_click';
+      parameters = {
+        contact_method: 'email',
+        contact_placement: analyticsPlacement(link),
+        contact_id: 'primary'
+      };
+    } else if (
+      link.matches('[data-analytics-cta][href], a.btn.btn--primary[href]')
+    ) {
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      const sourceId = analyticsRouteId(window.location.pathname);
+      const destinationId = analyticsRouteId(destination.pathname);
+      eventName = 'cta_select';
+      parameters = {
+        cta_id: (
+          link.dataset.analyticsCta || `${sourceId}_to_${destinationId}`
+        ).slice(0, 100),
+        cta_destination: destinationId,
+        cta_placement: analyticsPlacement(link),
+        contact_topic: analyticsTopic(
+          link.dataset.contactTopic || destination.searchParams.get('topic')
+        )
+      };
+    }
+
+    if (!eventName || !parameters || !canSendAnalyticsEvents()) return;
+
+    const sameContext = !link.hasAttribute('download') &&
+      (link.getAttribute('target') || '_self').toLowerCase() === '_self';
+    const plainActivation = event.button === 0 &&
+      !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+    if (!sameContext || !plainActivation) {
+      sendAnalyticsEvent(eventName, parameters);
+      return;
+    }
+
+    event.preventDefault();
+    navigateAfterAnalytics(eventName, parameters, link.href);
+  });
+}
+
 function clearGoogleAnalyticsCookies() {
   const names = document.cookie.split(';')
     .map((item) => item.split('=')[0].trim())
@@ -673,6 +840,7 @@ function initContactForm() {
   if (!form) return;
 
   const RECIPIENT = 'zo.siek@interia.pl';
+  prefillContactForm(form);
 
   /* Błędy walidacji pokazujemy przy polach (aria-invalid + aria-describedby),
      toast jest tylko podsumowaniem — komunikat nie może żyć wyłącznie 4 sekundy. */
@@ -716,6 +884,9 @@ function initContactForm() {
       if (!String(data[k] || '').trim()) {
         setError(field, STR.formRequired);
         if (!firstInvalid) firstInvalid = field;
+      } else if (k === 'email' && field.validity.typeMismatch) {
+        setError(field, STR.formEmail);
+        if (!firstInvalid) firstInvalid = field;
       } else {
         clearError(field);
       }
@@ -744,9 +915,26 @@ function initContactForm() {
       `mailto:${RECIPIENT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     showToast(STR.mailOpening, 'success');
-    window.location.href = href;
+    navigateAfterAnalytics('form_mailto_handoff', {
+      contact_method: 'email_client',
+      contact_placement: 'contact_form',
+      contact_topic: form.dataset.contactTopic || 'general'
+    }, href);
     // Celowo NIE czyścimy pól — jeśli program pocztowy nie wystartuje, wpisana treść nie przepada.
   });
+}
+
+function prefillContactForm(form) {
+  const requestedTopic = new URLSearchParams(window.location.search).get('topic');
+  const topic = analyticsTopic(requestedTopic);
+  if (topic === 'general') return;
+  const preset = STR.contactTopics[topic];
+
+  form.dataset.contactTopic = topic;
+  const subject = form.elements.subject;
+  const message = form.elements.message;
+  if (subject && !subject.value.trim()) subject.value = preset.subject;
+  if (message && !message.value.trim()) message.value = preset.message;
 }
 
 /* ----- Mapa kontaktowa (mapa Google dopiero po osobnej zgodzie) -----
@@ -911,12 +1099,57 @@ function initHeroSlider() {
   let index = slides.findIndex(s => s.classList.contains('is-active'));
   if (index < 0) index = 0;
   let timer = null;
+  let timerRun = 0;
+  let navigationRequest = 0;
+  let hoverPaused = false;
+  let warmTimer = null;
 
   // WCAG 2.2.2: autoodtwarzanie musi dać się zatrzymać — służy do tego przycisk
   // pauzy poniżej. Pokaz startuje SAM przy każdym wejściu/odświeżeniu. Przy
   // preferencji redukcji ruchu globalny CSS skraca przenikanie do ~0 ms, więc
   // slajdy przełączają się bez animacji (treść leci, ruchu brak).
   let userPaused = false;
+
+  slides.forEach((slide, i) => {
+    slide.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+  });
+
+  function waitForImage(image) {
+    if (!image) return Promise.resolve(false);
+
+    const decode = () => {
+      if (!image.naturalWidth) return Promise.resolve(false);
+      if (typeof image.decode !== 'function') return Promise.resolve(true);
+      return image.decode().then(() => true, () => Boolean(image.naturalWidth));
+    };
+
+    if (image.complete) return decode();
+    return new Promise((resolve) => {
+      image.addEventListener('load', () => { decode().then(resolve); }, { once: true });
+      image.addEventListener('error', () => resolve(false), { once: true });
+    });
+  }
+
+  function ensureSlideLoaded(slide) {
+    if (slide._heroLoadPromise) return slide._heroLoadPromise;
+
+    let image = slide.querySelector('.hero-slider__image');
+    if (image) {
+      slide._heroLoadPromise = waitForImage(image);
+      return slide._heroLoadPromise;
+    }
+
+    const template = slide.querySelector('template');
+    if (!template) return Promise.resolve(false);
+
+    const fragment = template.content.cloneNode(true);
+    image = fragment.querySelector('.hero-slider__image');
+    slide.appendChild(fragment);
+    template.remove();
+    const ready = waitForImage(image);
+    slide._heroLoadPromise = ready;
+    return ready;
+  }
 
   const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2.5" y="1.5" width="4" height="13" rx="1"/><rect x="9.5" y="1.5" width="4" height="13" rx="1"/></svg>';
   const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5l11 6.5-11 6.5z"/></svg>';
@@ -945,33 +1178,94 @@ function initHeroSlider() {
     dot.className = 'hero-slider__dot' + (i === index ? ' is-active' : '');
     dot.setAttribute('aria-label', `${STR.slide} ${i + 1}`);
     if (i === index) dot.setAttribute('aria-current', 'true');
-    dot.addEventListener('click', () => { go(i); restart(); });
+    dot.addEventListener('click', async () => {
+      stop();
+      await go(i);
+      start();
+    });
     dots.appendChild(dot);
   });
   slider.appendChild(dots);
 
   const dotEls = () => [...dots.querySelectorAll('.hero-slider__dot')];
 
-  function go(i) {
+  async function go(i, shouldCommit = () => true) {
+    const target = (i + slides.length) % slides.length;
+    const request = ++navigationRequest;
+    if (target === index) return true;
+
+    const ready = await ensureSlideLoaded(slides[target]);
+    if (!ready || request !== navigationRequest || !shouldCommit()) return false;
+
     const dl = dotEls();
     slides[index].classList.remove('is-active');
+    slides[index].setAttribute('aria-hidden', 'true');
     dl[index].classList.remove('is-active');
     dl[index].removeAttribute('aria-current');
-    index = (i + slides.length) % slides.length;
+    index = target;
     slides[index].classList.add('is-active');
+    slides[index].setAttribute('aria-hidden', 'false');
     dl[index].classList.add('is-active');
     dl[index].setAttribute('aria-current', 'true');
+    scheduleWarmNext();
+    return true;
   }
-  function next() { go(index + 1); }
-  function start() { stop(); if (userPaused) return; timer = setInterval(next, delay); }
-  function stop() { clearInterval(timer); }
-  function restart() { stop(); start(); }
 
-  slider.addEventListener('mouseenter', stop);
-  slider.addEventListener('mouseleave', start);
+  function canAutoplay() {
+    return !userPaused && !hoverPaused && !document.hidden;
+  }
+
+  function stop() {
+    clearTimeout(timer);
+    timer = null;
+    timerRun += 1;
+  }
+
+  function start() {
+    stop();
+    if (!canAutoplay()) return;
+
+    const run = timerRun;
+    timer = setTimeout(async () => {
+      timer = null;
+      const moved = await go(index + 1, () => run === timerRun && canAutoplay());
+      if (run === timerRun && canAutoplay()) {
+        if (!moved) navigationRequest += 1;
+        start();
+      }
+    }, delay);
+  }
+
+  function scheduleWarmNext() {
+    clearTimeout(warmTimer);
+    warmTimer = setTimeout(() => {
+      const warm = () => { void ensureSlideLoaded(slides[(index + 1) % slides.length]); };
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(warm, { timeout: 1200 });
+      } else {
+        warm();
+      }
+    }, 900);
+  }
+
+  slider.addEventListener('mouseenter', () => {
+    hoverPaused = true;
+    stop();
+  });
+  slider.addEventListener('mouseleave', () => {
+    hoverPaused = false;
+    start();
+  });
   document.addEventListener('visibilitychange', () => {
     document.hidden ? stop() : start();
   });
+
+  void ensureSlideLoaded(slides[index]);
+  if (document.readyState === 'complete') {
+    scheduleWarmNext();
+  } else {
+    window.addEventListener('load', scheduleWarmNext, { once: true });
+  }
   start();
 }
 

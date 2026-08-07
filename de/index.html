@@ -25,22 +25,24 @@
   <meta name="twitter:image" content="https://zofiasiek.pl/img/slider/slide-01.jpg">
   <meta property="og:locale" content="de_DE">
   <meta property="og:locale:alternate" content="pl_PL">
-  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="en_GB">
   <meta property="og:site_name" content="Zofia Siek-Mlicka">
 
   <!-- Fonts -->
   <link rel="stylesheet" href="../css/fonts.css">
 
   <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
-  <link rel="stylesheet" href="../css/style.css?v=20260719film12">
+  <link rel="stylesheet" href="../css/style.css?v=20260807campaign1">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Zofia Siek-Mlicka — Gemäldekopien & Restaurierung",
-    "description": "Handgemalte Gemäldekopien, Konservierung und Restaurierung von Denkmälern und Kunstwerken",
+    "@id": "https://zofiasiek.pl/#business",
+    "name": "Pracownia konserwatorsko-artystyczna Zofia Siek-Mlicka",
+    "alternateName": "Zofia Siek-Mlicka — Gemäldekopien & Restaurierung",
+    "description": "Handgemalte Gemäldekopien, Konservierung und Restaurierung historischer Objekte und Kunstwerke",
     "url": "https://zofiasiek.pl/de/",
     "telephone": "+48607752370",
     "email": "zo.siek@interia.pl",
@@ -67,7 +69,7 @@
   <!-- Header -->
   <header class="header header--transparent">
     <div class="header__inner">
-      <a href="./" class="header__logo"><img src="../img/logo.png" alt="Zofia Siek-Mlicka"></a>
+      <a href="./" class="header__logo"><img src="../img/logo-526x200-v1.png" width="526" height="200" alt="Zofia Siek-Mlicka"></a>
       <nav aria-label="Hauptnavigation">
         <button class="nav__toggle" aria-label="Navigationsmenü öffnen">
           <span></span><span></span><span></span>
@@ -99,16 +101,58 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-slider" data-autoplay="5000" role="region" aria-roledescription="Karussell" aria-label="Präsentation ausgewählter Arbeiten">
-      <div class="hero-slider__slide is-active" style="background-image:url('../img/slider/slide-01.jpg');background-position:center 65%" role="img" aria-label="Der rote Sonnenschirm — Józef Mehoffer"></div>
-      <div class="hero-slider__slide" style="background-image:url('../img/slider/slide-02.jpg');background-position:center 20%" role="img" aria-label="Muttergottes von Paczółtowice"></div>
-      <div class="hero-slider__slide" style="background-image:url('../img/slider/slide-03.jpg');background-position:center 35%" role="img" aria-label="Muttergottes"></div>
-      <div class="hero-slider__slide" style="background-image:url('../img/slider/slide-04.jpg')" role="img" aria-label="Die Turiner Passion — Hans Memling"></div>
-      <div class="hero-slider__slide" style="background-image:url('../img/slider/slide-05.jpg');background-position:center 38%" role="img" aria-label="Die Arnolfini-Hochzeit — Jan van Eyck"></div>
+      <div class="hero-slider__slide is-active" style="--slide-position:center 65%" role="img" aria-label="Der rote Sonnenschirm — Józef Mehoffer">
+        <picture class="hero-slider__picture">
+          <source type="image/avif" srcset="../img/slider/slide-01-960w-v1.avif 960w, ../img/slider/slide-01-1396w-v1.avif 1396w" sizes="100vw">
+          <source type="image/webp" srcset="../img/slider/slide-01-960w-v1.webp 960w, ../img/slider/slide-01-1396w-v1.webp 1396w" sizes="100vw">
+          <img class="hero-slider__image" src="../img/slider/slide-01.jpg" width="1396" height="1920" alt="" decoding="async" fetchpriority="high">
+        </picture>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 20%" role="img" aria-label="Muttergottes von Paczółtowice" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="../img/slider/slide-02-960w-v1.avif 960w, ../img/slider/slide-02-1324w-v1.avif 1324w" sizes="100vw">
+            <source type="image/webp" srcset="../img/slider/slide-02-960w-v1.webp 960w, ../img/slider/slide-02-1324w-v1.webp 1324w" sizes="100vw">
+            <img class="hero-slider__image" src="../img/slider/slide-02.jpg" width="1324" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 35%" role="img" aria-label="Muttergottes" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="../img/slider/slide-03-960w-v1.avif 960w, ../img/slider/slide-03-1465w-v1.avif 1465w" sizes="100vw">
+            <source type="image/webp" srcset="../img/slider/slide-03-960w-v1.webp 960w, ../img/slider/slide-03-1465w-v1.webp 1465w" sizes="100vw">
+            <img class="hero-slider__image" src="../img/slider/slide-03.jpg" width="1465" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" role="img" aria-label="Die Turiner Passion — Hans Memling" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="../img/slider/slide-04-699w-v1.avif 699w" sizes="100vw">
+            <source type="image/webp" srcset="../img/slider/slide-04-699w-v1.webp 699w" sizes="100vw">
+            <img class="hero-slider__image" src="../img/slider/slide-04.jpg" width="699" height="435" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
+      <div class="hero-slider__slide" style="--slide-position:center 38%" role="img" aria-label="Die Arnolfini-Hochzeit — Jan van Eyck" aria-hidden="true">
+        <template>
+          <picture class="hero-slider__picture">
+            <source type="image/avif" srcset="../img/slider/slide-05-960w-v1.avif 960w, ../img/slider/slide-05-1280w-v1.avif 1280w" sizes="100vw">
+            <source type="image/webp" srcset="../img/slider/slide-05-960w-v1.webp 960w, ../img/slider/slide-05-1280w-v1.webp 1280w" sizes="100vw">
+            <img class="hero-slider__image" src="../img/slider/slide-05.jpg" width="1280" height="1920" alt="" decoding="async">
+          </picture>
+        </template>
+      </div>
     </div>
     <div class="hero__content">
       <p class="hero__subtitle">Zofia Siek-Mlicka</p>
       <h1 class="hero__title">Handgemalte Gemäldekopien &amp;&nbsp;Restaurierung von Kunstwerken</h1>
-      <p class="hero__description">Handgemalte Reproduktionen der großen Meister und professionelle Restaurierung von Denkmälern und Kunstwerken — getreu den&nbsp;traditionellen Techniken der alten Meister.</p>
+      <p class="hero__description">Handgemalte Reproduktionen der großen Meister und professionelle Konservierung und Restaurierung historischer Objekte und Kunstwerke — getreu den&nbsp;traditionellen Techniken der alten Meister.</p>
+      <div class="hero__actions" aria-label="Schnellkontakt">
+        <a href="kontakt/?topic=conservation#contact-form" class="btn btn--primary" data-analytics-cta="home-conservation" data-contact-topic="conservation">Restaurierung anfragen</a>
+        <a href="kontakt/?topic=painting-copy#contact-form" class="btn btn--outline" data-analytics-cta="home-painting-copy" data-contact-topic="painting-copy">Gemäldekopie anfragen</a>
+      </div>
     </div>
   </section>
 
@@ -131,33 +175,35 @@
 
       <div class="gallery-grid reveal">
         <button class="gallery-item" data-images="../img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" data-title="Der rote Sonnenschirm — Józef Mehoffer" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" alt="Der rote Sonnenschirm — Józef Mehoffer" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="../img/home-thumbs/czerwona-parasolka-jozef-mehoffer-800x1000-v1.avif"><source type="image/webp" srcset="../img/home-thumbs/czerwona-parasolka-jozef-mehoffer-800x1000-v1.webp"><img class="gallery-item__img" src="../img/realizacje/czerwona-parasolka-jozef-mehoffer.jpg" width="800" height="1000" alt="Der rote Sonnenschirm — Józef Mehoffer" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Der rote Sonnenschirm</span><span class="gallery-item__meta">nach Józef Mehoffer</span></span>
         </button>
         <button class="gallery-item" data-images="../img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" data-title="Die Dame mit dem Hermelin — Leonardo da Vinci" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" alt="Die Dame mit dem Hermelin — Leonardo da Vinci" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="../img/home-thumbs/dama-z-lasiczka-leonardo-da-vinci-800x1000-v1.avif"><source type="image/webp" srcset="../img/home-thumbs/dama-z-lasiczka-leonardo-da-vinci-800x1000-v1.webp"><img class="gallery-item__img" src="../img/realizacje/dama-z-lasiczka-leonardo-da-vinci.jpg" width="800" height="1000" alt="Die Dame mit dem Hermelin — Leonardo da Vinci" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Die Dame mit dem Hermelin</span><span class="gallery-item__meta">nach Leonardo da Vinci</span></span>
         </button>
         <button class="gallery-item" data-images="../img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" data-title="Die Sternennacht — Vincent van Gogh" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" alt="Die Sternennacht — Vincent van Gogh" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="../img/home-thumbs/gwiazdzista-noc-vincenta-van-gogh-800x1000-v1.avif"><source type="image/webp" srcset="../img/home-thumbs/gwiazdzista-noc-vincenta-van-gogh-800x1000-v1.webp"><img class="gallery-item__img" src="../img/realizacje/gwiazdzista-noc-vincenta-van-gogh.jpg" width="800" height="1000" alt="Die Sternennacht — Vincent van Gogh" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Die Sternennacht</span><span class="gallery-item__meta">nach Vincent van Gogh</span></span>
         </button>
         <button class="gallery-item" data-images="../img/realizacje/pocalunek-gustav-klimt.jpg" data-title="Der Kuss — Gustav Klimt" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/pocalunek-gustav-klimt.jpg" alt="Der Kuss — Gustav Klimt" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="../img/home-thumbs/pocalunek-gustav-klimt-800x1000-v1.avif"><source type="image/webp" srcset="../img/home-thumbs/pocalunek-gustav-klimt-800x1000-v1.webp"><img class="gallery-item__img" src="../img/realizacje/pocalunek-gustav-klimt.jpg" width="800" height="1000" alt="Der Kuss — Gustav Klimt" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Der Kuss</span><span class="gallery-item__meta">nach Gustav Klimt</span></span>
         </button>
         <button class="gallery-item" data-images="../img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" data-title="Szał uniesień (Ekstase) — Władysław Podkowiński" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" alt="Szał uniesień (Ekstase) — Władysław Podkowiński" loading="lazy">
+          <picture class="gallery-item__picture"><source type="image/avif" srcset="../img/home-thumbs/szal-uniesien-wladyslaw-podkowinski-800x1000-v1.avif"><source type="image/webp" srcset="../img/home-thumbs/szal-uniesien-wladyslaw-podkowinski-800x1000-v1.webp"><img class="gallery-item__img" src="../img/realizacje/szal-uniesien-wladyslaw-podkowinski.jpg" width="800" height="1000" alt="Szał uniesień (Ekstase) — Władysław Podkowiński" loading="lazy"></picture>
           <span class="gallery-item__info"><span class="gallery-item__title">Szał uniesień (Ekstase)</span><span class="gallery-item__meta">nach Władysław Podkowiński</span></span>
         </button>
-        <button class="gallery-item" data-images="../img/realizacje/portret-malzonkow-arnolfinich-jan-van-eyck.jpg" data-title="Die Arnolfini-Hochzeit — Jan van Eyck" data-meta="Ausgewählte Arbeit">
-          <img class="gallery-item__img" src="../img/realizacje/portret-malzonkow-arnolfinich-jan-van-eyck.jpg" alt="Die Arnolfini-Hochzeit — Jan van Eyck" loading="lazy">
-          <span class="gallery-item__info"><span class="gallery-item__title">Die Arnolfini-Hochzeit</span><span class="gallery-item__meta">nach Jan van Eyck</span></span>
+        <button class="gallery-item gallery-item--ba" data-images="../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/00.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/01.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/02.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/03.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/04.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/05.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/06.jpg|../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/07.jpg" data-title="Frau mit Zweigen — Włodzimierz Tetmajer" data-meta="Restaurierung — vorher und nachher">
+          <span class="ba"><img src="../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/thumb.jpg" alt="Frau mit Zweigen von Włodzimierz Tetmajer nach der Restaurierung" loading="lazy"><img src="../img/konserwacje/01-wlodzimierz-tetmajer-kobieta-z-galeziami/thumb-b.jpg" alt="Frau mit Zweigen von Włodzimierz Tetmajer vor der Restaurierung" loading="lazy"></span>
+          <span class="gallery-item__info"><span class="gallery-item__title">Frau mit Zweigen — Włodzimierz Tetmajer</span><span class="gallery-item__meta">Restaurierung — vorher und nachher</span></span>
+          <span class="gallery-item__badge">8 Fotos</span>
         </button>
       </div>
 
-      <div style="margin-top: var(--space-xl);">
-        <a href="gemaeldekopien/" class="btn btn--primary reveal">Weitere Arbeiten ansehen</a>
+      <div class="portfolio-actions reveal" style="margin-top: var(--space-xl);">
+        <a href="gemaeldekopien/" class="btn btn--primary">Alle Gemäldekopien ansehen</a>
+        <a href="restaurierung/" class="btn btn--outline">Restaurierungsprojekte ansehen</a>
       </div>
     </div>
   </section>
@@ -186,7 +232,7 @@
             <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4z"/><path d="M16 28c0-4.42 3.58-8 8-8s8 3.58 8 8"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="20" r="2"/></svg>
           </div>
           <h3 class="service-card__title">Restaurierung</h3>
-          <p class="service-card__text">Professionelle Konservierung und Restaurierung von Denkmälern und Kunstwerken. Ich gebe Gemälden, Skulpturen und Architekturelementen ihren einstigen Glanz zurück.</p>
+          <p class="service-card__text">Professionelle Konservierung und Restaurierung historischer Objekte und Kunstwerke. Ich gebe Gemälden, Skulpturen und Architekturelementen ihren einstigen Glanz zurück.</p>
           <a href="restaurierung/" class="btn btn--outline btn--small">Mehr erfahren</a>
         </div>
       </div>
@@ -207,7 +253,7 @@
     <div class="container">
       <h2 class="cta__title reveal">Haben Sie eine Frage oder möchten Sie ein Werk in Auftrag geben?</h2>
       <p class="cta__text reveal">Nehmen Sie Kontakt auf — ich bespreche gerne Ihr Projekt und erstelle ein individuelles Angebot.</p>
-      <a href="kontakt/" class="btn btn--primary reveal">Kontakt aufnehmen</a>
+      <a href="kontakt/#contact-form" class="btn btn--primary reveal" data-analytics-cta="home-contact">Kontakt aufnehmen</a>
     </div>
   </section>
 
@@ -219,7 +265,7 @@
       <div class="footer__grid">
         <div>
           <div class="footer__brand">Zofia Siek-Mlicka</div>
-          <p class="footer__description">Handgemalte Gemäldekopien, Restaurierung von Denkmälern und Kunstwerken. Atelier in Siedlec bei Krzeszowice — Małopolska, bei Krakau, Polen.</p>
+          <p class="footer__description">Handgemalte Gemäldekopien, Konservierung und Restaurierung historischer Objekte und Kunstwerke. Atelier in Siedlec bei Krzeszowice — Małopolska, bei Krakau, Polen.</p>
           <div class="social-links">
             <a href="https://www.facebook.com/share/15gsfSCKKnL/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
@@ -303,6 +349,6 @@
       } catch (e) {}
     })();
   </script>
-  <script src="../js/main.js?v=20260722film14"></script>
+  <script src="../js/main.js?v=20260807campaign1"></script>
 </body>
 </html>
