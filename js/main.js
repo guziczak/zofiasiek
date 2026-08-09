@@ -2091,10 +2091,20 @@ function initFaqAccordions() {
       item.open = open;
       item.style.removeProperty('height');
       item.style.removeProperty('overflow');
+      item.classList.remove('faq-item--closing');
       animation = null;
       direction = null;
       if (completedAnimation) completedAnimation.cancel();
     };
+
+    const handleMotionPreference = event => {
+      if (event.matches && animation) finish(direction === 'opening');
+    };
+    if (typeof reduceMotion.addEventListener === 'function') {
+      reduceMotion.addEventListener('change', handleMotionPreference);
+    } else {
+      reduceMotion.addListener(handleMotionPreference);
+    }
 
     summary.addEventListener('click', event => {
       if (reduceMotion.matches) return;
@@ -2103,6 +2113,7 @@ function initFaqAccordions() {
 
       const opening = !item.open || direction === 'closing';
       const startHeight = item.getBoundingClientRect().height;
+      item.classList.toggle('faq-item--closing', !opening);
 
       if (animation) {
         animation.onfinish = null;
