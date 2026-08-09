@@ -121,6 +121,7 @@ Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego pro
 - [x] Dodać po polsku osobne FAQ do stron konserwacji i kopii obrazów; odpowiedzi oparto wyłącznie na informacjach obecnych już w ofercie
 - [x] Po akceptacji polskich treści przetłumaczyć publikację i oba FAQ na EN/DE
 - [x] Połączyć pierwszą odpowiedź FAQ konserwacji z istniejącą galerią realizacji „przed i po” w PL/EN/DE
+- [x] Dodać płynne rozwijanie i zwijanie odpowiedzi FAQ z natywnym fallbackiem oraz obsługą `prefers-reduced-motion`
 - [x] Zidentyfikować publiczny Profil Firmy Google po zgodnych danych: nazwa, Siedlec 3, telefon 607 752 370, domena zofiasiek.pl; Place ID `ChIJK-5dgyn3FkcRWT9VxU1_Rtg`
 - [x] Dodać na stronach kontaktowych PL/EN/DE link do właściwego profilu i opinii w Mapach Google
 - [ ] Właścicielka profilu: skopiować z panelu bezpośredni link „Więcej opinii” i porównać go z przygotowanym adresem `https://search.google.com/local/writereview?placeid=ChIJK-5dgyn3FkcRWT9VxU1_Rtg`

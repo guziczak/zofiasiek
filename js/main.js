@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactMap();
   initHeroSlider();
   initLightbox();
+  initFaqAccordions();
   initExpandable();
 });
 
@@ -2068,6 +2069,73 @@ function initLightbox() {
     }
   });
 
+}
+
+/* ----- FAQ: płynne rozwijanie natywnego <details> ----- */
+function initFaqAccordions() {
+  const items = [...document.querySelectorAll('details.faq-item')];
+  if (!items.length || typeof Element.prototype.animate !== 'function') return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  items.forEach(item => {
+    const summary = item.querySelector('summary');
+    const answer = item.querySelector('.faq-item__answer');
+    if (!summary || !answer) return;
+
+    let animation = null;
+    let direction = null;
+
+    const finish = open => {
+      const completedAnimation = animation;
+      item.open = open;
+      item.style.removeProperty('height');
+      item.style.removeProperty('overflow');
+      animation = null;
+      direction = null;
+      if (completedAnimation) completedAnimation.cancel();
+    };
+
+    summary.addEventListener('click', event => {
+      if (reduceMotion.matches) return;
+
+      event.preventDefault();
+
+      const opening = !item.open || direction === 'closing';
+      const startHeight = item.getBoundingClientRect().height;
+
+      if (animation) {
+        animation.onfinish = null;
+        animation.cancel();
+      }
+
+      item.style.height = `${startHeight}px`;
+      item.style.overflow = 'hidden';
+
+      let endHeight;
+      if (opening) {
+        item.open = true;
+        item.style.removeProperty('height');
+        endHeight = item.getBoundingClientRect().height;
+        item.style.height = `${startHeight}px`;
+        direction = 'opening';
+      } else {
+        const borderHeight = item.offsetHeight - item.clientHeight;
+        endHeight = summary.getBoundingClientRect().height + borderHeight;
+        direction = 'closing';
+      }
+
+      animation = item.animate(
+        { height: [`${startHeight}px`, `${endHeight}px`] },
+        {
+          duration: 260,
+          easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+          fill: 'both'
+        }
+      );
+      animation.onfinish = () => finish(opening);
+    });
+  });
 }
 
 /* ----- Rozwijany tekst ----- */
