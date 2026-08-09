@@ -1,9 +1,8 @@
-# Fallback for Plesk installations where requests are handled by Apache.
-# Rules are exact; only the confirmed feed of the recovered article is redirected.
+# === zofiasiek: static front end in ROOT (WordPress front end off, admin remains) ===
 ErrorDocument 404 /404.html
 
-# Apache fallback. Production currently serves static files through Nginx, so the
-# equivalent policy must also be set in Plesk's "Additional nginx directives".
+# Apache fallback. If Plesk serves static files directly through Nginx, .htaccess
+# is bypassed; mirror the MIME/cache policy in "Additional nginx directives".
 <IfModule mod_mime.c>
   AddType image/avif .avif
   AddType image/webp .webp
@@ -31,6 +30,14 @@ ErrorDocument 404 /404.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteBase /
+
+  # Keep one canonical host and preserve the requested path and query string.
+  RewriteCond %{HTTP_HOST} ^www\.zofiasiek\.pl$ [NC]
+  RewriteRule ^ https://zofiasiek.pl%{REQUEST_URI} [R=301,L,NE]
+
+  # Keep the WordPress administration and service endpoints available.
+  RewriteRule ^(wp-admin|wp-includes|wp-content|wp-json|wp-login\.php|wp-cron\.php|xmlrpc\.php) - [L]
 
   # Known pages moved from the previous WordPress website.
   RewriteRule ^konserwacja-zabytkow-i-dziel-sztuki(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
@@ -40,7 +47,11 @@ ErrorDocument 404 /404.html
   RewriteRule ^portret-malzonkow-arnolfinich-jana-van-eycka(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
   RewriteRule ^vermeer-dziewczyna-z-perla(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
 
-  # Keep one canonical host and preserve the requested path and query string.
-  RewriteCond %{HTTP_HOST} ^www\.zofiasiek\.pl$ [NC]
-  RewriteRule ^ https://zofiasiek.pl%{REQUEST_URI} [R=301,L,NE]
+  # Normalise explicit root index.html and root-level flat .html URLs.
+  RewriteRule ^index\.html$ / [R=301,L]
+  RewriteCond %{REQUEST_URI} !^/404\.html$
+  RewriteCond %{REQUEST_URI} ^/([^/]+)\.html$
+  RewriteRule ^ /%1/ [R=301,L]
 </IfModule>
+
+DirectoryIndex index.html index.php
