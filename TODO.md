@@ -144,8 +144,11 @@ Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego pro
 
 ## P3 — Porządki w kodzie
 
-- [ ] Usunąć osierocony duplikat `img/kopie/paysage-de-juan-les-pins-pablo-picasso/` (5 plików; zastąpiony przez `pablo-picasso-pejzaz-z-lodkami/`)
-- [ ] `pablo-picasso-pejzaz-z-lodkami/04.jpg` — pominięty w `data-images` (00|01|02|03|05); dodać albo skasować plik — kopie-obrazow/index.html:159
+- [x] Ujednolicić 8 identycznych JPEG-ów występujących równolegle w `img/realizacje/` i `img/kopie/`; odwołania prowadzą teraz do katalogów realizacji w `img/kopie/`, a stare URL-e mają fallback 301 w `.htaccess`
+- [x] Usunąć trzy identyczne pliki ze starego katalogu `img/kopie/paysage-de-juan-les-pins-pablo-picasso/` (`00.jpg`, `01.jpg`, `03.jpg`); zachowano `02.jpg` i `thumb.jpg`, ponieważ są unikalnymi zdjęciami, a nie duplikatami bajt w bajt
+- [ ] Zdecydować o dwóch unikalnych, nieużywanych zdjęciach w `img/kopie/paysage-de-juan-les-pins-pablo-picasso/`: przenieść je do bieżącej galerii Picassa albo usunąć po świadomej decyzji redakcyjnej
+- [x] Usunąć `pablo-picasso-pejzaz-z-lodkami/04.jpg` — był identyczny bajt w bajt z używanym `03.jpg`; stary URL ma fallback 301
+- [ ] Po deployu sprawdzić wszystkie 12 przekierowań obrazów (`301 → 200`); jeśli Nginx/Plesk omija `.htaccess` dla brakujących statyków, skopiować reguły do konfiguracji Nginx
 - [ ] Usunąć martwe atrybuty `data-fill="kopie|konserwacje|realizacje"` (nic ich nie czyta)
 - [x] Naprawić markup SVG: niedomknięte `<path>` na index.html, artefakty `"../>` na podstronach (zrobione razem z `aria-hidden`)
 - [x] main.js — absolutny link do polityki prywatności → relatywny (naprawione przy pakiecie dostępności)

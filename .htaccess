@@ -36,6 +36,21 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTP_HOST} ^www\.zofiasiek\.pl$ [NC]
   RewriteRule ^ https://zofiasiek.pl%{REQUEST_URI} [R=301,L,NE]
 
+  # Consolidated byte-identical image files. Keep legacy URLs working for
+  # search engines, external links and visitors with an older cached page.
+  RewriteRule ^img/realizacje/dama-z-lasiczka-leonardo-da-vinci\.jpg$ /img/kopie/dama-z-gronostajem-leonardo-da-vinci/00.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/dziewczyna-z-perla\.jpg$ /img/kopie/dziewczyna-z-perla-johannes-vermeer/00.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/krzyk-edward-munch\.jpg$ /img/kopie/krzyk-edvard-munch/04.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/matka-boska-wspomozenia-wiernych-cranach\.jpg$ /img/kopie/matka-boska-wspomozenia-wiernych-lucas-cranach/00.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/paysage-de-juan-les-pins-pablo-picasso\.jpg$ /img/kopie/pablo-picasso-pejzaz-z-lodkami/02.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/pocalunek-gustav-klimt\.jpg$ /img/kopie/pocalunek-gustav-klimt/00.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/portret-malzonkow-arnolfinich-jan-van-eyck\.jpg$ /img/kopie/portret-malzonkow-arnolfinich-jan-van-eyck/00.jpg [R=301,L,NE]
+  RewriteRule ^img/realizacje/szal-uniesien-wladyslaw-podkowinski\.jpg$ /img/kopie/szal-uniesien-wladyslaw-podkowinski/00.jpg [R=301,L,NE]
+  RewriteRule ^img/kopie/paysage-de-juan-les-pins-pablo-picasso/00\.jpg$ /img/kopie/pablo-picasso-pejzaz-z-lodkami/02.jpg [R=301,L,NE]
+  RewriteRule ^img/kopie/paysage-de-juan-les-pins-pablo-picasso/01\.jpg$ /img/kopie/pablo-picasso-pejzaz-z-lodkami/03.jpg [R=301,L,NE]
+  RewriteRule ^img/kopie/paysage-de-juan-les-pins-pablo-picasso/03\.jpg$ /img/kopie/pablo-picasso-pejzaz-z-lodkami/05.jpg [R=301,L,NE]
+  RewriteRule ^img/kopie/pablo-picasso-pejzaz-z-lodkami/04\.jpg$ /img/kopie/pablo-picasso-pejzaz-z-lodkami/03.jpg [R=301,L,NE]
+
   # Keep the WordPress administration and service endpoints available.
   RewriteRule ^(wp-admin|wp-includes|wp-content|wp-json|wp-login\.php|wp-cron\.php|xmlrpc\.php) - [L]
 
