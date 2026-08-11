@@ -1,6 +1,6 @@
 # TODO — zofiasiek.pl / siekart.pl
 
-Backlog z audytu strony (2026-07-08). Priorytety: P0 = robimy teraz, P4 = decyzje/kiedyś.
+Backlog z audytów strony (2026-07-08 i 2026-08-11). Priorytety: P0 = robimy teraz, P4 = decyzje/kiedyś.
 Uwaga: repo jest deployowane w całości na hosting, więc ten plik będzie publicznie dostępny pod `/TODO.md` — nie wpisywać tu nic wrażliwego.
 
 ## P0 — Dostępność (cel: WCAG 2.2 AA bez naruszeń, ocena ≥9,5/10)
@@ -60,12 +60,21 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 - [ ] Smoke test NVDA (Windows): strona główna + kontakt
 - [ ] Emulacja `prefers-reduced-motion` w DevTools: zero animacji, slider stoi
 
+## P1 — Responsywność i interfejs (audyt 2026-08-11)
+
+- [ ] **Hero na niskich ekranach**: zarezerwować pionowe miejsce na fixed header oraz kontrolki slidera. Zweryfikować co najmniej 320×568, 360×640 i landscape 844×390 — obecnie nagłówek wchodzi pod header, a kropki nakładają się na CTA (`css/style.css`, okolice linii 253, 472 i 2049)
+- [ ] **Nawigacja 769–960 px**: wcześniej przełączać menu desktopowe na drawer (około 900–960 px), dodać `flex-shrink: 0` dla logo i `white-space: nowrap` dla pozycji menu; sprawdzić PL/EN/DE, szczególnie niemiecką wersję (`css/style.css`, breakpoint około linii 1731)
+- [ ] **Modal ustawień prywatności**: przywrócić centrowanie `<dialog>` przez `margin: auto` oraz dodać bezpieczne marginesy i maksymalną wysokość na mobile (`css/style.css`, okolice linii 1235)
+- [ ] **Kotwica formularza kontaktowego**: dodać `scroll-margin-top` uwzględniający fixed header albo przenieść `id="contact-form"` na wrapper z nagłówkiem; po wejściu z CTA pierwsza etykieta nie może być schowana pod headerem (`kontakt/index.html`, okolice linii 148)
+- [ ] **Długie niemieckie słowa przy 320 px**: usunąć poziomy scroll na `/de/datenschutz/` i wychodzenie kart poza grid na `/de/restaurierung/`; zastosować zależnie od miejsca `hyphens: auto`, `overflow-wrap: anywhere`, `min-width: 0` i `minmax(0, 1fr)`
+- [ ] **Linki w zwykłym tekście**: dodać trwałe podkreślenie lub inny niekolorystyczny wyróżnik dla linków w treści, formularzu i polityce prywatności; sam kolor nie zapewnia wystarczającego rozróżnienia (WCAG 1.4.1)
+
 ## P1 — Wydajność
 
 - [x] Hero: pierwszy slajd jako responsywny `<picture>` z `fetchpriority="high"`; pozostałe slajdy są hydraturowane po idle lub na żądanie, dopiero przed przełączeniem
 - [x] Miniatury dla pięciu kopii na stronie głównej: wersjonowane AVIF/WebP o maksymalnym rozmiarze 800×1000 z pełnym JPEG-em pozostawionym wyłącznie jako fallback/lightbox
 - [ ] Miniatury dla osieroconej strony `aktualnosci/` — dopiero po decyzji, czy strona ma zostać rozwinięta, czy usunięta
-- [ ] WebP/AVIF + `srcset/sizes` dla galerii (60 MB JPG → ~40–50% mniej)
+- [ ] WebP/AVIF + `srcset/sizes` dla galerii (60 MB JPG → ~40–50% mniej); wygenerować warianty około 400/800 px i osobne małe miniatury lightboxa, żeby siatki oraz pasek miniaturek nie pobierały pełnych JPG (pełny przebieg audytu: `/o-mnie/` 9,16 MB, `/konserwacja/` 5,62 MB)
 - [ ] `<link rel="preload">` dla krytycznych fontów woff2 (latin, 400/700)
 - [x] Slider: wersjonowane AVIF/WebP 960 px i pełne rozdzielczości z JPEG fallbackiem; start mobilny spadł z 2,3 MB do ok. 188 KB
 - [x] Logo: wersjonowany PNG 526×200 z wymiarami w HTML; 193,6 KB → 22,7 KB
@@ -80,23 +89,25 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [x] **Przekierowania ze starych URL-i WP** — zrobione jako stuby w repo (foldery ze starymi nazwami + index.html: meta-refresh 0 + JS + canonical; wtyczka Redirection by nie zadziałała, bo 404 serwuje hosting, nie WP):
   - `/konserwacja-zabytkow-i-dziel-sztuki/` → `/konserwacja/`
   - `/portret-malzonkow-arnolfinich-jana-van-eycka/` → `/kopie-obrazow/`
-  - `/vermeer-dziewczyna-z-perla/` → `/kopie-obrazow/`
+  - `/vermeer-dziewczyna-z-perla/` → `/kopie-obrazow/dziewczyna-z-perla/`
 - [ ] Opcjonalny upgrade: prawdziwe HTTP 301 w panelu hostingu (Plesk), jeśli kiedyś będzie dostęp — wtedy stuby można skasować
 - [ ] Pełną listę starych 404 pokaże Search Console (indeks może trzymać więcej niż te 3)
 - [ ] **Google Search Console**: weryfikacja domeny, zgłoszenie sitemap.xml, prośba o przeindeksowanie (indeks ma jeszcze stary title „Zofia Siek"), raport Strony/404 — zero cookies, zgodne z privacy-first
-- [ ] **Po deployu (teraz!)**: w GSC „Sprawdź URL" → „Poproś o zindeksowanie" dla 4 głównych podstron + 3 starych URL-i (żeby Google szybciej zobaczył przekierowania zamiast czekać na crawl); Test wyników z elementami rozszerzonymi (Rich Results) dla schema LocalBusiness/BreadcrumbList
-- [ ] **Wersje EN + DE (2026-07-09/10)**: po deployu zgłosić w GSC zaktualizowaną sitemap.xml (15 URL-i: PL+EN+DE z hreflang ×4) i poprosić o zindeksowanie /en/ i /de/; sprawdzić trójkę / ↔ /en/ ↔ /de/ walidatorem hreflang; przy okazji wizytówki Google rozważyć dodatkowe języki profilu
+- [ ] **Po deployu (teraz!)**: w GSC „Sprawdź URL" → „Poproś o zindeksowanie" dla 4 głównych podstron, 3 nowych realizacji i 3 starych URL-i (żeby Google szybciej zobaczył nowe treści oraz przekierowania zamiast czekać na crawl); Test wyników z elementami rozszerzonymi dla schema LocalBusiness/Service/BreadcrumbList
+- [ ] **Wersje EN + DE (2026-07-09/10)**: po deployu zgłosić w GSC zaktualizowaną sitemap.xml (18 URL-i: 15 stron PL+EN+DE oraz 3 polskie realizacje; hreflang tylko dla faktycznych odpowiedników) i poprosić o zindeksowanie /en/ i /de/; sprawdzić trójkę / ↔ /en/ ↔ /de/ walidatorem hreflang; przy okazji wizytówki Google rozważyć dodatkowe języki profilu
 - [ ] **Bing Webmaster Tools**: weryfikacja + ta sama sitemap.xml (Bing zasila też DuckDuck; import jednym klikiem z GSC) — mały ruch, ale darmowy i 5 minut
 - [ ] **Wizytówka Google (Business Profile)** dla pracowni (Siedlec 3, Krzeszowice) + systematyczne zbieranie opinii — dla fraz lokalnych pack mapowy stoi nad wynikami organicznymi
 - [ ] **Spójność NAP** (nazwa/adres/telefon identyczne co do znaku wszędzie): strona, wizytówka Google, FB, IG, stare katalogi. Uwaga: strona ma 2 telefony (607 752 370 i 502 244 629) — ustalić JEDEN główny do NAP, żeby Google nie widział rozjazdu. Musi zgadzać się ze schema LocalBusiness (jest tam 607…)
 - [ ] Linki zwrotne: strona w bio FB/IG/TikToka, katalogi lokalne, współprace (np. Muzeum w Chrzanowie), prasa lokalna
 - [ ] Treść przyrostowa: `aktualnosci/` jako blog realizacji (każda praca = wpis z unikalnym opisem) — powiązane z decyzją w P4
 - [ ] Favicon w wynikach Google: dziś jest tylko SVG — Google do wyników wymaga też PNG/ICO (min. 48×48) pod stałym URL-em; powiązane z pozycją favicon w P3
+- [x] Rozbudować `/kopie-obrazow/`: naturalny title/H1 i treść lokalno-usługowa, osobna sekcja portfolio, `Service` JSON-LD oraz opisowe linki do realizacji
 - Podgląd guziczak.github.io/zofiasiek jest SEO-bezpieczny: absolutne canonicale na zofiasiek.pl skleją kopie w Google (nic nie trzeba robić)
 
 ## P2 — Kontakt i pomiar
 
 - [x] Decyzja właściciela: formularz celowo przygotowuje wiadomość i otwiera aplikację pocztową; nie dodajemy backendu ani uploadu plików na stronie
+- [ ] Przed uruchomieniem płatnych kampanii ponownie ocenić prosty backend/API formularza: `mailto:` może nie zadziałać bez skonfigurowanego klienta pocztowego i nie daje potwierdzenia dostarczenia. Jeżeli pozostaje `mailto:`, przygotować i przetestować czytelny fallback z adresem e-mail oraz kopią treści do skopiowania
 - [x] CTA przekazują rodzaj usługi do formularza, a formularz wstępnie uzupełnia temat i treść wiadomości
 - [x] Pomiar rozróżnia kliknięcie CTA, kliknięcie telefonu/e-maila oraz przekazanie poprawnego formularza do aplikacji pocztowej; żadnego z nich nie nazywa potwierdzonym leadem
 - [ ] Po wdrożeniu sprawdzić zdarzenia `cta_select`, `contact_link_click` i `form_mailto_handoff` w GA4 Realtime/DebugView po wyrażeniu zgody
@@ -105,9 +116,10 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 
 Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego procesu usługi nie wolno przypisywać konkretnemu obiektowi bez potwierdzenia.
 
+- [x] Opublikować ostrożne strony dokumentacji fotograficznej dla „Damy z gronostajem”, „Dziewczyny z perłą” i „Pocałunku”; połączyć je ze stroną usługi, formularzem i sitemapą, bez dopisywania niepotwierdzonych wymiarów, techniki, dat, klienta ani czasu pracy
 - [ ] Dla 3–5 konserwacji zebrać: typ/autorstwo/datowanie, materiał i wymiary, stan początkowy, diagnozę, zatwierdzony zakres, wykonane zabiegi, rok/czas, rezultat, zalecenia, opis etapów zdjęć i zgodę na publikację
 - [ ] Dla 2–3 kopii zebrać: format, podłoże, technikę, rok/czas, założenia zamówienia, etapy, najtrudniejszy element, wykończenie oraz zgodę klienta na opis kontekstu
-- [ ] Po zebraniu danych utworzyć osobne, unikalne strony realizacji i połączyć je z usługą oraz formularzem z odpowiednim tematem
+- [ ] Po zebraniu danych rozbudować istniejące strony dokumentacji do pełnych, unikalnych case studies; nowe realizacje od razu łączyć z usługą i formularzem z odpowiednim tematem
 - [ ] Kandydaci z najbogatszą dokumentacją: Tetmajer, Madonna Sykstyńska, dekoracja ścienna oraz kopie mające po 8 zdjęć
 
 ## P2C — Języki

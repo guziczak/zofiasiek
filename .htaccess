@@ -45,7 +45,7 @@ ErrorDocument 404 /404.html
   RewriteRule ^konserwacja-obrazu/feed(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
   RewriteRule ^stol-dublazowy(?:/index\.html)?/?$ https://zofiasiek.pl/konserwacja/ [R=301,L,NE]
   RewriteRule ^portret-malzonkow-arnolfinich-jana-van-eycka(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
-  RewriteRule ^vermeer-dziewczyna-z-perla(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/ [R=301,L,NE]
+  RewriteRule ^vermeer-dziewczyna-z-perla(?:/index\.html)?/?$ https://zofiasiek.pl/kopie-obrazow/dziewczyna-z-perla/ [R=301,L,NE]
 
   # Normalise explicit root index.html and root-level flat .html URLs.
   RewriteRule ^index\.html$ / [R=301,L]
