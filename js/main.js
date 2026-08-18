@@ -37,7 +37,7 @@ const STR = (function () {
       privacySettings: 'Ustawienia prywatności',
       privacyDescription: 'Wybierz, na które opcjonalne usługi zezwalasz. Ustawienia możesz później zmienić w stopce strony.',
       essentialTitle: 'Niezbędne',
-      essentialDescription: 'Zapamiętują decyzję o prywatności i pozycję przewijania. Nie można ich wyłączyć.',
+      essentialDescription: 'Zapamiętują decyzję o prywatności, wybrany motyw i pozycję przewijania. Nie można ich wyłączyć.',
       alwaysActive: 'Zawsze aktywne',
       analyticsTitle: 'Analityka',
       analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) pomaga nam zrozumieć, jak używana jest strona. Ładuje się dopiero po Twojej zgodzie.',
@@ -64,7 +64,9 @@ const STR = (function () {
       searchEmpty: 'Brak wyników dla',
       searchEmptyHint: 'Spróbuj inaczej — np. samego nazwiska malarza.',
       searchError: 'Nie udało się wczytać wyszukiwarki. Odśwież stronę i spróbuj ponownie.',
-      searchCount: 'Liczba wyników:'
+      searchCount: 'Liczba wyników:',
+      themeToDark: 'Włącz motyw ciemny',
+      themeToLight: 'Włącz motyw jasny'
     },
     en: {
       navOpen: 'Open navigation menu',
@@ -98,7 +100,7 @@ const STR = (function () {
       privacySettings: 'Privacy settings',
       privacyDescription: 'Choose which optional services you allow. You can change these settings later in the website footer.',
       essentialTitle: 'Essential',
-      essentialDescription: 'Remembers your privacy decision and scroll position. It cannot be disabled.',
+      essentialDescription: 'Remembers your privacy decision, the chosen theme and your scroll position. It cannot be disabled.',
       alwaysActive: 'Always active',
       analyticsTitle: 'Analytics',
       analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) helps us understand how the website is used. It loads only after you consent.',
@@ -125,7 +127,9 @@ const STR = (function () {
       searchEmpty: 'No results for',
       searchEmptyHint: 'Try a different word — the artist’s surname often works best.',
       searchError: 'The search index could not be loaded. Please refresh the page and try again.',
-      searchCount: 'Results:'
+      searchCount: 'Results:',
+      themeToDark: 'Switch to dark theme',
+      themeToLight: 'Switch to light theme'
     },
     de: {
       navOpen: 'Navigationsmenü öffnen',
@@ -159,7 +163,7 @@ const STR = (function () {
       privacySettings: 'Datenschutzeinstellungen',
       privacyDescription: 'Wählen Sie aus, welche optionalen Dienste Sie zulassen. Sie können diese Einstellungen später in der Fußzeile ändern.',
       essentialTitle: 'Notwendig',
-      essentialDescription: 'Speichert Ihre Datenschutzentscheidung und Scrollposition. Diese Funktion kann nicht deaktiviert werden.',
+      essentialDescription: 'Speichert Ihre Datenschutzentscheidung, das gewählte Design und die Scrollposition. Diese Funktion kann nicht deaktiviert werden.',
       alwaysActive: 'Immer aktiv',
       analyticsTitle: 'Analyse',
       analyticsDescription: 'Google Analytics 4 (G-VFS072VFK9) hilft uns zu verstehen, wie die Website genutzt wird. Der Dienst lädt erst nach Ihrer Einwilligung.',
@@ -186,7 +190,9 @@ const STR = (function () {
       searchEmpty: 'Keine Treffer für',
       searchEmptyHint: 'Versuchen Sie es anders — oft hilft nur der Nachname des Künstlers.',
       searchError: 'Die Suche konnte nicht geladen werden. Bitte laden Sie die Seite neu.',
-      searchCount: 'Treffer:'
+      searchCount: 'Treffer:',
+      themeToDark: 'Zum dunklen Design wechseln',
+      themeToLight: 'Zum hellen Design wechseln'
     }
   };
   const lang = (document.documentElement.lang || 'pl').slice(0, 2);
@@ -241,6 +247,7 @@ let privacyBannerWasVisible = false;
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
+  initTheme();
   initSearch();
   initDeepLinkedWork();
   initCookieConsent();
@@ -2200,7 +2207,32 @@ function initExpandable() {
    na stronę nie płaci za wyszukiwarkę ani bajta.
    ============================================================ */
 
-const SEARCH_INDEX_URL = 'js/search-index.json';
+/* Adresy wyszukiwarki liczymy od ŚCIEŻKI TEGO SKRYPTU, nie od korzenia domeny.
+   `resolveSiteUrl()` wymusza adres od korzenia origin — na stronie serwowanej
+   z podkatalogu (podgląd GitHub Pages) dawało to 404 na indeksie oraz złe
+   adresy wyników i miniatur. main.js leży w <korzeń>/js/, więc korzeń strony
+   to katalog wyżej — i to działa niezależnie od miejsca wdrożenia. */
+const SEARCH_PATHS = (function () {
+  const script = document.currentScript || document.querySelector('script[src*="main.js"]');
+  const src = (script && script.src) || '';
+  try {
+    return {
+      index: new URL('search-index.json', src).href,
+      root: new URL('../', src).href
+    };
+  } catch (error) {
+    return { index: 'js/search-index.json', root: '' };
+  }
+})();
+
+function searchUrl(path) {
+  try {
+    return new URL(path, SEARCH_PATHS.root).href;
+  } catch (error) {
+    return path;
+  }
+}
+
 const SEARCH_MAX_RESULTS = 10;
 const SEARCH_SUGGESTIONS = 6;
 /* Przewaga typów treści: „Klimt" ma dawać obraz, a nie stronę kontaktową. */
@@ -2237,7 +2269,7 @@ function escapeHtml(value) {
 
 function loadSearchIndex() {
   if (!searchIndexPromise) {
-    searchIndexPromise = fetch(resolveSiteUrl(SEARCH_INDEX_URL), { credentials: 'same-origin' })
+    searchIndexPromise = fetch(SEARCH_PATHS.index, { credentials: 'same-origin' })
       .then(response => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
@@ -2303,12 +2335,16 @@ function searchEntries(entries, query) {
 function searchResultMarkup(entry) {
   const meta = entry.c === 'copy' && entry.m ? `${entry.s} · ${entry.m}` : entry.s;
   const media = entry.i
-    ? `<img class="search-result__img" src="${escapeHtml(resolveSiteUrl(entry.i))}" alt="" width="56" height="56" loading="lazy" decoding="async">`
+    /* Bez loading="lazy": obrazek wstawiany do świeżo otwartego <dialog> trafia do
+       warstwy wierzchniej i przeglądarka potrafi nigdy nie uznać go za widoczny —
+       kafelek zostaje pusty. Leniwość i tak nic nie daje, bo wyniki (najwyżej 10
+       miniatur) powstają dopiero po otwarciu wyszukiwarki. */
+    ? `<img class="search-result__img" src="${escapeHtml(searchUrl(entry.i))}" alt="" width="56" height="56" decoding="async">`
     : `<svg class="search-result__glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg>`;
 
   return `
     <li class="search-result">
-      <a class="search-result__link" href="${escapeHtml(resolveSiteUrl(entry.u))}" data-search-result>
+      <a class="search-result__link" href="${escapeHtml(searchUrl(entry.u))}" data-search-result>
         <span class="search-result__media">${media}</span>
         <span class="search-result__text">
           <span class="search-result__title">${escapeHtml(entry.t)}</span>
@@ -2530,4 +2566,79 @@ function initDeepLinkedWork() {
   target.focus({ preventScroll: true });
   [150, 500, 1200].forEach(delay => window.setTimeout(settle, delay));
   if (document.readyState !== 'complete') window.addEventListener('load', settle, { once: true });
+}
+
+/* ============================================================
+   Motyw ciemny
+   Domyślnie idzie za ustawieniem systemu (czysty CSS, bez migotania).
+   Przełącznik nadpisuje wybór i zapamiętuje go — a mały skrypt w <head>
+   każdej strony ustawia atrybut przed pierwszym malowaniem, więc osoba,
+   która wybrała inaczej niż system, też nie zobaczy przeskoku.
+   ============================================================ */
+
+const THEME_KEY = 'zofiasiek-theme';
+
+function readStoredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    return (stored === 'dark' || stored === 'light') ? stored : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function activeTheme() {
+  return readStoredTheme() ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+
+function initTheme() {
+  const nav = document.querySelector('.header__inner nav');
+  if (!nav || nav.querySelector('[data-theme-toggle]')) return;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'nav__theme';
+  button.setAttribute('data-theme-toggle', '');
+  // Widoczna jest zawsze ikona motywu DOCELOWEGO — przełączaniem zajmuje się CSS.
+  button.innerHTML =
+    '<svg class="nav__theme-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3z"/></svg>' +
+    '<svg class="nav__theme-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<circle cx="12" cy="12" r="4.2"/>' +
+    '<path d="M12 2.6v2.1M12 19.3v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.6 12h2.1M19.3 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"/></svg>';
+
+  function refreshLabel() {
+    const next = activeTheme() === 'dark' ? STR.themeToLight : STR.themeToDark;
+    button.setAttribute('aria-label', next);
+    button.setAttribute('title', next);
+  }
+
+  button.addEventListener('click', () => {
+    const next = activeTheme() === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, next); } catch (error) {}
+    document.documentElement.dataset.theme = next;
+    refreshLabel();
+  });
+
+  refreshLabel();
+  nav.appendChild(button);
+
+  // Póki nikt nie wybrał ręcznie, zmiana ustawienia systemu przestawia stronę.
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const onSystemChange = () => { if (!readStoredTheme()) refreshLabel(); };
+  if (typeof systemDark.addEventListener === 'function') {
+    systemDark.addEventListener('change', onSystemChange);
+  } else if (typeof systemDark.addListener === 'function') {
+    systemDark.addListener(onSystemChange); // starsze Safari
+  }
+
+  // Wybór motywu w innej karcie ma się przenieść i tutaj.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== THEME_KEY) return;
+    const stored = readStoredTheme();
+    if (stored) document.documentElement.dataset.theme = stored;
+    else delete document.documentElement.dataset.theme;
+    refreshLabel();
+  });
 }

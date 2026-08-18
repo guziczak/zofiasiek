@@ -18,7 +18,25 @@
   --color-accent-light: #d4c4a8;
   --color-border: #e8e0d6;
   --color-footer-text: #d4c4a8;
+  /* Powierzchnie kart, okien i solidnego nagłówka. W jasnym motywie to biel,
+     w ciemnym — ciepła płaszczyzna. NIE mylić z --color-white, które oznacza
+     „biel jako taką" (tekst i elementy nad hero oraz nad ciemnymi sekcjami)
+     i celowo pozostaje białe w obu motywach. */
+  --color-surface: #ffffff;
   --color-white: #ffffff;
+  /* Tekst na złotym tle (przyciski, aktywny język, scroll-top). W jasnym motywie
+     złoto jest ciemne, więc tekst biały; w ciemnym złoto jaśnieje i tekst musi
+     zciemnieć — jeden token zamiast trzynastu nadpisań. */
+  --color-on-accent: #ffffff;
+  /* Passe-partout pod reprodukcjami: w ciemnym motywie obrazy zostają na jasnym
+     tle, żeby barwa kopii czytała się tak, jak będzie wisieć u klienta. */
+  --artwork-mat: transparent;
+  --artwork-mat-pad: 0px;
+  /* Papierowa tekstura tła i wybielanie logo — sterowane tokenem, żeby ciemny
+     motyw nie musiał powielać reguł, tylko wartości. */
+  --color-texture-base: #e8dccb;
+  --texture-scrim: rgba(251, 248, 242, 0.5);
+  --logo-filter-solid: none;
   --color-overlay: rgba(20, 18, 15, 0.55);
   --color-success: #4a7c59;
   --color-error: #c0392b;
@@ -212,12 +230,12 @@ p + p { margin-top: var(--space-sm); }
 
 .btn--primary {
   background-color: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
 }
 
 .btn--primary:hover {
   background-color: var(--color-accent-darker);
-  color: var(--color-white);
+  color: var(--color-on-accent);
 }
 
 /* Na ciemnych tłach zostaje jasne złoto, ale z ciemnym tekstem — kontrast AA w obu kontekstach */
@@ -241,7 +259,7 @@ p + p { margin-top: var(--space-sm); }
 
 .btn--outline:hover {
   background-color: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
 }
 
 .btn--small {
@@ -265,7 +283,7 @@ p + p { margin-top: var(--space-sm); }
 }
 
 .header--solid {
-  background: var(--color-white);
+  background: var(--color-surface);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
 }
 
@@ -337,6 +355,12 @@ p + p { margin-top: var(--space-sm); }
   filter: brightness(0) invert(1);
 }
 
+/* Logo to ciemny tusz na przezroczystym tle. Nad hero zawsze wybielane (wyżej),
+   a w ciemnym motywie także na solidnym nagłówku — stąd token zamiast reguły. */
+.header--solid .header__logo img {
+  filter: var(--logo-filter-solid);
+}
+
 .header--transparent .nav__link {
   color: var(--color-white);
 }
@@ -397,7 +421,7 @@ p + p { margin-top: var(--space-sm); }
 
 .header--solid .nav__lang-current {
   background: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
 }
 
 .header--solid .nav__lang-link:hover,
@@ -672,7 +696,7 @@ p + p { margin-top: var(--space-sm); }
   flex-direction: column;
   gap: 0.35rem;
   padding: var(--space-md);
-  background: var(--color-white);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   text-align: left;
@@ -731,7 +755,7 @@ p + p { margin-top: var(--space-sm); }
   gap: var(--space-sm);
   min-height: 74px;
   padding: 0.8rem 1rem;
-  background: var(--color-white);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   text-align: left;
@@ -792,7 +816,7 @@ p + p { margin-top: var(--space-sm); }
 .service-card {
   text-align: center;
   padding: var(--space-xl) var(--space-lg);
-  background: var(--color-white);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   transition: all var(--transition);
@@ -1043,7 +1067,7 @@ p + p { margin-top: var(--space-sm); }
 .social-links a:hover {
   background-color: var(--color-accent-dark);
   border-color: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
 }
 
 .social-links a svg {
@@ -1239,7 +1263,7 @@ body.privacy-dialog-open {
   border: 0;
   border-radius: var(--border-radius);
   color: var(--color-text);
-  background: var(--color-white);
+  background: var(--color-surface);
   box-shadow: 0 24px 70px rgba(25, 21, 17, 0.35);
 }
 
@@ -1306,7 +1330,7 @@ body.privacy-dialog-open {
   padding: var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  background: var(--color-white);
+  background: var(--color-surface);
   cursor: pointer;
 }
 
@@ -1330,7 +1354,7 @@ body.privacy-dialog-open {
   margin-top: 0.15rem;
   border-radius: 3px;
   background: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -1372,7 +1396,7 @@ body.privacy-dialog-open {
   width: 56px;
   height: 56px;
   background-color: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   border-radius: 50%;
   align-items: center;
   justify-content: center;
@@ -1383,7 +1407,7 @@ body.privacy-dialog-open {
 
 .mobile-cta:hover {
   background-color: var(--color-accent-darker);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   transform: scale(1.1);
 }
 
@@ -1401,7 +1425,7 @@ body.privacy-dialog-open {
   width: 44px;
   height: 44px;
   background-color: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1419,7 +1443,7 @@ body.privacy-dialog-open {
 
 .scroll-top:hover {
   background-color: var(--color-accent-darker);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   transform: translateY(-3px);
 }
 
@@ -1680,7 +1704,7 @@ body.privacy-dialog-open {
 .map-placeholder__hint {
   padding: 0.6em 1.4em;
   background: var(--color-accent-dark);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   border-radius: var(--border-radius);
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -1836,7 +1860,7 @@ body.privacy-dialog-open {
     margin: var(--space-md) 0 0;
     border-color: var(--color-border);
     color: var(--color-muted);
-    background: var(--color-white);
+    background: var(--color-surface);
   }
 
   .nav__list .nav__lang > *:not(:first-child) {
@@ -1845,7 +1869,7 @@ body.privacy-dialog-open {
 
   .nav__list .nav__lang .nav__lang-current {
     background: var(--color-accent-dark);
-    color: var(--color-white);
+    color: var(--color-on-accent);
   }
 
   .nav__list .nav__lang .nav__lang-link {
@@ -1992,11 +2016,13 @@ body.privacy-dialog-open {
    ROZSZERZENIA: tło, slider, galerie, lightbox, rozwijanie
    ============================================================ */
 
-/* ----- Tekstura tła na całej stronie (tlo.jpg) ----- */
+/* ----- Tekstura tła na całej stronie (tlo.jpg) -----
+   Ta sama tekstura służy obu motywom — zmienia się tylko przesłona nad nią
+   (--texture-scrim), więc ciemny motyw zachowuje papierowy charakter strony. */
 body {
-  background-color: #e8dccb;
+  background-color: var(--color-texture-base);
   background-image:
-    linear-gradient(rgba(251, 248, 242, 0.5), rgba(251, 248, 242, 0.5)),
+    linear-gradient(var(--texture-scrim), var(--texture-scrim)),
     url('../img/tlo.jpg');
   background-repeat: repeat;
 }
@@ -2865,7 +2891,7 @@ body.search-open {
   padding: 0;
   border: 0;
   border-radius: var(--border-radius);
-  background: var(--color-white);
+  background: var(--color-surface);
   color: var(--color-text);
   box-shadow: 0 28px 80px rgba(25, 21, 17, 0.4);
   overflow: hidden;
@@ -3075,5 +3101,134 @@ body.search-open {
 
   .search-result__title {
     font-size: var(--fs-base);
+  }
+}
+
+/* ============================================================
+   Motyw ciemny
+   Domyślnie idzie za ustawieniem systemu; przełącznik w nagłówku nadpisuje
+   wybór i zapamiętuje go w localStorage (klucz `zofiasiek-theme`).
+
+   UWAGA: poniższy spis tokenów występuje DWA RAZY — raz pod preferencją
+   systemu, raz pod jawnym wyborem. To jedyne powielenie w tym motywie:
+   wszystkie reguły niżej zależą wyłącznie od zmiennych, więc dopisując kolor
+   trzeba go dodać w OBU blokach i nigdzie indziej.
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #1a1611;
+    --color-bg-warm: #221d16;
+    --color-bg-dark: #100d0a;
+    --color-surface: #24201a;
+    --color-text: #e6ded1;
+    --color-heading: #f4ecdd;
+    --color-muted: #b3a795;
+    --color-accent: #c9a97a;
+    --color-accent-dark: #d9bd8c;
+    --color-accent-darker: #ecd8b0;
+    --color-accent-light: #d4c4a8;
+    --color-border: #3b332a;
+    --color-on-accent: #1a1a1a;
+    --color-error: #f1968c;
+    --color-success: #86c39a;
+    --color-overlay: rgba(0, 0, 0, 0.68);
+    --color-texture-base: #14110d;
+    --texture-scrim: rgba(20, 17, 12, 0.88);
+    --logo-filter-solid: brightness(0) invert(1);
+    --artwork-mat: #e8dccb;
+    --artwork-mat-pad: 10px;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #1a1611;
+  --color-bg-warm: #221d16;
+  --color-bg-dark: #100d0a;
+  --color-surface: #24201a;
+  --color-text: #e6ded1;
+  --color-heading: #f4ecdd;
+  --color-muted: #b3a795;
+  --color-accent: #c9a97a;
+  --color-accent-dark: #d9bd8c;
+  --color-accent-darker: #ecd8b0;
+  --color-accent-light: #d4c4a8;
+  --color-border: #3b332a;
+  --color-on-accent: #1a1a1a;
+  --color-error: #f1968c;
+  --color-success: #86c39a;
+  --color-overlay: rgba(0, 0, 0, 0.68);
+  --color-texture-base: #14110d;
+  --texture-scrim: rgba(20, 17, 12, 0.88);
+  --logo-filter-solid: brightness(0) invert(1);
+  --artwork-mat: #e8dccb;
+  --artwork-mat-pad: 10px;
+}
+
+/* Passe-partout: jasna obwódka WYŁĄCZNIE wokół kafelka z reprodukcją.
+   `box-shadow` z rozrzutem nie zajmuje miejsca w układzie, więc w jasnym motywie
+   (kolor `transparent`, rozrzut 0) rule jest całkowicie bezkosztowa.
+   Obwódki celowo nie ma pod podpisami — jasna płaszczyzna pod jasnym tekstem
+   ciemnego motywu dałaby tekst niewidoczny. */
+.gallery-item {
+  box-shadow: 0 0 0 var(--artwork-mat-pad) var(--artwork-mat);
+}
+
+/* Przełącznik motywu — bliźniak lupki. */
+.nav__theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--color-text);
+  transition: background var(--transition), color var(--transition);
+}
+
+.nav__theme svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header--solid .nav__theme {
+  color: var(--color-text);
+}
+
+.header--solid .nav__theme:hover {
+  background: var(--color-bg-warm);
+  color: var(--color-accent-dark);
+}
+
+.header--transparent .nav__theme {
+  color: var(--color-white);
+}
+
+.header--transparent .nav__theme:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Ikona pokazuje DOCELOWY motyw, nie bieżący: w jasnym widać księżyc. */
+.nav__theme .nav__theme-sun { display: none; }
+.nav__theme .nav__theme-moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .nav__theme .nav__theme-sun { display: block; }
+  :root:not([data-theme="light"]) .nav__theme .nav__theme-moon { display: none; }
+}
+
+:root[data-theme="dark"] .nav__theme .nav__theme-sun { display: block; }
+:root[data-theme="dark"] .nav__theme .nav__theme-moon { display: none; }
+
+@media (max-width: 960px) {
+  .nav__theme {
+    order: 1;
   }
 }
