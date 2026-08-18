@@ -73,7 +73,7 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 
 - [x] Hero: pierwszy slajd jako responsywny `<picture>` z `fetchpriority="high"`; pozostałe slajdy są hydraturowane po idle lub na żądanie, dopiero przed przełączeniem
 - [x] Miniatury dla pięciu kopii na stronie głównej: wersjonowane AVIF/WebP o maksymalnym rozmiarze 800×1000 z pełnym JPEG-em pozostawionym wyłącznie jako fallback/lightbox
-- [ ] Miniatury dla osieroconej strony `aktualnosci/` — dopiero po decyzji, czy strona ma zostać rozwinięta, czy usunięta
+- [x] Miniatury dla ukrytych archiwów PL/EN/DE (`aktualnosci/`, `en/news/`, `de/aktuelles/`): galerie korzystają z istniejących `thumb.jpg` i pełnych zestawów zdjęć 15 bieżących realizacji
 - [ ] WebP/AVIF + `srcset/sizes` dla galerii (60 MB JPG → ~40–50% mniej); wygenerować warianty około 400/800 px i osobne małe miniatury lightboxa, żeby siatki oraz pasek miniaturek nie pobierały pełnych JPG (pełny przebieg audytu: `/o-mnie/` 9,16 MB, `/konserwacja/` 5,62 MB)
 - [ ] `<link rel="preload">` dla krytycznych fontów woff2 (latin, 400/700)
 - [x] Slider: wersjonowane AVIF/WebP 960 px i pełne rozdzielczości z JPEG fallbackiem; start mobilny spadł z 2,3 MB do ok. 188 KB
@@ -86,11 +86,11 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 Weryfikacja live 2026-07-08: zofiasiek.pl serwuje stronę z korzenia domeny ✓, domena w indeksie ✓,
 ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 
-- [x] **Przekierowania ze starych URL-i WP** — zrobione jako stuby w repo (foldery ze starymi nazwami + index.html: meta-refresh 0 + JS + canonical; wtyczka Redirection by nie zadziałała, bo 404 serwuje hosting, nie WP):
+- [x] **Przekierowania ze starych URL-i WP** — fallbacki w repo oraz zarządzane endpointy PHP zwracające prawdziwe HTTP 301 na LIVE:
   - `/konserwacja-zabytkow-i-dziel-sztuki/` → `/konserwacja/`
-  - `/portret-malzonkow-arnolfinich-jana-van-eycka/` → `/kopie-obrazow/`
+  - `/portret-malzonkow-arnolfinich-jana-van-eycka/` → `/kopie-obrazow/portret-malzonkow-arnolfinich/`
   - `/vermeer-dziewczyna-z-perla/` → `/kopie-obrazow/dziewczyna-z-perla/`
-- [ ] Opcjonalny upgrade: prawdziwe HTTP 301 w panelu hostingu (Plesk), jeśli kiedyś będzie dostęp — wtedy stuby można skasować
+- [x] **Lokalne slugi realizacji EN/DE** — 26 zmienionych adresów ma bezpośrednie 301 ze starego polskiego sluga do nowego kanonicznego URL; bez fizycznych folderów fallbackowych dla starych slugów
 - [ ] Pełną listę starych 404 pokaże Search Console (indeks może trzymać więcej niż te 3)
 - [ ] **Google Search Console**: weryfikacja domeny, zgłoszenie sitemap.xml, prośba o przeindeksowanie (indeks ma jeszcze stary title „Zofia Siek"), raport Strony/404 — zero cookies, zgodne z privacy-first
 - [ ] **Po deployu (teraz!)**: w GSC „Sprawdź URL" → „Poproś o zindeksowanie" dla 4 głównych podstron, 3 nowych realizacji i 3 starych URL-i (żeby Google szybciej zobaczył nowe treści oraz przekierowania zamiast czekać na crawl); Test wyników z elementami rozszerzonymi dla schema LocalBusiness/Service/BreadcrumbList
@@ -99,7 +99,7 @@ ale Google trzyma stare URL-e z WordPressa, które dziś zwracają 404.
 - [ ] **Wizytówka Google (Business Profile)** dla pracowni (Siedlec 3, Krzeszowice) + systematyczne zbieranie opinii — dla fraz lokalnych pack mapowy stoi nad wynikami organicznymi
 - [ ] **Spójność NAP** (nazwa/adres/telefon identyczne co do znaku wszędzie): strona, wizytówka Google, FB, IG, stare katalogi. Uwaga: strona ma 2 telefony (607 752 370 i 502 244 629) — ustalić JEDEN główny do NAP, żeby Google nie widział rozjazdu. Musi zgadzać się ze schema LocalBusiness (jest tam 607…)
 - [ ] Linki zwrotne: strona w bio FB/IG/TikToka, katalogi lokalne, współprace (np. Muzeum w Chrzanowie), prasa lokalna
-- [ ] Treść przyrostowa: `aktualnosci/` jako blog realizacji (każda praca = wpis z unikalnym opisem) — powiązane z decyzją w P4
+- [ ] Treść przyrostowa: ukryte archiwa PL/EN/DE jako blog realizacji (każda praca = wpis z unikalnym opisem i właściwym tłumaczeniem) — powiązane z decyzją w P4
 - [ ] Favicon w wynikach Google: dziś jest tylko SVG — Google do wyników wymaga też PNG/ICO (min. 48×48) pod stałym URL-em; powiązane z pozycją favicon w P3
 - [x] Rozbudować `/kopie-obrazow/`: naturalny title/H1 i treść lokalno-usługowa, osobna sekcja portfolio, `Service` JSON-LD oraz opisowe linki do realizacji
 - Podgląd guziczak.github.io/zofiasiek jest SEO-bezpieczny: absolutne canonicale na zofiasiek.pl skleją kopie w Google (nic nie trzeba robić)
@@ -159,7 +159,7 @@ Pełnych case studies nie publikować na podstawie samych zdjęć. Ogólnego pro
 
 ## P4 — Architektura / decyzje
 
-- [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach PL + 6 EN + 6 DE i już wcześniej się rozjechały (nav w `aktualnosci/` ma 5 pozycji, reszta 4) — przy TRZECH językach generator/szablonowanie robi się coraz bardziej zasadne („zmiana menu = 20 plików")
-- [ ] Los `aktualnosci/`: albo na produkcję (nav na wszystkich stronach + sitemap + zdjąć noindex), albo usunąć
+- [ ] Header/footer/cookie-banner/inline-skrypt są skopiowane w 8 plikach PL + 7 EN + 7 DE — przy TRZECH językach generator/szablonowanie pozostaje zasadne („zmiana menu = 22 pliki")
+- [x] Los `aktualnosci/`, `en/news/` i `de/aktuelles/` na teraz: pozostają ukryte (`noindex`, bez sitemap i bez linku w globalnej nawigacji), a odpowiadające sobie wersje łączy wyłącznie przełącznik języka na tych stronach; przed publikacją wymagają właściwych wpisów z datami oraz ponownej decyzji o nav/sitemap
 - [x] Potwierdzić, że zofiasiek.pl serwuje z korzenia domeny — potwierdzone live 2026-07-08 (strona odpowiada z `/`, canonicale poprawne)
 - [x] Analityka: GA4 `G-VFS072VFK9` w Basic Consent Mode, ładowana wyłącznie po osobnej zgodzie
