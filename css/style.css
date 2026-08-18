@@ -37,6 +37,12 @@
   --color-texture-base: #e8dccb;
   --texture-scrim: rgba(251, 248, 242, 0.5);
   --logo-filter-solid: none;
+  /* Obramowanie pól formularza — osobno od dekoracyjnego --color-border, bo
+     podlega progowi 3:1 (WCAG 1.4.11). W jasnym motywie zostawione bez zmian,
+     żeby ten pakiet nie przemalował wyglądu formularza: dziś daje 1,16:1 na
+     bieli, czyli progu NIE spełnia. To zaległość sprzed tej zmiany — poprawka
+     to podmiana tej jednej wartości na ok. #8a8074. */
+  --color-field-border: var(--color-border);
   --color-overlay: rgba(20, 18, 15, 0.55);
   --color-success: #4a7c59;
   --color-error: #c0392b;
@@ -1011,7 +1017,9 @@ p + p { margin-top: var(--space-sm); }
   font-size: var(--fs-base);
   color: var(--color-text);
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  /* Obramowanie pola identyfikuje kontrolkę, więc podlega progowi 3:1
+     (WCAG 1.4.11) — inaczej niż dekoracyjne separatory na --color-border. */
+  border: 1px solid var(--color-field-border);
   border-radius: var(--border-radius);
   transition: border-color var(--transition);
 }
@@ -3129,6 +3137,7 @@ body.search-open {
     --color-accent-darker: #ecd8b0;
     --color-accent-light: #d4c4a8;
     --color-border: #3b332a;
+    --color-field-border: #7a7060;
     --color-on-accent: #1a1a1a;
     --color-error: #f1968c;
     --color-success: #86c39a;
@@ -3154,6 +3163,7 @@ body.search-open {
   --color-accent-darker: #ecd8b0;
   --color-accent-light: #d4c4a8;
   --color-border: #3b332a;
+  --color-field-border: #7a7060;
   --color-on-accent: #1a1a1a;
   --color-error: #f1968c;
   --color-success: #86c39a;
