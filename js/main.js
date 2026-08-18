@@ -55,7 +55,16 @@ const STR = (function () {
       prev: 'Poprzednie',
       next: 'Następne',
       collapse: 'Zwiń',
-      readMore: 'Czytaj więcej'
+      readMore: 'Czytaj więcej',
+      searchOpen: 'Szukaj na stronie',
+      searchTitle: 'Szukaj',
+      searchPlaceholder: 'Wpisz np. Klimt, Vermeer, konserwacja…',
+      searchHint: 'Wpisz tytuł obrazu, nazwisko malarza albo nazwę usługi.',
+      searchPopular: 'Popularne',
+      searchEmpty: 'Brak wyników dla',
+      searchEmptyHint: 'Spróbuj inaczej — np. samego nazwiska malarza.',
+      searchError: 'Nie udało się wczytać wyszukiwarki. Odśwież stronę i spróbuj ponownie.',
+      searchCount: 'Liczba wyników:'
     },
     en: {
       navOpen: 'Open navigation menu',
@@ -107,7 +116,16 @@ const STR = (function () {
       prev: 'Previous',
       next: 'Next',
       collapse: 'Collapse',
-      readMore: 'Read more'
+      readMore: 'Read more',
+      searchOpen: 'Search the website',
+      searchTitle: 'Search',
+      searchPlaceholder: 'Try Klimt, Vermeer, conservation…',
+      searchHint: 'Enter a painting title, an artist’s name or a service.',
+      searchPopular: 'Popular',
+      searchEmpty: 'No results for',
+      searchEmptyHint: 'Try a different word — the artist’s surname often works best.',
+      searchError: 'The search index could not be loaded. Please refresh the page and try again.',
+      searchCount: 'Results:'
     },
     de: {
       navOpen: 'Navigationsmenü öffnen',
@@ -159,12 +177,24 @@ const STR = (function () {
       prev: 'Zurück',
       next: 'Weiter',
       collapse: 'Einklappen',
-      readMore: 'Weiterlesen'
+      readMore: 'Weiterlesen',
+      searchOpen: 'Website durchsuchen',
+      searchTitle: 'Suche',
+      searchPlaceholder: 'z. B. Klimt, Vermeer, Restaurierung…',
+      searchHint: 'Geben Sie einen Bildtitel, einen Künstlernamen oder eine Leistung ein.',
+      searchPopular: 'Beliebt',
+      searchEmpty: 'Keine Treffer für',
+      searchEmptyHint: 'Versuchen Sie es anders — oft hilft nur der Nachname des Künstlers.',
+      searchError: 'Die Suche konnte nicht geladen werden. Bitte laden Sie die Seite neu.',
+      searchCount: 'Treffer:'
     }
   };
   const lang = (document.documentElement.lang || 'pl').slice(0, 2);
   return all[lang] || all.pl;
 })();
+
+/* Kod języka strony — wyszukiwarka wybiera po nim gałąź indeksu. */
+const SITE_LANG = (document.documentElement.lang || 'pl').slice(0, 2);
 
 /* ----- Prywatność i Google Analytics 4 -----
    Basic Consent Mode: przed zgodą nie pobieramy gtag.js i nie wysyłamy
@@ -211,6 +241,8 @@ let privacyBannerWasVisible = false;
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
+  initSearch();
+  initDeepLinkedWork();
   initCookieConsent();
   initAnalyticsEvents();
   initScrollTop();
@@ -2159,4 +2191,343 @@ function initExpandable() {
       toggle.textContent = open ? STR.collapse : STR.readMore;
     });
   });
+}
+
+/* ============================================================
+   Wyszukiwarka
+   Indeks (js/search-index.json) generuje tools/build-search-index.mjs.
+   Pobieramy go dopiero przy pierwszym otwarciu okna, więc zwykłe wejście
+   na stronę nie płaci za wyszukiwarkę ani bajta.
+   ============================================================ */
+
+const SEARCH_INDEX_URL = 'js/search-index.json';
+const SEARCH_MAX_RESULTS = 10;
+const SEARCH_SUGGESTIONS = 6;
+/* Przewaga typów treści: „Klimt" ma dawać obraz, a nie stronę kontaktową. */
+const SEARCH_KIND_BOOST = { copy: 14, conservation: 10, service: 8, info: 0 };
+
+let searchIndexPromise = null;
+
+/* Składanie znaków do porównań — „Pocałunek" i „pocalunek" to ma być to samo.
+   Uwaga: „ł" NIE rozkłada się w NFD, więc wymaga osobnej podmianki. */
+function foldText(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/ł/g, 'l')
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+/* Musi dawać ten sam wynik co slugify() w tools/build-search-index.mjs —
+   inaczej odnośnik ?work= nie trafi w pracę na stronie konserwacji. */
+function slugify(value) {
+  return foldText(value).replace(/ /g, '-');
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function loadSearchIndex() {
+  if (!searchIndexPromise) {
+    searchIndexPromise = fetch(resolveSiteUrl(SEARCH_INDEX_URL), { credentials: 'same-origin' })
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(data => (data[SITE_LANG] || data.pl || []).map((entry, order) => ({
+        ...entry,
+        _o: order, // kolejność z indeksu jest kuratorska — rozstrzyga remisy punktowe
+        _t: foldText(entry.t),
+        _s: foldText(entry.s || ''),
+        _k: foldText(entry.k || ''),
+        _u: foldText(entry.u || '')
+      })))
+      .catch(error => {
+        searchIndexPromise = null; // pozwól spróbować ponownie przy kolejnym otwarciu
+        throw error;
+      });
+  }
+  return searchIndexPromise;
+}
+
+/* Trafienie na początku słowa liczy się mocniej niż w środku:
+   „mona" ma wygrać z przypadkowym fragmentem w opisie. */
+function matchScore(haystack, token, strong, weak) {
+  const at = haystack.indexOf(token);
+  if (at < 0) return 0;
+  return (at === 0 || haystack[at - 1] === ' ') ? strong : weak;
+}
+
+function scoreSearchEntry(entry, tokens) {
+  let total = 0;
+  for (const token of tokens) {
+    const best = Math.max(
+      matchScore(entry._t, token, 100, 45),
+      matchScore(entry._s, token, 60, 30),
+      matchScore(entry._k, token, 40, 20),
+      matchScore(entry._u, token, 25, 10)
+    );
+    if (!best) return 0; // każdy człon zapytania musi trafić
+    total += best;
+  }
+  return total + (SEARCH_KIND_BOOST[entry.c] || 0);
+}
+
+function searchEntries(entries, query) {
+  const folded = foldText(query);
+  if (!folded) return [];
+  const tokens = folded.split(' ');
+  const scored = [];
+
+  for (const entry of entries) {
+    let score = scoreSearchEntry(entry, tokens);
+    if (!score) continue;
+    if (entry._t === folded) score += 60;
+    else if (entry._t.startsWith(folded)) score += 20;
+    scored.push({ entry, score });
+  }
+
+  // Przy równych punktach wygrywa wcześniejszy wpis indeksu (Pocałunek przed Kościołem w Cassone).
+  scored.sort((a, b) => b.score - a.score || a.entry._o - b.entry._o);
+  return scored.slice(0, SEARCH_MAX_RESULTS).map(item => item.entry);
+}
+
+function searchResultMarkup(entry) {
+  const meta = entry.c === 'copy' && entry.m ? `${entry.s} · ${entry.m}` : entry.s;
+  const media = entry.i
+    ? `<img class="search-result__img" src="${escapeHtml(resolveSiteUrl(entry.i))}" alt="" width="56" height="56" loading="lazy" decoding="async">`
+    : `<svg class="search-result__glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg>`;
+
+  return `
+    <li class="search-result">
+      <a class="search-result__link" href="${escapeHtml(resolveSiteUrl(entry.u))}" data-search-result>
+        <span class="search-result__media">${media}</span>
+        <span class="search-result__text">
+          <span class="search-result__title">${escapeHtml(entry.t)}</span>
+          <span class="search-result__meta">${escapeHtml(meta || '')}</span>
+        </span>
+      </a>
+    </li>`;
+}
+
+function initSearch() {
+  const nav = document.querySelector('.header__inner nav');
+  if (!nav || nav.querySelector('[data-search-open]')) return;
+
+  /* Guzik wstrzykujemy z JS-a (tak jak „Ustawienia prywatności" w stopce):
+     bez JS-a wyszukiwarka i tak by nie działała, więc nie zostawiamy martwej ikony. */
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'nav__search';
+  trigger.setAttribute('data-search-open', '');
+  trigger.setAttribute('aria-haspopup', 'dialog');
+  trigger.setAttribute('aria-label', STR.searchOpen);
+  trigger.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>';
+  nav.appendChild(trigger);
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'search-dialog';
+  dialog.setAttribute('aria-label', STR.searchTitle);
+  dialog.innerHTML = `
+    <div class="search-dialog__panel">
+      <div class="search-dialog__bar">
+        <svg class="search-dialog__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>
+        <input type="search" class="search-dialog__input" data-search-input
+               placeholder="${escapeHtml(STR.searchPlaceholder)}" aria-label="${escapeHtml(STR.searchTitle)}"
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+        <button type="button" class="search-dialog__close" data-search-close aria-label="${escapeHtml(STR.close)}">&times;</button>
+      </div>
+      <p class="search-dialog__note" data-search-note></p>
+      <ul class="search-results" data-search-results></ul>
+      <p class="sr-only" role="status" aria-live="polite" data-search-status></p>
+    </div>`;
+  document.body.appendChild(dialog);
+
+  const input = dialog.querySelector('[data-search-input]');
+  const note = dialog.querySelector('[data-search-note]');
+  const list = dialog.querySelector('[data-search-results]');
+  const status = dialog.querySelector('[data-search-status]');
+
+  let entries = null;
+  let renderTimer = 0;
+  let returnFocus = null;
+
+  const resultLinks = () => [...list.querySelectorAll('[data-search-result]')];
+
+  function render() {
+    if (!entries) return;
+    const query = input.value.trim();
+    const results = query
+      ? searchEntries(entries, query)
+      : entries.filter(entry => entry.c === 'copy').slice(0, SEARCH_SUGGESTIONS);
+
+    list.innerHTML = results.map(searchResultMarkup).join('');
+
+    if (!query) {
+      note.textContent = STR.searchHint;
+      status.textContent = '';
+    } else if (results.length) {
+      note.textContent = '';
+      status.textContent = `${STR.searchCount} ${results.length}`;
+    } else {
+      note.textContent = `${STR.searchEmpty} „${query}". ${STR.searchEmptyHint}`;
+      status.textContent = `${STR.searchCount} 0`;
+    }
+    dialog.classList.toggle('has-query', Boolean(query));
+  }
+
+  function openSearch(source) {
+    returnFocus = source || document.activeElement;
+    document.body.classList.add('search-open');
+    if (!dialog.open) dialog.showModal();
+
+    if (entries) {
+      render();
+    } else {
+      note.textContent = STR.searchHint;
+      loadSearchIndex().then(loaded => {
+        entries = loaded;
+        render();
+      }).catch(() => {
+        note.textContent = STR.searchError;
+        list.innerHTML = '';
+      });
+    }
+    setTimeout(() => input.focus(), 0);
+  }
+
+  function moveFocus(delta) {
+    const links = resultLinks();
+    if (!links.length) return;
+    const current = links.indexOf(document.activeElement);
+    if (current < 0) {
+      links[delta > 0 ? 0 : links.length - 1].focus();
+      return;
+    }
+    // Pętla domknięta w obie strony: pole → wyniki → pole.
+    const next = current + delta;
+    if (next < 0 || next >= links.length) input.focus();
+    else links[next].focus();
+  }
+
+  trigger.addEventListener('click', event => openSearch(event.currentTarget));
+  // Rozgrzewka: zanim okno się otworzy, indeks zwykle jest już pobrany.
+  ['pointerenter', 'focus'].forEach(type => {
+    trigger.addEventListener(type, () => { loadSearchIndex().catch(() => {}); }, { once: true });
+  });
+
+  dialog.querySelector('[data-search-close]').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener('close', () => {
+    document.body.classList.remove('search-open');
+    // Fokus oddajemy po ticku — inaczej własne przywracanie fokusu przez <dialog>
+    // potrafi go zaraz potem zabrać na <body>.
+    const back = returnFocus;
+    returnFocus = null;
+    if (back instanceof HTMLElement) {
+      setTimeout(() => { if (document.contains(back)) back.focus(); }, 0);
+    }
+  });
+
+  input.addEventListener('input', () => {
+    window.clearTimeout(renderTimer);
+    renderTimer = window.setTimeout(render, 120);
+  });
+
+  dialog.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      moveFocus(1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      moveFocus(-1);
+    } else if (event.key === 'Enter' && event.target === input) {
+      const first = resultLinks()[0];
+      if (first) {
+        event.preventDefault();
+        first.click();
+      }
+    }
+  });
+
+  /* Mierzymy wyłącznie WYBRANY wynik (zamknięty słownik adresów), nigdy wpisanego
+     tekstu — zgodnie z zasadą, że zdarzenia nie niosą treści wpisanych przez
+     odwiedzającego. */
+  list.addEventListener('click', event => {
+    const link = event.target instanceof Element ? event.target.closest('[data-search-result]') : null;
+    if (!link) return;
+    let route = 'unknown';
+    try { route = analyticsRouteId(new URL(link.href).pathname); } catch (error) {}
+    sendAnalyticsEvent('search_select', { search_target: route });
+  });
+
+  // Ctrl/⌘+K oraz „/" otwierają wyszukiwarkę, o ile nie piszemy właśnie w polu.
+  document.addEventListener('keydown', event => {
+    if (dialog.open) return;
+    const typing = event.target instanceof Element &&
+      event.target.closest('input, textarea, select, [contenteditable="true"]');
+    const shortcut = (event.key === 'k' || event.key === 'K') && (event.ctrlKey || event.metaKey);
+    if (shortcut || (event.key === '/' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey)) {
+      event.preventDefault();
+      openSearch(document.activeElement);
+    }
+  });
+}
+
+/* ----- Wejście z wyszukiwarki na konkretną pracę (?work=…) -----
+   Strony konserwacji nie mają osobnych podstron dla poszczególnych prac, więc
+   wynik prowadzi do galerii i podświetla właściwy kafelek. */
+function initDeepLinkedWork() {
+  let wanted = '';
+  try {
+    wanted = new URLSearchParams(window.location.search).get('work') || '';
+  } catch (error) {
+    return;
+  }
+  if (!wanted) return;
+
+  const target = [...document.querySelectorAll('.gallery-item[data-title]')]
+    .find(item => slugify(item.dataset.title || '') === wanted);
+  if (!target) return;
+
+  target.classList.add('is-search-target');
+  window.setTimeout(() => target.classList.remove('is-search-target'), 6000);
+
+  /* Galeria konserwacji ma kilkadziesiąt leniwie ładowanych miniatur bez wymiarów,
+     więc wysokość strony rośnie jeszcze długo po DOMContentLoaded i pozycja pracy
+     ucieka. Stąd skok natychmiastowy (płynne przewijanie przez tysiące pikseli i tak
+     zostałoby przerwane) plus kilka korekt — przerywanych, gdy tylko odwiedzający
+     sam sięgnie po kółko, klawiaturę czy ekran dotykowy. */
+  let userMoved = false;
+  const markUserMoved = () => { userMoved = true; };
+  ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(type => {
+    window.addEventListener(type, markUserMoved, { once: true, passive: true });
+  });
+
+  /* `behavior: 'auto'` NIE znaczy „natychmiast" — bierze wartość z CSS, a strona ma
+     `html { scroll-behavior: smooth }`. Płynność wyłączamy więc na czas skoku, tak samo
+     jak robi to skrypt przywracania pozycji przewijania na końcu <body>. */
+  const settle = () => {
+    if (userMoved) return;
+    const html = document.documentElement;
+    const previous = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    target.scrollIntoView({ block: 'center' });
+    html.style.scrollBehavior = previous;
+  };
+
+  settle();
+  target.focus({ preventScroll: true });
+  [150, 500, 1200].forEach(delay => window.setTimeout(settle, delay));
+  if (document.readyState !== 'complete') window.addEventListener('load', settle, { once: true });
 }

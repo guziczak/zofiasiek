@@ -23,6 +23,13 @@ ErrorDocument 404 /404.html
     Header set Cache-Control "public, max-age=2592000"
   </FilesMatch>
 
+  # Indeks wyszukiwarki pobierany jest bez ?v=, więc nie może być "immutable" jak
+  # CSS/JS — godzina wystarczy, żeby nowa realizacja pojawiła się w wynikach szybko.
+  <FilesMatch "\.(?:json)$">
+    Header set Cache-Control "public, max-age=3600"
+    Header merge Vary "Accept-Encoding"
+  </FilesMatch>
+
   <FilesMatch "^(?:logo-526x200-v1|slide-[0-9]{2}-[0-9]+w-v1|.+-800x1000-v1)\.(?:png|avif|webp)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>

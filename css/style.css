@@ -2800,3 +2800,280 @@ body {
     transition: none;
   }
 }
+
+/* ============================================================
+   Wyszukiwarka (lupka w nagłówku + okno wyników)
+   ============================================================ */
+
+/* Nagłówkowy <nav> staje się flexem, żeby lupka miała swoje miejsce obok menu.
+   Selektor jest zawężony do headera — breadcrumby też są w <nav>. */
+.header__inner > nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.nav__search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px; /* cel dotykowy jak hamburger (WCAG 2.5.8) */
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--color-text);
+  transition: background var(--transition), color var(--transition);
+}
+
+.nav__search svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.header--solid .nav__search {
+  color: var(--color-text);
+}
+
+.header--solid .nav__search:hover {
+  background: var(--color-bg-warm);
+  color: var(--color-accent-dark);
+}
+
+.header--transparent .nav__search {
+  color: var(--color-white);
+}
+
+.header--transparent .nav__search:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+body.search-open {
+  overflow: hidden;
+}
+
+/* Okno wyników — natywny <dialog>, więc focus-trap, Esc i inert tła daje przeglądarka.
+   Domyślne `margin: auto` centruje w pionie; tutaj przyklejamy panel bliżej góry. */
+.search-dialog {
+  width: min(640px, calc(100% - 2rem));
+  max-height: calc(100dvh - min(12vh, 5rem) - 2rem);
+  margin: min(12vh, 5rem) auto auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  color: var(--color-text);
+  box-shadow: 0 28px 80px rgba(25, 21, 17, 0.4);
+  overflow: hidden;
+}
+
+/* <dialog> jest display:none do czasu otwarcia — układ włączamy dopiero na [open]. */
+.search-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-dialog::backdrop {
+  background: rgba(20, 18, 15, 0.6);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.search-dialog__panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.search-dialog__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 0 0 auto;
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-warm);
+}
+
+.search-dialog__icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-left: var(--space-xs);
+  fill: none;
+  stroke: var(--color-accent-dark);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.search-dialog__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.7rem 0.4rem;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-lg);
+  color: var(--color-heading);
+}
+
+.search-dialog__input::placeholder {
+  color: var(--color-muted);
+}
+
+.search-dialog__close {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  color: var(--color-heading);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.search-dialog__close:hover {
+  background: var(--color-border);
+}
+
+.search-dialog__note {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.search-dialog__note:empty {
+  display: none;
+}
+
+.search-results {
+  min-height: 0;
+  margin: 0;
+  padding: var(--space-xs);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.search-results:empty {
+  display: none;
+}
+
+.search-result__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.55rem;
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+}
+
+.search-result__link:hover,
+.search-result__link:focus-visible {
+  background: var(--color-bg-warm);
+  color: var(--color-heading);
+}
+
+.search-result__media {
+  position: relative; /* miniatura pozycjonowana absolutnie — % wysokości musi mieć od czego liczyć */
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--color-bg-warm);
+}
+
+.search-result__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-result__glyph {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--color-accent-dark);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.search-result__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.search-result__title {
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+  color: var(--color-heading);
+  overflow-wrap: anywhere;
+}
+
+.search-result__meta {
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+/* Wejście z wyników na pracę konserwatorską (?work=…) — podświetlenie kafelka. */
+.gallery-item.is-search-target {
+  outline: 3px solid var(--color-accent-dark);
+  outline-offset: 3px;
+  scroll-margin-top: calc(var(--header-height) + var(--space-md));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .search-dialog[open] {
+    animation: search-dialog-in 0.18s ease-out;
+  }
+}
+
+@keyframes search-dialog-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 960px) {
+  /* Lupka na lewo od hamburgera — kolejność w DOM jest odwrotna. */
+  .nav__search {
+    order: 1;
+  }
+
+  .nav__toggle {
+    order: 2;
+  }
+
+  .header__inner > nav {
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 600px) {
+  .search-dialog {
+    width: calc(100% - 1rem);
+    max-height: calc(100dvh - 1rem);
+    margin: 0.5rem auto auto;
+  }
+
+  .search-result__media {
+    width: 48px;
+    height: 48px;
+  }
+
+  .search-result__title {
+    font-size: var(--fs-base);
+  }
+}

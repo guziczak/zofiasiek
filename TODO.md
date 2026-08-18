@@ -60,6 +60,26 @@ Wdrożone 2026-07-08 (niezcommitowane). Kontrasty policzone skryptem — 16/16 p
 - [ ] Smoke test NVDA (Windows): strona główna + kontakt
 - [ ] Emulacja `prefers-reduced-motion` w DevTools: zero animacji, slider stoi
 
+## Wyszukiwarka (wdrożona 2026-08-18)
+
+Lupka w nagłówku otwiera okno wyników — kopie obrazów, prace konserwatorskie i strony działowe, osobno dla PL/EN/DE.
+
+- [x] Indeks `js/search-index.json` (47 wpisów na język) generowany przez `node tools/build-search-index.mjs`; generator sam wyciąga konserwacje ze stron w trzech językach, łączy je po katalogu miniatury i **przerywa pracę**, gdy strona albo miniatura nie istnieje
+- [x] Pobierany dopiero przy pierwszym otwarciu okna (plus rozgrzewka przy najechaniu na lupkę) — wejście na stronę nie płaci za wyszukiwarkę ani bajta
+- [x] Składanie znaków: `pocalunek` = `Pocałunek`, `maedchen` = `Mädchen`; tytuły z pozostałych języków są aliasami, więc „the kiss” działa też po polsku
+- [x] Ranking z przewagą typu treści — „Klimt” daje *Pocałunek*, a nie stronę kontaktową; remisy rozstrzyga kuratorska kolejność indeksu
+- [x] Guzik wstrzykiwany z JS-a do `<nav>` (jak „Ustawienia prywatności” w stopce) — zero zmian w 22 plikach HTML, brak martwej ikony bez JS-a
+- [x] Okno na natywnym `<dialog>` + `showModal()`; strzałki krążą polem i wynikami, Enter wchodzi w pierwszy wynik, `Ctrl/⌘+K` oraz `/` otwierają
+- [x] Prace konserwatorskie nie mają własnych podstron, więc wynik prowadzi do `?work=<slug>` — kafelek jest przewijany na środek, dostaje fokus i obramowanie na 6 s
+- [x] Pomiar: wyłącznie `search_select` z identyfikatorem trafionej podstrony (zamknięty słownik). Wpisany tekst **nie** opuszcza przeglądarki — zgodnie z zasadą z sekcji pomiaru kontaktu
+- [x] Reguła cache dla `.json` w `.htaccess` (godzina — indeks nie ma `?v=`, więc nie może być `immutable` jak CSS/JS)
+- [x] Sprawdzone: 141 adresów i 41 miniatur z indeksu odpowiada 200; 78 slugów `?work=` trafia w unikalny kafelek w PL/EN/DE
+- [ ] Ręczny przejazd klawiaturą — w szczególności powrót fokusu na lupkę po zamknięciu okna (automat połyka zdarzenia `close` i `focus`, więc tego jednego nie dało się potwierdzić maszynowo)
+- [ ] Ponowny Lighthouse Accessibility na stronie z otwartym oknem wyszukiwarki
+- [ ] Po deployu potwierdzić zdarzenie `search_select` w GA4 DebugView (po wyrażeniu zgody)
+- [ ] Decyzja: `rama-demo/` ma nagłówek, ale nie ładuje `main.js`, więc jako jedyna podstrona nie ma lupki (stan sprzed tej zmiany)
+- [ ] Po dodaniu nowej realizacji: uruchomić generator i podbić `?v=` przy `js/main.js`
+
 ## P1 — Responsywność i interfejs (audyt 2026-08-11)
 
 - [ ] **Hero na niskich ekranach**: zarezerwować pionowe miejsce na fixed header oraz kontrolki slidera. Zweryfikować co najmniej 320×568, 360×640 i landscape 844×390 — obecnie nagłówek wchodzi pod header, a kropki nakładają się na CTA (`css/style.css`, okolice linii 253, 472 i 2049)
