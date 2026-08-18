@@ -74,11 +74,32 @@ Lupka w nagłówku otwiera okno wyników — kopie obrazów, prace konserwatorsk
 - [x] Pomiar: wyłącznie `search_select` z identyfikatorem trafionej podstrony (zamknięty słownik). Wpisany tekst **nie** opuszcza przeglądarki — zgodnie z zasadą z sekcji pomiaru kontaktu
 - [x] Reguła cache dla `.json` w `.htaccess` (godzina — indeks nie ma `?v=`, więc nie może być `immutable` jak CSS/JS)
 - [x] Sprawdzone: 141 adresów i 41 miniatur z indeksu odpowiada 200; 78 slugów `?work=` trafia w unikalny kafelek w PL/EN/DE
+- [x] **Naprawione po zgłoszeniu**: adresy liczone przez `resolveSiteUrl()` szły od korzenia domeny, więc podgląd z podkatalogu (GitHub Pages) dostawał 404 na indeksie i złe adresy wyników. Teraz wszystko liczy się od ścieżki `main.js`, co działa na obu wdrożeniach — sprawdzone na serwerze podającym stronę spod `/zofiasiek/`. Uwaga: `resolveSiteUrl()` ma tę samą wadę dla linku do polityki prywatności (zaległość sprzed tej zmiany)
+- [x] **Naprawione**: `loading="lazy"` na miniaturach wyników — obrazek wstawiany do świeżo otwartego `<dialog>` trafia do warstwy wierzchniej i przeglądarka potrafi nigdy nie uznać go za widoczny, przez co kafelek zostawał pusty
+- [ ] Miniatury konserwacji ważą ok. 130 KB przy 743 px, a wyświetlamy je w 56 px — dziesięć wyników to ok. 1 MB. Powiązane z otwartym punktem o małych miniaturach w sekcji Wydajność
 - [ ] Ręczny przejazd klawiaturą — w szczególności powrót fokusu na lupkę po zamknięciu okna (automat połyka zdarzenia `close` i `focus`, więc tego jednego nie dało się potwierdzić maszynowo)
 - [ ] Ponowny Lighthouse Accessibility na stronie z otwartym oknem wyszukiwarki
 - [ ] Po deployu potwierdzić zdarzenie `search_select` w GA4 DebugView (po wyrażeniu zgody)
 - [ ] Decyzja: `rama-demo/` ma nagłówek, ale nie ładuje `main.js`, więc jako jedyna podstrona nie ma lupki (stan sprzed tej zmiany)
 - [ ] Po dodaniu nowej realizacji: uruchomić generator i podbić `?v=` przy `js/main.js`
+
+## Motyw ciemny (wdrożony 2026-08-18)
+
+Domyślnie idzie za ustawieniem systemu; przełącznik w nagłówku nadpisuje i zapamiętuje wybór.
+
+- [x] Paleta jako tokeny — spis występuje dwa razy (pod `prefers-color-scheme` i pod `[data-theme="dark"]`), ale **wszystkie reguły zależą tylko od zmiennych**, więc nowy kolor dopisuje się w tych dwóch miejscach i nigdzie indziej
+- [x] Bez migotania: mały skrypt w `<head>` 68 stron ustawia atrybut przed pierwszym malowaniem; przy zgodzie z ustawieniem systemu działa sam CSS, bez JS-a
+- [x] **Reprodukcje na jasnym passe-partout** — `box-shadow` z rozrzutem wokół kafelka, nie pod podpisem (jasna płaszczyzna pod jasnym tekstem dałaby tekst niewidoczny). W jasnym motywie `transparent` i rozrzut 0: potwierdzone, że szerokość kafelka i wysokość dokumentu są identyczne w obu motywach
+- [x] Nowe tokeny rozdzielające znaczenia: `--color-surface` (powierzchnie kart i okien) vs `--color-white` (biel jako taka — tekst i elementy nad hero, celowo biała w obu motywach); `--color-on-accent` (tekst na złocie, zamiast trzynastu nadpisań); `--color-field-border` (obramowanie pól, osobno od dekoracyjnego)
+- [x] Tekstura `tlo.jpg` zachowana w obu motywach — zmienia się tylko przesłona nad nią
+- [x] Logo wybielane także na solidnym nagłówku w ciemnym motywie
+- [x] Kontrasty policzone skryptem: **28/28 par przechodzi** (tekst ≥4,5:1, elementy nieteksowe ≥3:1)
+- [x] Potwierdzone, że jasny motyw jest nietknięty: 13 oryginalnych tokenów, tło strony, obramowanie pola i filtr logo bez zmian
+- [x] Opis pamięci niezbędnej w oknie zgód uzupełniony o motyw (PL/EN/DE) — to trzeci zapamiętywany klucz
+- [ ] **Zaległość sprzed tej zmiany**: obramowanie pól formularza w JASNYM motywie daje 1,16:1 na bieli, czyli nie spełnia progu 3:1 z WCAG 1.4.11 (axe tego nie wykrywa, stąd 100/100 mimo wszystko). Poprawka to podmiana jednej wartości `--color-field-border` na ok. `#8a8074` — celowo nie zrobiona, żeby ten pakiet nie przemalował formularza bez decyzji
+- [ ] Lighthouse Accessibility w ciemnym motywie na 8 stronach (jasny miał 100/100)
+- [ ] Przejrzeć ciemny motyw na stronach EN/DE oraz na `404.html` (ma własny `<base>`)
+- [ ] Sprawdzić ciemny motyw pod `prefers-contrast: more` i na ekranach OLED
 
 ## P1 — Responsywność i interfejs (audyt 2026-08-11)
 
