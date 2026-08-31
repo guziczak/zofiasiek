@@ -1342,6 +1342,76 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-white);
 }
 
+.cookie-banner__label--compact {
+  display: none;
+}
+
+/* Gdy stopka wchodzi w ekran, pełne objaśnienie zwija się do jawnego paska
+   decyzji. Footer pozostaje klikalny, a brak zgody nadal oznacza brak usług. */
+.footer-in-view.privacy-banner-visible .cookie-banner {
+  width: min(640px, calc(100% - 1rem));
+  padding: var(--space-xs);
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__inner {
+  display: block;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__text {
+  display: none;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  gap: var(--space-xs);
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__actions .btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  white-space: normal;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__label--full {
+  display: none;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner__label--compact {
+  display: inline;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings {
+  grid-column: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: stretch;
+  min-height: 44px;
+  padding: 0.625rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.footer-in-view.privacy-banner-visible .footer__bottom {
+  visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  .footer-in-view.privacy-banner-visible .mobile-cta {
+    bottom: 250px;
+  }
+}
+
 body.privacy-dialog-open {
   overflow: hidden;
 }
@@ -2942,7 +3012,7 @@ body {
 
 @media (max-width: 600px) {
   .cta {
-    padding: 2.75rem 0;
+    padding: 2.75rem 0 1.75rem;
   }
 
   .cta__title {
@@ -2952,6 +3022,10 @@ body {
   .cta__actions {
     grid-template-columns: 1fr;
     width: min(100%, 342px);
+  }
+
+  .cta__text {
+    margin-bottom: var(--space-md);
   }
 
   .cta__actions .btn {
@@ -3002,9 +3076,9 @@ body {
   .cta__actions .btn {
     min-height: 58px;
     padding: 0.625rem 0.5rem;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1.35;
-    letter-spacing: 0.75px;
+    letter-spacing: 1px;
   }
 }
 
