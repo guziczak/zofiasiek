@@ -1854,8 +1854,6 @@ body.privacy-dialog-open {
   }
 
   .cookie-banner__inner {
-    flex-direction: column;
-    align-items: stretch;
     gap: 0.75rem;
   }
 
@@ -2234,6 +2232,10 @@ body.privacy-dialog-open {
     display: flex;
   }
 
+  .privacy-banner-visible .mobile-cta {
+    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 40px);
+  }
+
   .scroll-top {
     bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 64px);
   }
@@ -2243,6 +2245,14 @@ body.privacy-dialog-open {
     position: static;
     aspect-ratio: 1 / 1;
     max-height: none;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 650px) {
+  .privacy-banner-visible .mobile-cta {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
