@@ -1418,12 +1418,6 @@ p + p { margin-top: var(--space-sm); }
   visibility: hidden;
 }
 
-@media (max-width: 768px) {
-  .footer-in-view.privacy-banner-visible .mobile-cta {
-    bottom: 250px;
-  }
-}
-
 body.privacy-dialog-open {
   overflow: hidden;
 }
@@ -1587,6 +1581,38 @@ body.privacy-dialog-open {
   width: 24px;
   height: 24px;
   fill: currentColor;
+}
+
+.mobile-cta--footer-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.footer .social-links .mobile-cta--docked {
+  position: static;
+  display: flex;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+  box-shadow: none;
+  transform: none;
+}
+
+.footer .social-links .mobile-cta--docked:hover {
+  border-color: var(--color-accent-dark);
+  background-color: var(--color-accent-dark);
+  color: var(--color-on-accent);
+  transform: none;
+}
+
+.footer .social-links .mobile-cta--docked svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ----- 19. Scroll to Top ----- */
