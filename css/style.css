@@ -1133,7 +1133,7 @@ p + p { margin-top: var(--space-sm); }
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
-  width: min(100%, 540px);
+  width: min(100%, 680px);
 }
 
 .cta .btn {
@@ -1147,6 +1147,8 @@ p + p { margin-top: var(--space-sm); }
 .cta__actions .btn {
   width: 100%;
   min-width: 0;
+  padding-inline: 1.25rem;
+  letter-spacing: 1.5px;
 }
 
 .cta .btn--outline {
@@ -2017,7 +2019,72 @@ body.privacy-dialog-open {
 
   /* Otwarte menu mobilne chowa baner cookies, by nie zasłaniał stopki panelu */
   body.nav-open .cookie-banner {
-    transform: translateY(100%);
+    transform: translate(-50%, calc(100% + 2rem));
+  }
+
+  /* Na tym samym progu co szuflada nawigacji stopka przechodzi w dostępny
+     akordeon. Bez JS listy pozostają rozwinięte — treść nigdy nie znika. */
+  .footer-accordion-enabled .footer__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-bottom: var(--space-sm);
+  }
+
+  .footer-accordion-enabled .footer__grid > * {
+    grid-column: 1 / -1;
+  }
+
+  .footer-accordion-enabled .footer__grid > :first-child {
+    padding-bottom: 0.5rem;
+  }
+
+  .footer__group {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .footer__group:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .footer__group .footer__heading {
+    margin: 0;
+  }
+
+  .footer__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 0;
+    color: var(--color-white);
+    font: inherit;
+    text-align: left;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .footer__toggle::after {
+    content: "+";
+    flex: 0 0 auto;
+    margin-left: var(--space-sm);
+    color: var(--color-accent-light);
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .footer__toggle[aria-expanded="true"]::after {
+    content: "−";
+  }
+
+  .footer__group .footer__links {
+    display: block;
+    padding: 0 0 var(--space-sm);
+  }
+
+  .footer__group .footer__links[hidden] {
+    display: none !important;
   }
 }
 
@@ -2061,13 +2128,28 @@ body.privacy-dialog-open {
   }
 
   .footer {
-    padding: 2rem 0 1rem;
+    padding: 1.5rem 0 1rem;
   }
 
   .footer__bottom {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
     gap: var(--space-xs);
     text-align: center;
+  }
+
+  .footer__bottom > span:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .footer__brand {
+    margin-bottom: var(--space-xs);
+  }
+
+  .footer__description {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
   }
 
   .footer__privacy-button {
@@ -2849,9 +2931,22 @@ body {
 }
 
 @media (max-width: 600px) {
+  .cta {
+    padding: 2.75rem 0;
+  }
+
+  .cta__title {
+    font-size: 2.125rem;
+  }
+
   .cta__actions {
     grid-template-columns: 1fr;
     width: min(100%, 342px);
+  }
+
+  .cta__actions .btn {
+    padding-inline: var(--space-sm);
+    letter-spacing: 1px;
   }
 
   .cta > .container > .btn {
@@ -2886,6 +2981,21 @@ body {
     background-position: 0 1px, 8px calc(100% - 1px);
   }
   .lightbox__thumb { flex-basis: 56px; width: 56px; height: 44px; }
+}
+
+@media (min-width: 360px) and (max-width: 600px) {
+  .cta__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .cta__actions .btn {
+    min-height: 58px;
+    padding: 0.625rem 0.5rem;
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    letter-spacing: 0.75px;
+  }
 }
 
 /* Niskie ekrany oraz małe telefony: hero rośnie razem z treścią i zaczyna się

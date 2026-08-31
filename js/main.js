@@ -248,6 +248,7 @@ let privacyBannerResizeObserver = null;
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
+  initFooterAccordion();
   initTheme();
   initSearch();
   initDeepLinkedWork();
@@ -437,6 +438,72 @@ function initMobileNav() {
       first.focus();
     }
   });
+}
+
+/* ----- Responsive Footer Accordion ----- */
+function initFooterAccordion() {
+  const footer = document.querySelector('.footer');
+  if (!footer) return;
+
+  const records = [...footer.querySelectorAll('.footer__grid > div')]
+    .slice(1)
+    .map((group, index) => {
+      const heading = group.querySelector('.footer__heading');
+      const list = group.querySelector('.footer__links');
+      if (!heading || !list) return null;
+      if (!list.id) list.id = `footer-panel-${index + 1}`;
+      return { group, heading, list, label: heading.textContent.trim(), button: null };
+    })
+    .filter(Boolean);
+  if (!records.length) return;
+
+  const mobileLayout = window.matchMedia('(max-width: 960px)');
+
+  const enable = () => {
+    document.documentElement.classList.add('footer-accordion-enabled');
+    records.forEach((record) => {
+      if (record.button) return;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'footer__toggle';
+      button.textContent = record.label;
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-controls', record.list.id);
+      button.addEventListener('click', () => {
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', String(!expanded));
+        record.list.hidden = expanded;
+      });
+
+      record.group.classList.add('footer__group');
+      record.heading.replaceChildren(button);
+      record.list.hidden = true;
+      record.button = button;
+    });
+  };
+
+  const disable = () => {
+    document.documentElement.classList.remove('footer-accordion-enabled');
+    records.forEach((record) => {
+      record.list.hidden = false;
+      record.heading.textContent = record.label;
+      record.group.classList.remove('footer__group');
+      record.button = null;
+    });
+  };
+
+  const update = () => {
+    if (mobileLayout.matches) enable();
+    else disable();
+  };
+
+  update();
+  if (typeof mobileLayout.addEventListener === 'function') {
+    mobileLayout.addEventListener('change', update);
+  } else {
+    mobileLayout.addListener(update);
+  }
 }
 
 /* ----- Cookie Consent ----- */
