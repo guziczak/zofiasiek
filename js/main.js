@@ -225,6 +225,7 @@ let privacyBanner = null;
 let privacyDialog = null;
 let privacyDialogReturnFocus = null;
 let privacyBannerWasVisible = false;
+let privacyBannerResizeObserver = null;
 
 /* ----- Zapis pozycji przewijania -----
    Samo PRZYWRACANIE robi mały inline-skrypt na końcu <body> — uruchamia się przed
@@ -444,6 +445,12 @@ function initCookieConsent() {
   if (!banner) return;
 
   privacyBanner = banner;
+  if ('ResizeObserver' in window) {
+    privacyBannerResizeObserver = new ResizeObserver(() => updatePrivacyBannerOffset());
+    privacyBannerResizeObserver.observe(banner);
+  }
+  window.addEventListener('resize', updatePrivacyBannerOffset, { passive: true });
+  window.visualViewport?.addEventListener('resize', updatePrivacyBannerOffset, { passive: true });
   removeLegacyConsent();
   renderPrivacyBanner();
   createPrivacyDialog();
@@ -496,6 +503,27 @@ function setPrivacyBannerVisible(visible) {
   privacyBanner.classList.toggle('visible', visible);
   privacyBanner.setAttribute('aria-hidden', String(!visible));
   privacyBanner.inert = !visible;
+  document.documentElement.classList.toggle('privacy-banner-visible', visible);
+
+  if (!visible) {
+    document.documentElement.style.setProperty('--privacy-banner-offset', '0px');
+    return;
+  }
+
+  requestAnimationFrame(updatePrivacyBannerOffset);
+}
+
+function updatePrivacyBannerOffset() {
+  const root = document.documentElement;
+  if (!privacyBanner?.classList.contains('visible')) {
+    root.style.setProperty('--privacy-banner-offset', '0px');
+    return;
+  }
+
+  const bannerStyle = getComputedStyle(privacyBanner);
+  const bottomInset = Math.max(0, Number.parseFloat(bannerStyle.bottom) || 0);
+  const bannerHeight = Math.ceil(privacyBanner.getBoundingClientRect().height);
+  root.style.setProperty('--privacy-banner-offset', `${bannerHeight + bottomInset}px`);
 }
 
 function createPrivacyDialog() {
@@ -846,11 +874,13 @@ function initRevealAnimations() {
   const elements = document.querySelectorAll('.reveal');
   if (!elements.length) return;
 
-  // Brak wsparcia IntersectionObserver → pokaż wszystko od razu (bezpieczny fallback)
+  // Domyślnie elementy są widoczne. Animację uzbrajamy dopiero, gdy wiemy, że JS
+  // i IntersectionObserver działają — awaria skryptu nie może ukryć CTA ani treści.
   if (!('IntersectionObserver' in window)) {
-    elements.forEach(el => el.classList.add('visible'));
     return;
   }
+
+  document.documentElement.classList.add('reveal-enabled');
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
