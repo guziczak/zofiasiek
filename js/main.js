@@ -32,7 +32,9 @@ const STR = (function () {
       learnMore: 'Dowiedz się więcej',
       cookieIntro: 'Używamy niezbędnej pamięci przeglądarki. Możesz osobno zezwolić na Google Analytics 4 i interaktywną Mapę Google.',
       acceptAll: 'Akceptuj wszystkie',
+      acceptCompact: 'Akceptuję',
       rejectOptional: 'Odrzuć opcjonalne',
+      rejectCompact: 'Odrzucam',
       settings: 'Ustawienia',
       privacySettings: 'Ustawienia prywatności',
       privacyDescription: 'Wybierz, na które opcjonalne usługi zezwalasz. Ustawienia możesz później zmienić w stopce strony.',
@@ -95,7 +97,9 @@ const STR = (function () {
       learnMore: 'Learn more',
       cookieIntro: 'We use essential browser storage. You can separately allow Google Analytics 4 and the interactive Google Map.',
       acceptAll: 'Accept all',
+      acceptCompact: 'Accept',
       rejectOptional: 'Reject optional',
+      rejectCompact: 'Reject',
       settings: 'Settings',
       privacySettings: 'Privacy settings',
       privacyDescription: 'Choose which optional services you allow. You can change these settings later in the website footer.',
@@ -158,7 +162,9 @@ const STR = (function () {
       learnMore: 'Mehr erfahren',
       cookieIntro: 'Wir verwenden notwendige Browser-Speicherfunktionen. Sie können Google Analytics 4 und die interaktive Google-Karte getrennt zulassen.',
       acceptAll: 'Alle akzeptieren',
+      acceptCompact: 'Akzeptieren',
       rejectOptional: 'Optionale Dienste ablehnen',
+      rejectCompact: 'Ablehnen',
       settings: 'Einstellungen',
       privacySettings: 'Datenschutzeinstellungen',
       privacyDescription: 'Wählen Sie aus, welche optionalen Dienste Sie zulassen. Sie können diese Einstellungen später in der Fußzeile ändern.',
@@ -249,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initMobileNav();
   initFooterAccordion();
+  initFooterViewportState();
   initTheme();
   initSearch();
   initDeepLinkedWork();
@@ -506,6 +513,32 @@ function initFooterAccordion() {
   }
 }
 
+function initFooterViewportState() {
+  const footer = document.querySelector('.footer');
+  if (!footer) return;
+
+  const setFooterInView = (inView) => {
+    document.documentElement.classList.toggle('footer-in-view', inView);
+    requestAnimationFrame(updatePrivacyBannerOffset);
+  };
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      setFooterInView(entry.isIntersecting);
+    }, { threshold: 0 });
+    observer.observe(footer);
+    return;
+  }
+
+  const update = () => {
+    const rect = footer.getBoundingClientRect();
+    setFooterInView(rect.top < window.innerHeight && rect.bottom > 0);
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+}
+
 /* ----- Cookie Consent ----- */
 function initCookieConsent() {
   const banner = document.querySelector('.cookie-banner');
@@ -558,8 +591,8 @@ function renderPrivacyBanner() {
     <div class="cookie-banner__inner">
       <p class="cookie-banner__text">${STR.cookieIntro} <a href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>.</p>
       <div class="cookie-banner__actions">
-        <button type="button" class="btn btn--primary btn--small" data-consent-accept-all>${STR.acceptAll}</button>
-        <button type="button" class="btn btn--outline btn--small" data-consent-reject>${STR.rejectOptional}</button>
+        <button type="button" class="btn btn--primary btn--small" data-consent-accept-all><span class="cookie-banner__label cookie-banner__label--full">${STR.acceptAll}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.acceptCompact}</span></button>
+        <button type="button" class="btn btn--outline btn--small" data-consent-reject><span class="cookie-banner__label cookie-banner__label--full">${STR.rejectOptional}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.rejectCompact}</span></button>
         <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
       </div>
     </div>`;
