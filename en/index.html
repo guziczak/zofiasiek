@@ -250,11 +250,14 @@
   </section>
 
   <!-- CTA -->
-  <section class="section section--dark cta">
+  <section class="section section--dark cta" aria-labelledby="home-cta-title">
     <div class="container">
-      <h2 class="cta__title reveal">Have a question or would you like to commission a work?</h2>
-      <p class="cta__text reveal">Get in touch — I will be happy to discuss your project and prepare an individual quote.</p>
-      <a href="contact/#contact-form" class="btn btn--primary reveal" data-analytics-cta="home-contact">Get in touch</a>
+      <h2 id="home-cta-title" class="cta__title reveal">Let’s talk about your artwork</h2>
+      <p class="cta__text reveal">Choose a topic and the form will prompt you for the details I need to prepare an initial quote.</p>
+      <div class="cta__actions reveal">
+        <a href="contact/?topic=painting-copy#contact-form" class="btn btn--primary" data-analytics-cta="home-painting-copy" data-contact-topic="painting-copy">Enquire about a copy</a>
+        <a href="contact/?topic=conservation#contact-form" class="btn btn--outline" data-analytics-cta="home-conservation" data-contact-topic="conservation">Enquire about conservation</a>
+      </div>
     </div>
   </section>
 

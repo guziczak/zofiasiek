@@ -250,11 +250,14 @@
   </section>
 
   <!-- CTA -->
-  <section class="section section--dark cta">
+  <section class="section section--dark cta" aria-labelledby="home-cta-title">
     <div class="container">
-      <h2 class="cta__title reveal">Haben Sie eine Frage oder möchten Sie ein Werk in Auftrag geben?</h2>
-      <p class="cta__text reveal">Nehmen Sie Kontakt auf — ich bespreche gerne Ihr Projekt und erstelle ein individuelles Angebot.</p>
-      <a href="kontakt/#contact-form" class="btn btn--primary reveal" data-analytics-cta="home-contact">Kontakt aufnehmen</a>
+      <h2 id="home-cta-title" class="cta__title reveal">Sprechen wir über Ihr Kunstwerk</h2>
+      <p class="cta__text reveal">Wählen Sie ein Thema. Das Formular zeigt direkt, welche Angaben ich für eine erste Kosteneinschätzung benötige.</p>
+      <div class="cta__actions reveal">
+        <a href="kontakt/?topic=painting-copy#contact-form" class="btn btn--primary" data-analytics-cta="home-painting-copy" data-contact-topic="painting-copy">Gemäldekopie anfragen</a>
+        <a href="kontakt/?topic=conservation#contact-form" class="btn btn--outline" data-analytics-cta="home-conservation" data-contact-topic="conservation">Restaurierung anfragen</a>
+      </div>
     </div>
   </section>
 
