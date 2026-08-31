@@ -1349,6 +1349,7 @@ p + p { margin-top: var(--space-sm); }
 /* Gdy stopka wchodzi w ekran, pełne objaśnienie zwija się do jawnego paska
    decyzji. Footer pozostaje klikalny, a brak zgody nadal oznacza brak usług. */
 .footer-in-view.privacy-banner-visible .cookie-banner {
+  bottom: var(--space-xs);
   width: min(640px, calc(100% - 1rem));
   padding: var(--space-xs);
 }
@@ -1400,6 +1401,17 @@ p + p { margin-top: var(--space-sm); }
   font-size: 0.75rem;
   line-height: 1.2;
   text-decoration: none;
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings:hover {
+  border-color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings:focus-visible,
+.footer__toggle:focus-visible {
+  outline: 2px solid var(--color-accent-light);
+  outline-offset: -3px;
 }
 
 .footer-in-view.privacy-banner-visible .footer__bottom {
@@ -2144,6 +2156,10 @@ body.privacy-dialog-open {
 
   .footer__toggle[aria-expanded="true"]::after {
     content: "−";
+  }
+
+  .footer__toggle:hover {
+    color: var(--color-accent-light);
   }
 
   .footer__group .footer__links {

@@ -36,6 +36,7 @@ const STR = (function () {
       rejectOptional: 'Odrzuć opcjonalne',
       rejectCompact: 'Odrzucam',
       settings: 'Ustawienia',
+      privacyCompact: 'Twoja prywatność',
       privacySettings: 'Ustawienia prywatności',
       privacyDescription: 'Wybierz, na które opcjonalne usługi zezwalasz. Ustawienia możesz później zmienić w stopce strony.',
       essentialTitle: 'Niezbędne',
@@ -101,6 +102,7 @@ const STR = (function () {
       rejectOptional: 'Reject optional',
       rejectCompact: 'Reject',
       settings: 'Settings',
+      privacyCompact: 'Your privacy',
       privacySettings: 'Privacy settings',
       privacyDescription: 'Choose which optional services you allow. You can change these settings later in the website footer.',
       essentialTitle: 'Essential',
@@ -166,6 +168,7 @@ const STR = (function () {
       rejectOptional: 'Optionale Dienste ablehnen',
       rejectCompact: 'Ablehnen',
       settings: 'Einstellungen',
+      privacyCompact: 'Ihre Privatsphäre',
       privacySettings: 'Datenschutzeinstellungen',
       privacyDescription: 'Wählen Sie aus, welche optionalen Dienste Sie zulassen. Sie können diese Einstellungen später in der Fußzeile ändern.',
       essentialTitle: 'Notwendig',
@@ -517,26 +520,75 @@ function initFooterViewportState() {
   const footer = document.querySelector('.footer');
   if (!footer) return;
 
+  const phone = document.querySelector('.mobile-cta');
+  const footerSocials = footer.querySelector('.footer__grid > :first-child .social-links');
+  const phoneHome = phone ? document.createComment('mobile-cta-home') : null;
+  const mobileLayout = window.matchMedia('(max-width: 768px)');
+  if (phone && phoneHome) phone.before(phoneHome);
+
+  let footerInView = false;
+  let footerSocialsInView = false;
+
+  const restorePhone = () => {
+    if (!phone || !phoneHome?.parentNode) return;
+    phoneHome.after(phone);
+    phone.classList.remove('mobile-cta--docked', 'mobile-cta--footer-hidden');
+  };
+
+  const updatePhonePlacement = () => {
+    if (!phone || !footerSocials || !mobileLayout.matches || !footerInView) {
+      restorePhone();
+      return;
+    }
+
+    if (footerSocialsInView) {
+      footerSocials.append(phone);
+      phone.classList.add('mobile-cta--docked');
+      phone.classList.remove('mobile-cta--footer-hidden');
+    } else {
+      restorePhone();
+      phone.classList.add('mobile-cta--footer-hidden');
+    }
+  };
+
   const setFooterInView = (inView) => {
+    footerInView = inView;
     document.documentElement.classList.toggle('footer-in-view', inView);
+    updatePhonePlacement();
     requestAnimationFrame(updatePrivacyBannerOffset);
   };
 
   if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(([entry]) => {
-      setFooterInView(entry.isIntersecting);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === footer) footerInView = entry.isIntersecting;
+        if (entry.target === footerSocials) footerSocialsInView = entry.isIntersecting;
+      });
+      document.documentElement.classList.toggle('footer-in-view', footerInView);
+      updatePhonePlacement();
+      requestAnimationFrame(updatePrivacyBannerOffset);
     }, { threshold: 0 });
     observer.observe(footer);
-    return;
+    if (footerSocials) observer.observe(footerSocials);
+  } else {
+    const update = () => {
+      const footerRect = footer.getBoundingClientRect();
+      const socialsRect = footerSocials?.getBoundingClientRect();
+      footerSocialsInView = Boolean(
+        socialsRect && socialsRect.top < window.innerHeight && socialsRect.bottom > 0
+      );
+      setFooterInView(footerRect.top < window.innerHeight && footerRect.bottom > 0);
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
   }
 
-  const update = () => {
-    const rect = footer.getBoundingClientRect();
-    setFooterInView(rect.top < window.innerHeight && rect.bottom > 0);
-  };
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update, { passive: true });
-  update();
+  if (typeof mobileLayout.addEventListener === 'function') {
+    mobileLayout.addEventListener('change', updatePhonePlacement);
+  } else {
+    mobileLayout.addListener(updatePhonePlacement);
+  }
 }
 
 /* ----- Cookie Consent ----- */
@@ -593,7 +645,7 @@ function renderPrivacyBanner() {
       <div class="cookie-banner__actions">
         <button type="button" class="btn btn--primary btn--small" data-consent-accept-all><span class="cookie-banner__label cookie-banner__label--full">${STR.acceptAll}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.acceptCompact}</span></button>
         <button type="button" class="btn btn--outline btn--small" data-consent-reject><span class="cookie-banner__label cookie-banner__label--full">${STR.rejectOptional}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.rejectCompact}</span></button>
-        <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
+        <button type="button" class="cookie-banner__settings" data-consent-settings><span class="cookie-banner__label cookie-banner__label--full">${STR.settings}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.privacyCompact}</span></button>
       </div>
     </div>`;
 }
