@@ -2249,12 +2249,25 @@ function initLightbox() {
     clearDrag(true);
   });
 
+  // Podgaleria podpisuje wszystkie zdjęcia jednym data-meta. Wyjątki wskazuje
+  // data-meta-at="9:Oryginał w Sukiennicach" — numer zdjęcia liczony od 1,
+  // kilka wpisów rozdziela „|”.
+  const metaOverrides = item => {
+    const map = new Map();
+    (item.dataset.metaAt || '').split('|').forEach(entry => {
+      const sep = entry.indexOf(':');
+      if (sep > 0) map.set(Number(entry.slice(0, sep)), entry.slice(sep + 1).trim());
+    });
+    return map;
+  };
+
   triggers.forEach(item => {
     item.addEventListener('click', () => {
       const imgs = item.dataset.images.split('|').filter(Boolean);
       if (imgs.length > 1) {
         // podgaleria danego obiektu
-        open(imgs.map(src => ({ src, title: item.dataset.title, meta: item.dataset.meta })), 0);
+        const overrides = metaOverrides(item);
+        open(imgs.map((src, i) => ({ src, title: item.dataset.title, meta: overrides.get(i + 1) || item.dataset.meta })), 0);
       } else {
         // pojedyncze kafelki — przegląd całej siatki
         const grid = item.closest('.gallery-grid') || document;
