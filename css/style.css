@@ -27,6 +27,10 @@
      i celowo pozostaje białe w obu motywach. */
   --color-surface: #ffffff;
   --color-white: #ffffff;
+  /* Ciemny tekst na --color-white nad hero (np. aktywny język). Jak --color-white
+     celowo taki sam w obu motywach — zdjęcie pod spodem się nie zmienia, a
+     --color-heading w ciemnym motywie jaśnieje i na bieli dawało 1,17:1. */
+  --color-on-white: #1a1a1a;
   /* Tekst na złotym tle (przyciski, aktywny język, scroll-top). W jasnym motywie
      złoto jest ciemne, więc tekst biały; w ciemnym złoto jaśnieje i tekst musi
      zciemnieć — jeden token zamiast trzynastu nadpisań. */
@@ -456,7 +460,7 @@ p + p { margin-top: var(--space-sm); }
 
 .header--transparent .nav__lang-current {
   background: var(--color-white);
-  color: var(--color-heading);
+  color: var(--color-on-white);
 }
 
 .header--transparent .nav__lang-link:hover,

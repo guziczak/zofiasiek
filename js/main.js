@@ -611,7 +611,9 @@ function initCookieConsent() {
   if (privacyConsent) {
     applyPrivacyConsent(privacyConsent);
   } else {
-    setTimeout(() => setPrivacyBannerVisible(true), 800);
+    // Baner od pierwszej chwili wizyty, nie po sztywnym opóźnieniu. Podwójny rAF:
+    // przeglądarka najpierw rysuje go schowanego, więc wjazd działa jako przejście.
+    requestAnimationFrame(() => requestAnimationFrame(() => setPrivacyBannerVisible(true)));
   }
 }
 
