@@ -440,7 +440,8 @@ p + p { margin-top: var(--space-sm); }
   cursor: default;
 }
 
-/* Pełna nazwa języka tylko dla czytników (jak .sr-only); szuflada ją odsłania */
+/* Pełna nazwa języka tylko dla czytników (jak .sr-only); szuflada ją odsłania.
+   Bez wersalików z .nav__lang — część przeglądarek przekazuje je czytnikom. */
 .nav__lang-name {
   position: absolute;
   width: 1px;
@@ -451,6 +452,7 @@ p + p { margin-top: var(--space-sm); }
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+  text-transform: none;
 }
 
 /* Header solidny (podstrony, home po przewinięciu) */
