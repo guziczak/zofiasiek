@@ -148,6 +148,18 @@
 
   const siteUrl = path => new URL(path, context.siteRoot).href;
 
+  // Ten sam układ co w HTML stron: skrót widoczny na komputerze, pełna nazwa
+  // w szufladzie mobilnej i dla czytników ekranu.
+  function fillLanguageLabel(element, option) {
+    const code = document.createElement('span');
+    code.className = 'nav__lang-code';
+    code.textContent = option.code;
+    const name = document.createElement('span');
+    name.className = 'nav__lang-name';
+    name.textContent = option.name;
+    element.append(code, ' ', name);
+  }
+
   function renderLanguageNavigation() {
     const container = document.querySelector('[data-language-nav]');
     if (!container) return;
@@ -166,7 +178,7 @@
         const current = document.createElement('span');
         current.className = 'nav__lang-current';
         current.setAttribute('aria-current', 'true');
-        current.textContent = languageOptions[code].code;
+        fillLanguageLabel(current, languageOptions[code]);
         fragment.appendChild(current);
         return;
       }
@@ -176,7 +188,7 @@
       link.href = siteUrl(routes[code].home);
       link.hreflang = code;
       link.lang = code;
-      link.textContent = languageOptions[code].code;
+      fillLanguageLabel(link, languageOptions[code]);
       fragment.appendChild(link);
     });
 
