@@ -1167,7 +1167,9 @@ p + p { margin-top: var(--space-sm); }
 .footer {
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
-  padding: 2.5rem 0 1.25rem;
+  /* Dopóki baner zgód jest widoczny, stopka dokłada pod sobą jego wysokość,
+     więc na samym dole strony cała stopka da się przewinąć nad baner. */
+  padding: 2.5rem 0 calc(1.25rem + var(--privacy-banner-offset));
   /* jaśniejszy tekst — szarość gubiła się na brązowym tle */
   --color-muted: rgba(255, 255, 255, 0.72);
 }
@@ -1342,95 +1344,36 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-white);
 }
 
-.cookie-banner__label--compact {
-  display: none;
-}
-
-/* Gdy stopka wchodzi w ekran, pełne objaśnienie zwija się do jawnego paska
-   decyzji. Footer pozostaje klikalny, a brak zgody nadal oznacza brak usług. */
-.footer-in-view.privacy-banner-visible .cookie-banner {
-  bottom: var(--space-xs);
-  width: min(640px, calc(100% - 1rem));
-  padding: var(--space-xs);
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__inner {
-  display: block;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__text {
-  display: none;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: 100%;
-  gap: var(--space-xs);
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__actions .btn {
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-  padding: 0.625rem 0.75rem;
-  font-size: 0.75rem;
-  line-height: 1.2;
-  letter-spacing: 1px;
-  white-space: normal;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__label--full {
-  display: none;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner__label--compact {
-  display: inline;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings {
-  grid-column: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: stretch;
-  min-height: 44px;
-  padding: 0.625rem 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.36);
-  border-radius: var(--border-radius);
-  font-size: 0.75rem;
-  line-height: 1.2;
-  text-decoration: none;
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings:hover {
-  border-color: var(--color-white);
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.footer-in-view.privacy-banner-visible .cookie-banner .cookie-banner__settings:focus-visible,
 .footer__toggle:focus-visible {
   outline: 2px solid var(--color-accent-light);
   outline-offset: -3px;
 }
 
-.footer-in-view.privacy-banner-visible .footer__bottom {
-  visibility: hidden;
+/* Na czas okna ustawień baner zsuwa się jak przy menu mobilnym, ale zostaje
+   „widoczny” — rezerwa pod stopką się nie zmienia, więc „Anuluj” nie przesuwa strony. */
+body.privacy-dialog-open .cookie-banner {
+  transform: translate(-50%, calc(100% + 2rem));
 }
 
 body.privacy-dialog-open {
   overflow: hidden;
 }
 
+/* Panel przy lewej krawędzi, od góry do samego dołu ekranu. Pozycję i wysokość
+   podajemy jawnie: reset `* { margin: 0 }` zabiera <dialog> domyślne centrowanie,
+   a domyślne `height: fit-content` + `max-height` z przeglądarki ucinały panel przed dołem. */
 .privacy-dialog {
-  width: min(680px, calc(100% - 2rem));
-  max-height: calc(100vh - 2rem);
+  inset: 0 auto 0 0;
+  width: min(680px, 100%);
+  max-width: none;
+  height: auto;
+  max-height: none;
   padding: 0;
   border: 0;
-  border-radius: var(--border-radius);
+  border-radius: 0;
   color: var(--color-text);
   background: var(--color-surface);
-  box-shadow: 0 24px 70px rgba(25, 21, 17, 0.35);
+  box-shadow: 24px 0 70px rgba(25, 21, 17, 0.35);
 }
 
 .privacy-dialog::backdrop {
@@ -1440,7 +1383,7 @@ body.privacy-dialog-open {
 }
 
 .privacy-dialog__panel {
-  max-height: calc(100vh - 2rem);
+  height: 100%;
   padding: var(--space-lg);
   overflow-y: auto;
 }
@@ -2238,7 +2181,7 @@ body.privacy-dialog-open {
   }
 
   .footer {
-    padding: 1.5rem 0 1rem;
+    padding: 1.5rem 0 calc(1rem + var(--privacy-banner-offset));
   }
 
   .footer__bottom {

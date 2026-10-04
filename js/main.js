@@ -32,11 +32,8 @@ const STR = (function () {
       learnMore: 'Dowiedz się więcej',
       cookieIntro: 'Używamy niezbędnej pamięci przeglądarki. Możesz osobno zezwolić na Google Analytics 4 i interaktywną Mapę Google.',
       acceptAll: 'Akceptuj wszystkie',
-      acceptCompact: 'Akceptuję',
       rejectOptional: 'Odrzuć opcjonalne',
-      rejectCompact: 'Odrzucam',
       settings: 'Ustawienia',
-      privacyCompact: 'Prywatność',
       privacySettings: 'Ustawienia prywatności',
       privacyDescription: 'Wybierz, na które opcjonalne usługi zezwalasz. Ustawienia możesz później zmienić w stopce strony.',
       essentialTitle: 'Niezbędne',
@@ -98,11 +95,8 @@ const STR = (function () {
       learnMore: 'Learn more',
       cookieIntro: 'We use essential browser storage. You can separately allow Google Analytics 4 and the interactive Google Map.',
       acceptAll: 'Accept all',
-      acceptCompact: 'Accept',
       rejectOptional: 'Reject optional',
-      rejectCompact: 'Reject',
       settings: 'Settings',
-      privacyCompact: 'Your privacy',
       privacySettings: 'Privacy settings',
       privacyDescription: 'Choose which optional services you allow. You can change these settings later in the website footer.',
       essentialTitle: 'Essential',
@@ -164,11 +158,8 @@ const STR = (function () {
       learnMore: 'Mehr erfahren',
       cookieIntro: 'Wir verwenden notwendige Browser-Speicherfunktionen. Sie können Google Analytics 4 und die interaktive Google-Karte getrennt zulassen.',
       acceptAll: 'Alle akzeptieren',
-      acceptCompact: 'Akzeptieren',
       rejectOptional: 'Optionale Dienste ablehnen',
-      rejectCompact: 'Ablehnen',
       settings: 'Einstellungen',
-      privacyCompact: 'Datenschutz',
       privacySettings: 'Datenschutzeinstellungen',
       privacyDescription: 'Wählen Sie aus, welche optionalen Dienste Sie zulassen. Sie können diese Einstellungen später in der Fußzeile ändern.',
       essentialTitle: 'Notwendig',
@@ -233,7 +224,6 @@ let privacyConsent = readPrivacyConsent();
 let privacyBanner = null;
 let privacyDialog = null;
 let privacyDialogReturnFocus = null;
-let privacyBannerWasVisible = false;
 let privacyBannerResizeObserver = null;
 
 /* ----- Zapis pozycji przewijania -----
@@ -553,9 +543,7 @@ function initFooterViewportState() {
 
   const setFooterInView = (inView) => {
     footerInView = inView;
-    document.documentElement.classList.toggle('footer-in-view', inView);
     updatePhonePlacement();
-    requestAnimationFrame(updatePrivacyBannerOffset);
   };
 
   if ('IntersectionObserver' in window) {
@@ -564,9 +552,7 @@ function initFooterViewportState() {
         if (entry.target === footer) footerInView = entry.isIntersecting;
         if (entry.target === footerSocials) footerSocialsInView = entry.isIntersecting;
       });
-      document.documentElement.classList.toggle('footer-in-view', footerInView);
       updatePhonePlacement();
-      requestAnimationFrame(updatePrivacyBannerOffset);
     }, { threshold: 0 });
     observer.observe(footer);
     if (footerSocials) observer.observe(footerSocials);
@@ -643,9 +629,9 @@ function renderPrivacyBanner() {
     <div class="cookie-banner__inner">
       <p class="cookie-banner__text">${STR.cookieIntro} <a href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>.</p>
       <div class="cookie-banner__actions">
-        <button type="button" class="btn btn--primary btn--small" data-consent-accept-all><span class="cookie-banner__label cookie-banner__label--full">${STR.acceptAll}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.acceptCompact}</span></button>
-        <button type="button" class="btn btn--outline btn--small" data-consent-reject><span class="cookie-banner__label cookie-banner__label--full">${STR.rejectOptional}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.rejectCompact}</span></button>
-        <button type="button" class="cookie-banner__settings" data-consent-settings><span class="cookie-banner__label cookie-banner__label--full">${STR.settings}</span><span class="cookie-banner__label cookie-banner__label--compact">${STR.privacyCompact}</span></button>
+        <button type="button" class="btn btn--primary btn--small" data-consent-accept-all>${STR.acceptAll}</button>
+        <button type="button" class="btn btn--outline btn--small" data-consent-reject>${STR.rejectOptional}</button>
+        <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
       </div>
     </div>`;
 }
@@ -742,7 +728,6 @@ function createPrivacyDialog() {
   });
   dialog.addEventListener('close', () => {
     document.body.classList.remove('privacy-dialog-open');
-    if (!privacyConsent && privacyBannerWasVisible) setPrivacyBannerVisible(true);
     if (privacyDialogReturnFocus instanceof HTMLElement) privacyDialogReturnFocus.focus();
     privacyDialogReturnFocus = null;
   });
@@ -769,8 +754,8 @@ function openPrivacySettings(focusCategory, trigger) {
   if (mapsInput) mapsInput.checked = current.maps;
 
   privacyDialogReturnFocus = trigger || document.activeElement;
-  privacyBannerWasVisible = privacyBanner?.classList.contains('visible') || false;
-  setPrivacyBannerVisible(false);
+  // Baner chowa CSS (body.privacy-dialog-open) — zostaje „widoczny”, żeby rezerwa
+  // pod stopką się nie zmieniała i „Anuluj” nie przesuwało strony.
   document.body.classList.add('privacy-dialog-open');
   if (!privacyDialog.open) privacyDialog.showModal();
 
