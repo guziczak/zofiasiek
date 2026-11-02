@@ -282,7 +282,37 @@ function initHeader() {
   }
 
   if (isHomePage) {
+    // Mobile Safari może przywrócić niewielki scroll po DOMContentLoaded,
+    // mimo history.scrollRestoration = 'manual'. Nowe wejście i odświeżenie
+    // strony głównej mają zaczynać od góry; back/forward i kotwice zachowują
+    // dotychczasowe zachowanie.
+    const navigation = performance.getEntriesByType?.('navigation')?.[0];
+    const navigationType = navigation?.type ||
+      (performance.navigation?.type === 2 ? 'back_forward' : '');
+    const resetOnEntry = navigationType !== 'back_forward' && !window.location.hash;
+
+    function resetToTop() {
+      if (!resetOnEntry || window.scrollY <= 0) return;
+      const root = document.documentElement;
+      const previous = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = previous;
+    }
+
+    resetToTop();
     window.addEventListener('scroll', updateHeader, { passive: true });
+    window.addEventListener('pageshow', (event) => {
+      if (!event.persisted && resetOnEntry) {
+        // Sprawdź ponownie po przywróceniu pozycji przez przeglądarkę.
+        requestAnimationFrame(() => {
+          resetToTop();
+          updateHeader();
+        });
+      } else {
+        updateHeader();
+      }
+    });
     updateHeader();
   } else {
     header.classList.add('header--solid');
