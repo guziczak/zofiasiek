@@ -2324,7 +2324,7 @@ body.privacy-dialog-open {
   }
 
   .privacy-banner-visible .mobile-cta {
-    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 40px);
+    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 12px);
   }
 
   .scroll-top {
