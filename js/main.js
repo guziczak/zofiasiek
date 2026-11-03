@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initDeepLinkedWork();
   initCookieConsent();
+  initHeroCookiePlacement();
   initMobilePhoneCtaPlacement();
   initAnalyticsEvents();
   initScrollTop();
@@ -585,6 +586,88 @@ function initFooterViewportState() {
   }
 }
 
+/* ----- Hero with cookies: center first, then clear ONLY the primary CTA -----
+   The banner animates via transform, so calculate its FINAL position from
+   offsetHeight + CSS bottom; getBoundingClientRect().top would move during
+   the cookie animation and give a wrong lift. */
+let scheduleHeroCookiePlacement = () => {};
+
+function initHeroCookiePlacement() {
+  const hero = document.querySelector('.hero');
+  const content = hero?.querySelector('.hero__content');
+  const primary = content?.querySelector('.hero__actions .btn--primary');
+  const banner = document.querySelector('.cookie-banner');
+  const header = document.querySelector('.header');
+  if (!hero || !content || !primary || !banner) return;
+
+  const root = document.documentElement;
+  const GAP = 12;
+  const HEADER_GAP = 8;
+  let frame = 0;
+
+  const update = () => {
+    if (!root.classList.contains('privacy-banner-visible') ||
+        !banner.classList.contains('visible')) {
+      hero.classList.remove('hero--cookie-tight');
+      if (content.style.getPropertyValue('--hero-cookie-lift')) {
+        content.style.removeProperty('--hero-cookie-lift');
+        scheduleMobilePhoneCtaPlacement();
+      }
+      return;
+    }
+
+    // 'top' is animated; subtract its CURRENT interpolated offset to
+    // recover the unshifted centered positions without a feedback loop.
+    const currentOffset = Number.parseFloat(getComputedStyle(content).top) || 0;
+    const naturalPrimaryBottom = primary.getBoundingClientRect().bottom - currentOffset;
+    const naturalContentTop = content.getBoundingClientRect().top - currentOffset;
+    const bannerBottom = Number.parseFloat(getComputedStyle(banner).bottom) || 0;
+    const bannerFinalTop = window.innerHeight - bannerBottom - banner.offsetHeight;
+    const requiredLift = Math.max(0, Math.ceil(naturalPrimaryBottom + GAP - bannerFinalTop));
+    const headerBottom = header?.getBoundingClientRect().bottom || 0;
+    const safeLift = Math.max(0, Math.floor(naturalContentTop - headerBottom - HEADER_GAP));
+
+    // Only shorten typography if even the MINIMUM required lift would put
+    // the top of the centered block behind the fixed navigation.
+    if (requiredLift > safeLift && window.innerWidth <= 768 &&
+        !hero.classList.contains('hero--cookie-tight')) {
+      hero.classList.add('hero--cookie-tight');
+      requestUpdate();
+      return;
+    }
+
+    const next = `${requiredLift}px`;
+    if (content.style.getPropertyValue('--hero-cookie-lift') !== next) {
+      content.style.setProperty('--hero-cookie-lift', next);
+      scheduleMobilePhoneCtaPlacement();
+    }
+  };
+
+  const requestUpdate = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      update();
+    });
+  };
+
+  scheduleHeroCookiePlacement = requestUpdate;
+  window.addEventListener('resize', requestUpdate, { passive: true });
+  window.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('pageshow', requestUpdate);
+  window.visualViewport?.addEventListener('resize', requestUpdate, { passive: true });
+  document.fonts?.ready?.then(requestUpdate);
+
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(requestUpdate);
+    observer.observe(content);
+    observer.observe(primary);
+    observer.observe(banner);
+  }
+
+  requestUpdate();
+}
+
 /* ----- Mobile call button: protect hero CTA (Hul-style) -----
    Only the floating phone moves. Never resize or shift the hero, its text,
    CTA buttons, or the cookie banner. Base placement remains defined by CSS. */
@@ -763,6 +846,7 @@ function setPrivacyBannerVisible(visible) {
   privacyBanner.setAttribute('aria-hidden', String(!visible));
   privacyBanner.inert = !visible;
   document.documentElement.classList.toggle('privacy-banner-visible', visible);
+  scheduleHeroCookiePlacement();
   scheduleMobilePhoneCtaPlacement();
 
   if (!visible) {
@@ -784,6 +868,7 @@ function updatePrivacyBannerOffset() {
   const bottomInset = Math.max(0, Number.parseFloat(bannerStyle.bottom) || 0);
   const bannerHeight = Math.ceil(privacyBanner.getBoundingClientRect().height);
   root.style.setProperty('--privacy-banner-offset', `${bannerHeight + bottomInset}px`);
+  scheduleHeroCookiePlacement();
   scheduleMobilePhoneCtaPlacement();
 }
 
