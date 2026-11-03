@@ -1550,7 +1550,7 @@ body.privacy-dialog-open {
 .mobile-cta {
   display: none;
   position: fixed;
-  bottom: calc(var(--space-md) + var(--privacy-banner-offset));
+  bottom: calc(var(--space-md) + var(--privacy-banner-offset) + var(--mobile-cta-lift, 0px));
   right: var(--space-md);
   width: 56px;
   height: 56px;
@@ -2382,7 +2382,7 @@ body.privacy-dialog-open {
   }
 
   .privacy-banner-visible .mobile-cta {
-    bottom: calc(var(--privacy-banner-offset) + 12px);
+    bottom: calc(var(--privacy-banner-offset) + 12px + var(--mobile-cta-lift, 0px));
   }
 
   .scroll-top {
