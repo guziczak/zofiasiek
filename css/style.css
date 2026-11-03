@@ -2259,13 +2259,25 @@ body.privacy-dialog-open {
     transform: translateY(calc(0px - var(--hero-cta-lift, 0px)));
   }
 
+  .privacy-banner-visible .hero__subtitle {
+    font-size: 0.875rem;
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+  }
+
   .privacy-banner-visible .hero__title {
-    margin-bottom: var(--space-sm);
+    font-size: 2.125rem;
+    margin-bottom: 0.75rem;
   }
 
   .privacy-banner-visible .hero__description {
-    line-height: 1.55;
-    margin-bottom: var(--space-md);
+    font-size: 1rem;
+    line-height: 1.45;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-banner-visible .hero__actions {
+    gap: 0.75rem;
   }
 
   /* Cookie banner */
@@ -2370,7 +2382,7 @@ body.privacy-dialog-open {
   }
 
   .privacy-banner-visible .hero__title {
-    font-size: 2rem;
+    font-size: 1.875rem;
     margin-bottom: 0.5rem;
   }
 
@@ -2378,10 +2390,26 @@ body.privacy-dialog-open {
     font-size: 1rem;
     line-height: 1.4;
     margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .privacy-banner-visible .hero__actions {
     gap: 0.5rem;
+  }
+}
+
+/* Najmniejsze telefony: priorytet dla widocznego przycisku kontaktu.
+   Pełny opis wraca po zamknięciu banera cookies. */
+@media (max-width: 340px) and (max-height: 600px) {
+  .privacy-banner-visible .hero__title {
+    font-size: 1.75rem;
+  }
+
+  .privacy-banner-visible .hero__description {
+    -webkit-line-clamp: 2;
   }
 }
 
