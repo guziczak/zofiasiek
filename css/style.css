@@ -526,6 +526,9 @@ p + p { margin-top: var(--space-sm); }
 .hero {
   position: relative;
   min-height: 100vh;
+  /* Nie utrzymuj automatycznej kotwicy scrolla na bloku zmieniającym układ
+     po inicjalizacji zgód; naturalne przewijanie reszty strony bez zmian. */
+  overflow-anchor: none;
   display: flex;
   align-items: center;
   justify-content: center;
