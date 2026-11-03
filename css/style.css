@@ -542,6 +542,10 @@ p + p { margin-top: var(--space-sm); }
   z-index: 1;
   max-width: 700px;
   padding: 0 var(--space-md);
+  /* Obraz zostaje pod transparentnym headerem, ale przewijany tekst
+     jest przycinany dokładnie na jego dolnej krawędzi. */
+  -webkit-clip-path: inset(var(--hero-text-clip-top, 0px) 0 0 0);
+  clip-path: inset(var(--hero-text-clip-top, 0px) 0 0 0);
 }
 
 .hero__subtitle {
