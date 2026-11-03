@@ -614,7 +614,10 @@ function initMobilePhoneCtaPlacement() {
     const root = document.documentElement;
     const rootStyle = getComputedStyle(root);
     const bannerOffset = Number.parseFloat(rootStyle.getPropertyValue('--privacy-banner-offset')) || 0;
-    const regularInset = Number.parseFloat(rootStyle.getPropertyValue('--space-md')) || 24;
+    const regularSpace = rootStyle.getPropertyValue('--space-md').trim();
+    const regularInset = regularSpace.endsWith('rem')
+      ? (Number.parseFloat(regularSpace) || 1.5) * (Number.parseFloat(rootStyle.fontSize) || 16)
+      : (Number.parseFloat(regularSpace) || 24);
     const bannerVisible = root.classList.contains('privacy-banner-visible');
     const normalBottom = bannerOffset + (bannerVisible ? 12 : regularInset);
     const viewportHeight = window.innerHeight;
