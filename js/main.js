@@ -271,15 +271,18 @@ function initHeader() {
   if (!header) return;
 
   const isHomePage = header.classList.contains('header--transparent');
+  const hero = isHomePage ? document.querySelector('.hero') : null;
 
   function updateHeader() {
-    if (window.scrollY > 50) {
-      header.classList.remove('header--transparent');
-      header.classList.add('header--solid');
-    } else if (isHomePage) {
-      header.classList.remove('header--solid');
-      header.classList.add('header--transparent');
-    }
+    if (!isHomePage) return;
+
+    // Keep the header transparent while the hero artwork is behind it.
+    // Switching at scrollY > 50 made the header turn white in the middle
+    // of the hero and cover its heading on mobile Safari.
+    const heroBottom = hero?.getBoundingClientRect().bottom ?? 0;
+    const overHero = heroBottom > header.getBoundingClientRect().height;
+    header.classList.toggle('header--transparent', overHero);
+    header.classList.toggle('header--solid', !overHero);
   }
 
   if (isHomePage) {
