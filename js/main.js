@@ -283,37 +283,10 @@ function initHeader() {
   }
 
   if (isHomePage) {
-    // Mobile Safari może przywrócić niewielki scroll po DOMContentLoaded,
-    // mimo history.scrollRestoration = 'manual'. Nowe wejście i odświeżenie
-    // strony głównej mają zaczynać od góry; back/forward i kotwice zachowują
-    // dotychczasowe zachowanie.
-    const navigation = performance.getEntriesByType?.('navigation')?.[0];
-    const navigationType = navigation?.type ||
-      (performance.navigation?.type === 2 ? 'back_forward' : '');
-    const resetOnEntry = navigationType !== 'back_forward' && !window.location.hash;
-
-    function resetToTop() {
-      if (!resetOnEntry || window.scrollY <= 0) return;
-      const root = document.documentElement;
-      const previous = root.style.scrollBehavior;
-      root.style.scrollBehavior = 'auto';
-      window.scrollTo(0, 0);
-      root.style.scrollBehavior = previous;
-    }
-
-    resetToTop();
+    // Przywracanie pozycji przy odświeżaniu obsługuje wczesny skrypt w <head>.
+    // Tu tylko odświeżamy wygląd nagłówka przy scrollu i po powrocie z bfcache.
     window.addEventListener('scroll', updateHeader, { passive: true });
-    window.addEventListener('pageshow', (event) => {
-      if (!event.persisted && resetOnEntry) {
-        // Sprawdź ponownie po przywróceniu pozycji przez przeglądarkę.
-        requestAnimationFrame(() => {
-          resetToTop();
-          updateHeader();
-        });
-      } else {
-        updateHeader();
-      }
-    });
+    window.addEventListener('pageshow', updateHeader);
     updateHeader();
   } else {
     header.classList.add('header--solid');
@@ -664,7 +637,10 @@ function initCookieConsent() {
   renderPrivacyBanner();
   createPrivacyDialog();
   createPrivacySettingsButton();
-  setPrivacyBannerVisible(false);
+  // Klasa układu dla pierwszej wizyty jest ustawiana już w <head>.
+  // Nie chowamy jej na dwa frame'y, bo iOS kotwiczy wtedy scroll do starego
+  // wycentrowanego hero i po odświeżeniu przesuwa tytuł pod fixed header.
+  setPrivacyBannerVisible(!privacyConsent);
   window.addEventListener('storage', (event) => {
     if (event.key === PRIVACY_CONSENT_KEY) window.location.reload();
   });
@@ -679,13 +655,7 @@ function initCookieConsent() {
     openPrivacySettings(null, event.currentTarget);
   });
 
-  if (privacyConsent) {
-    applyPrivacyConsent(privacyConsent);
-  } else {
-    // Baner od pierwszej chwili wizyty, nie po sztywnym opóźnieniu. Podwójny rAF:
-    // przeglądarka najpierw rysuje go schowanego, więc wjazd działa jako przejście.
-    requestAnimationFrame(() => requestAnimationFrame(() => setPrivacyBannerVisible(true)));
-  }
+  if (privacyConsent) applyPrivacyConsent(privacyConsent);
 }
 
 function resolveSiteUrl(path) {
