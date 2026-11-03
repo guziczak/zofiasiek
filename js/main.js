@@ -247,7 +247,6 @@ let privacyBannerResizeObserver = null;
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initPinnedHeroMedia();
-  initHeroCtaLayout();
   initMobileNav();
   initFooterAccordion();
   initFooterViewportState();
@@ -359,72 +358,6 @@ function initPinnedHeroMedia() {
   if ('ResizeObserver' in window) {
     new ResizeObserver(measureHero).observe(hero);
   }
-}
-
-/* ----- Widoczność pierwszego CTA nad banerem na telefonach -----
-   Mierzymy docelową górę banera (bez animacji wejścia), pozycję telefonu
-   i obszar pod nagłówkiem. Podnosimy cały blok hero tylko tyle, ile potrzeba.
-   Gdy nie ma zgody do wyświetlenia, wraca oryginalne wycentrowanie. */
-let heroCtaLayoutFrame = 0;
-
-function scheduleHeroCtaLayout() {
-  if (heroCtaLayoutFrame) return;
-  heroCtaLayoutFrame = requestAnimationFrame(() => {
-    heroCtaLayoutFrame = 0;
-
-    const content = document.querySelector('.hero .hero__content');
-    const firstCta = content?.querySelector('.hero__actions .btn');
-    if (!content || !firstCta) return;
-
-    if (!document.documentElement.classList.contains('privacy-banner-visible') ||
-        !window.matchMedia('(max-width: 768px)').matches) {
-      content.style.removeProperty('--hero-cta-lift');
-      return;
-    }
-
-    const bannerOffset = Number.parseFloat(
-      document.documentElement.style.getPropertyValue('--privacy-banner-offset')
-    ) || 0;
-    if (!bannerOffset) return;
-
-    // Korzystamy z docelowej pozycji, by animacja wjazdu cookies nie
-    // wpływała na obliczenia. Na małych ekranach telefon bywa ukrywany.
-    const bannerTop = window.innerHeight - bannerOffset;
-    const phone = document.querySelector('.mobile-cta');
-    const phoneStyle = phone ? getComputedStyle(phone) : null;
-    const phoneVisible = phone && phoneStyle.display !== 'none' &&
-      phoneStyle.visibility !== 'hidden' && Number.parseFloat(phoneStyle.opacity) > 0.5 &&
-      !phone.classList.contains('mobile-cta--footer-hidden');
-    const obstructionTop = phoneVisible
-      ? bannerTop - phone.offsetHeight - 12
-      : bannerTop;
-    const targetBottom = obstructionTop - 12;
-
-    // Odwracamy poprzednie przesunięcie i ewentualny scroll, żeby
-    // ponowne wywołania (resize, fonty, banner) nie kumulowały zmian.
-    const previousLift = Number.parseFloat(
-      content.style.getPropertyValue('--hero-cta-lift')
-    ) || 0;
-    const scroll = Math.max(0, window.scrollY);
-    const naturalCtaBottom = firstCta.getBoundingClientRect().bottom + previousLift + scroll;
-    const naturalContentTop = content.getBoundingClientRect().top + previousLift + scroll;
-    const headerBottom = document.querySelector('.header')?.getBoundingClientRect().bottom || 0;
-    const necessaryLift = Math.max(0, naturalCtaBottom - targetBottom);
-    const safeLift = Math.max(0, naturalContentTop - headerBottom - 12);
-    const lift = Math.min(necessaryLift, safeLift);
-
-    content.style.setProperty('--hero-cta-lift', `${Math.ceil(lift)}px`);
-  });
-}
-
-function initHeroCtaLayout() {
-  const content = document.querySelector('.hero .hero__content');
-  if (!content) return;
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(scheduleHeroCtaLayout).observe(content);
-  }
-  document.fonts?.ready?.then(scheduleHeroCtaLayout);
-  window.addEventListener('pageshow', scheduleHeroCtaLayout);
 }
 
 /* ----- Mobile Navigation ----- */
@@ -788,7 +721,6 @@ function setPrivacyBannerVisible(visible) {
 
   if (!visible) {
     document.documentElement.style.setProperty('--privacy-banner-offset', '0px');
-    scheduleHeroCtaLayout();
     return;
   }
 
@@ -799,7 +731,6 @@ function updatePrivacyBannerOffset() {
   const root = document.documentElement;
   if (!privacyBanner?.classList.contains('visible')) {
     root.style.setProperty('--privacy-banner-offset', '0px');
-    scheduleHeroCtaLayout();
     return;
   }
 
@@ -807,7 +738,6 @@ function updatePrivacyBannerOffset() {
   const bottomInset = Math.max(0, Number.parseFloat(bannerStyle.bottom) || 0);
   const bannerHeight = Math.ceil(privacyBanner.getBoundingClientRect().height);
   root.style.setProperty('--privacy-banner-offset', `${bannerHeight + bottomInset}px`);
-  scheduleHeroCtaLayout();
 }
 
 function createPrivacyDialog() {
