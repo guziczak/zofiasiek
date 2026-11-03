@@ -33,7 +33,61 @@
 
   <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
   <script>try{var t=localStorage.getItem('zofiasiek-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
-  <link rel="stylesheet" href="../css/style.css?v=20261103ctasafeflow">
+  <script>
+    /* Ustal układ hero PRZED pierwszym renderem, by cookies nie przesuwały
+       tekstu po wczytaniu JS. Dotyczy tylko stron głównych PL/EN/DE. */
+    (function () {
+      var root = document.documentElement;
+      try {
+        var consent = JSON.parse(localStorage.getItem('zofiasiek-privacy-consent-v2') || 'null');
+        var validConsent = consent && consent.version === 2
+          && typeof consent.analytics === 'boolean'
+          && typeof consent.maps === 'boolean'
+          && typeof consent.decidedAt === 'string'
+          && !Number.isNaN(Date.parse(consent.decidedAt));
+        if (!validConsent) root.classList.add('privacy-banner-visible');
+      } catch (error) {
+        root.classList.add('privacy-banner-visible');
+      }
+
+      /* Safari potrafi przywrócić scroll PO załadowaniu przy zwykłym refreshu.
+         Przypinamy scroll=0 tylko do pierwszego gestu użytkownika.
+         Cofnij/dalej i linki z kotwicą zachowują własną pozycję. */
+      var navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      var backForward = navigation
+        ? navigation.type === 'back_forward'
+        : (performance.navigation && performance.navigation.type === 2);
+      if (backForward || location.hash) return;
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      root.style.scrollBehavior = 'auto';
+      var released = false;
+      function pinTop() {
+        if (!released && window.scrollY !== 0) window.scrollTo(0, 0);
+      }
+      function release() {
+        if (released) return;
+        released = true;
+        root.style.removeProperty('scroll-behavior');
+        window.removeEventListener('scroll', pinTop);
+      }
+      window.addEventListener('scroll', pinTop, { passive: true });
+      document.addEventListener('DOMContentLoaded', pinTop, { once: true });
+      window.addEventListener('load', pinTop, { once: true });
+      window.addEventListener('pageshow', function (event) {
+        if (event.persisted) { release(); return; }
+        pinTop();
+        requestAnimationFrame(function () {
+          pinTop();
+          requestAnimationFrame(pinTop);
+        });
+      });
+      ['touchstart', 'pointerdown', 'mousedown', 'wheel', 'keydown'].forEach(function (type) {
+        window.addEventListener(type, release, { once: true, passive: true, capture: true });
+      });
+      pinTop();
+    })();
+  </script>
+  <link rel="stylesheet" href="../css/style.css?v=20261103stablehero">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -353,6 +407,6 @@
       } catch (e) {}
     })();
   </script>
-  <script src="../js/main.js?v=20261103ctasafeflow"></script>
+  <script src="../js/main.js?v=20261103stablehero"></script>
 </body>
 </html>
