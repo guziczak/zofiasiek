@@ -246,6 +246,7 @@ let privacyBannerResizeObserver = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
+  initPinnedHeroMedia();
   initMobileNav();
   initFooterAccordion();
   initFooterViewportState();
@@ -282,28 +283,6 @@ function initHeader() {
   }
 
   if (isHomePage) {
-    // Nie pozwól odciągnąć hero w dół poza początek dokumentu na iOS.
-    // Inaczej fixed header pozostaje na miejscu, a pod nim odsłania się
-    // ciemne tło strony zamiast aktualnego obrazu. Zwykły scroll działa dalej.
-    document.documentElement.classList.add('home-overscroll-guard');
-    let lastTouchY = null;
-    document.addEventListener('touchstart', (event) => {
-      lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
-    }, { passive: true });
-    document.addEventListener('touchend', () => { lastTouchY = null; }, { passive: true });
-    document.addEventListener('touchcancel', () => { lastTouchY = null; }, { passive: true });
-    document.addEventListener('touchmove', (event) => {
-      if (lastTouchY === null || event.touches.length !== 1) return;
-      const currentY = event.touches[0].clientY;
-      const pullingDown = currentY > lastTouchY;
-      lastTouchY = currentY;
-      if (!pullingDown || window.scrollY > 0 || !event.cancelable) return;
-      // Nie przechwytuj gestów w przewijanych oknach i otwartym menu.
-      if (document.body.classList.contains('nav-open') ||
-          event.target.closest?.('dialog, .search-dialog, .lightbox, .nav__list')) return;
-      event.preventDefault();
-    }, { passive: false });
-
     // Mobile Safari może przywrócić niewielki scroll po DOMContentLoaded,
     // mimo history.scrollRestoration = 'manual'. Nowe wejście i odświeżenie
     // strony głównej mają zaczynać od góry; back/forward i kotwice zachowują
@@ -339,6 +318,42 @@ function initHeader() {
   } else {
     header.classList.add('header--solid');
   }
+}
+
+/* ----- Obraz hero przypięty jak w Hul, bez blokowania gestów iOS -----
+   Tylko warstwa zdjęcia jest fixed. Treść, CTA i wysokość hero zostają w
+   normalnym układzie. Przy przewijaniu przycinamy warstwę na dolnej krawędzi
+   hero, żeby zdjęcie nie prześwitywało pod następnymi sekcjami. */
+function initPinnedHeroMedia() {
+  const hero = document.querySelector('.hero');
+  const slider = hero?.querySelector('.hero-slider');
+  if (!slider) return;
+
+  let heroHeight = 0;
+  let updateFrame = 0;
+
+  function updateClip() {
+    updateFrame = 0;
+    const clipBottom = Math.min(heroHeight, Math.max(0, window.scrollY));
+    slider.style.setProperty('--hero-clip-bottom', `${clipBottom}px`);
+  }
+
+  function scheduleClip() {
+    if (updateFrame) return;
+    updateFrame = requestAnimationFrame(updateClip);
+  }
+
+  function measureHero() {
+    heroHeight = hero.offsetHeight;
+    slider.style.setProperty('--hero-media-height', `${heroHeight}px`);
+    updateClip();
+  }
+
+  measureHero();
+  slider.classList.add('hero-slider--pinned');
+  window.addEventListener('scroll', scheduleClip, { passive: true });
+  window.addEventListener('resize', measureHero, { passive: true });
+  window.addEventListener('pageshow', scheduleClip);
 }
 
 /* ----- Mobile Navigation ----- */
@@ -1449,7 +1464,8 @@ function initHeroSlider() {
     });
     dots.appendChild(dot);
   });
-  slider.appendChild(dots);
+  // Kontrolki nadal przewijają się razem z treścią hero, nie z przypiętym tłem.
+  (slider.closest('.hero') || slider).appendChild(dots);
 
   const dotEls = () => [...dots.querySelectorAll('.hero-slider__dot')];
 
