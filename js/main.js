@@ -652,6 +652,9 @@ function initHeroCookiePlacement() {
   };
 
   scheduleHeroCookiePlacement = requestUpdate;
+  content.addEventListener('transitionend', (event) => {
+    if (event.propertyName === 'top') scheduleMobilePhoneCtaPlacement();
+  });
   window.addEventListener('resize', requestUpdate, { passive: true });
   window.addEventListener('scroll', requestUpdate, { passive: true });
   window.addEventListener('pageshow', requestUpdate);
