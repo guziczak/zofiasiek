@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initDeepLinkedWork();
   initCookieConsent();
+  initMobilePhoneCtaPlacement();
   initAnalyticsEvents();
   initScrollTop();
   initRevealAnimations();
@@ -584,6 +585,102 @@ function initFooterViewportState() {
   }
 }
 
+/* ----- Mobile call button: protect hero CTA (Hul-style) -----
+   Only the floating phone moves. Never resize or shift the hero, its text,
+   CTA buttons, or the cookie banner. Base placement remains defined by CSS. */
+let scheduleMobilePhoneCtaPlacement = () => {};
+
+function initMobilePhoneCtaPlacement() {
+  const phone = document.querySelector('.mobile-cta');
+  const actions = document.querySelector('.hero .hero__actions');
+  if (!phone || !actions) return;
+
+  const mobile = window.matchMedia('(max-width: 768px)');
+  const hero = actions.closest('.hero');
+  const header = document.querySelector('.header');
+  let frame = 0;
+
+  const update = () => {
+    const reset = () => phone.style.removeProperty('--mobile-cta-lift');
+    const phoneStyle = getComputedStyle(phone);
+    if (!mobile.matches || phoneStyle.position !== 'fixed' ||
+        phoneStyle.display === 'none' || phoneStyle.visibility === 'hidden' ||
+        phone.classList.contains('mobile-cta--footer-hidden') ||
+        phone.classList.contains('mobile-cta--docked')) {
+      reset();
+      return;
+    }
+
+    const root = document.documentElement;
+    const rootStyle = getComputedStyle(root);
+    const bannerOffset = Number.parseFloat(rootStyle.getPropertyValue('--privacy-banner-offset')) || 0;
+    const regularInset = Number.parseFloat(rootStyle.getPropertyValue('--space-md')) || 24;
+    const bannerVisible = root.classList.contains('privacy-banner-visible');
+    const normalBottom = bannerOffset + (bannerVisible ? 12 : regularInset);
+    const viewportHeight = window.innerHeight;
+    const phoneHeight = phone.offsetHeight;
+    const normalTop = viewportHeight - normalBottom - phoneHeight;
+    const normalPhoneBottom = normalTop + phoneHeight;
+    const phoneRect = phone.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const nextSectionTop = hero?.nextElementSibling?.getBoundingClientRect().top ?? Infinity;
+
+    // Check the phone's NORMAL position, not its animated current position.
+    // Otherwise moving the phone would itself clear the collision and cause a jump.
+    const collision = [...actions.querySelectorAll('.btn')].some((button) => {
+      const rect = button.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < viewportHeight &&
+        rect.top < nextSectionTop &&
+        rect.left < phoneRect.right + 12 && rect.right > phoneRect.left - 12 &&
+        rect.top < normalPhoneBottom + 12 && rect.bottom > normalTop - 12;
+    });
+
+    if (!collision) {
+      reset();
+      return;
+    }
+
+    // Protect BOTH full-width CTA buttons, with 12px of clearance.
+    const desiredTop = actionsRect.top - phoneHeight - 12;
+    const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
+    const minimumTop = Math.max(8, headerBottom + 8);
+    const requestedLift = Math.max(0, normalTop - desiredTop);
+    const maximumLift = Math.max(0, normalTop - minimumTop);
+    const lift = Math.ceil(Math.min(requestedLift, maximumLift));
+    phone.style.setProperty('--mobile-cta-lift', `${lift}px`);
+  };
+
+  const requestUpdate = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      update();
+    });
+  };
+
+  scheduleMobilePhoneCtaPlacement = requestUpdate;
+  window.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('resize', requestUpdate, { passive: true });
+  window.visualViewport?.addEventListener('resize', requestUpdate, { passive: true });
+  if (typeof mobile.addEventListener === 'function') {
+    mobile.addEventListener('change', requestUpdate);
+  } else {
+    mobile.addListener(requestUpdate);
+  }
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(requestUpdate);
+    observer.observe(actions);
+    observer.observe(phone);
+  }
+  if ('MutationObserver' in window) {
+    new MutationObserver(requestUpdate).observe(phone, {
+      attributes: true, attributeFilter: ['class']
+    });
+  }
+  document.fonts?.ready?.then(requestUpdate);
+  requestUpdate();
+}
+
 /* ----- Cookie Consent ----- */
 function initCookieConsent() {
   const banner = document.querySelector('.cookie-banner');
@@ -651,6 +748,7 @@ function setPrivacyBannerVisible(visible) {
   privacyBanner.setAttribute('aria-hidden', String(!visible));
   privacyBanner.inert = !visible;
   document.documentElement.classList.toggle('privacy-banner-visible', visible);
+  scheduleMobilePhoneCtaPlacement();
 
   if (!visible) {
     document.documentElement.style.setProperty('--privacy-banner-offset', '0px');
@@ -671,6 +769,7 @@ function updatePrivacyBannerOffset() {
   const bottomInset = Math.max(0, Number.parseFloat(bannerStyle.bottom) || 0);
   const bannerHeight = Math.ceil(privacyBanner.getBoundingClientRect().height);
   root.style.setProperty('--privacy-banner-offset', `${bannerHeight + bottomInset}px`);
+  scheduleMobilePhoneCtaPlacement();
 }
 
 function createPrivacyDialog() {
