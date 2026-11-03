@@ -282,6 +282,13 @@ p + p { margin-top: var(--space-sm); }
   font-size: 0.75rem;
 }
 
+/* Na stronie głównej wyłącz pionowy rubber-band na granicy dokumentu.
+   Bez tego iOS potrafi przesunąć hero pod stałym nagłówkiem i odsłonić
+   tło strony. Klasa jest dodawana tylko dla strony z hero w main.js. */
+html.home-overscroll-guard {
+  overscroll-behavior-y: none;
+}
+
 /* ----- 6. Header & Navigation ----- */
 .header {
   position: fixed;
