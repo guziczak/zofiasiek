@@ -354,6 +354,10 @@ function initPinnedHeroMedia() {
   window.addEventListener('scroll', scheduleClip, { passive: true });
   window.addEventListener('resize', measureHero, { passive: true });
   window.addEventListener('pageshow', scheduleClip);
+  // Wysokość hero może się zmienić także po załadowaniu fontów.
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(measureHero).observe(hero);
+  }
 }
 
 /* ----- Mobile Navigation ----- */
