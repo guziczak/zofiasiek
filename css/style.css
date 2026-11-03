@@ -102,20 +102,6 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Jak w Hul: w czasie pierwszego wczytywania strony głównej zablokuj
-   wyłącznie wizualną pozycję dokumentu. Safari nie może wtedy odtworzyć
-   starego scrolla pod hero. Blokada znika po pageshow. */
-html.initial-home-load {
-  scroll-behavior: auto !important;
-  overflow-y: scroll;
-}
-
-html.initial-home-load-visual body {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-}
-
 html,
 body,
 .nav__list,
