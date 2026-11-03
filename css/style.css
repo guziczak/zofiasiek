@@ -2252,6 +2252,22 @@ body.privacy-dialog-open {
     margin-left: 0;
   }
 
+  /* Podczas pierwszej wizyty cały blok hero podnosi się tyle, ile potrzeba,
+     by pierwsze CTA zmieściło się nad banerem i telefonem. Wartość podaje JS
+     na podstawie rzeczywistych wysokości, a nie stałego offsetu. */
+  .privacy-banner-visible .hero__content {
+    transform: translateY(calc(-1 * var(--hero-cta-lift, 0px)));
+  }
+
+  .privacy-banner-visible .hero__title {
+    margin-bottom: var(--space-sm);
+  }
+
+  .privacy-banner-visible .hero__description {
+    line-height: 1.55;
+    margin-bottom: var(--space-md);
+  }
+
   /* Cookie banner */
   .cookie-banner {
     bottom: var(--space-xs);
@@ -2342,6 +2358,30 @@ body.privacy-dialog-open {
     position: static;
     aspect-ratio: 1 / 1;
     max-height: none;
+  }
+}
+
+/* Na bardzo niskich ekranach zwolnij dodatkowe miejsce na pierwszy przycisk,
+   bez ukrywania opisu i bez wpychania nagłówka pod stałe menu. */
+@media (max-width: 600px) and (max-height: 600px) {
+  .privacy-banner-visible .hero__subtitle {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .privacy-banner-visible .hero__title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .privacy-banner-visible .hero__description {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-banner-visible .hero__actions {
+    gap: 0.5rem;
   }
 }
 
