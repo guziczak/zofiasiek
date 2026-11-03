@@ -246,7 +246,6 @@ let privacyBannerResizeObserver = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
-  initPinnedHeroMedia();
   initMobileNav();
   initFooterAccordion();
   initFooterViewportState();
@@ -265,35 +264,22 @@ document.addEventListener('DOMContentLoaded', () => {
   initExpandable();
 });
 
-/* ----- Sticky Header ----- */
+/* ----- Sticky Header -----
+   Hero (obraz i treść) jest jednym elementem sticky. Dopóki kolejna sekcja
+   nie zasłoni jego górnej części, pokazuj przezroczysty nagłówek nad obrazem. */
 function initHeader() {
   const header = document.querySelector('.header');
   if (!header) return;
 
   const isHomePage = header.classList.contains('header--transparent');
   const hero = isHomePage ? document.querySelector('.hero') : null;
-  const heroContent = hero?.querySelector('.hero__content');
-  let previousClip = -1;
+  const followingSection = hero?.nextElementSibling;
 
   function updateHeader() {
     if (!isHomePage) return;
-
     const headerBottom = header.getBoundingClientRect().bottom;
-    const heroBottom = hero?.getBoundingClientRect().bottom ?? 0;
-    const overHero = heroBottom > headerBottom;
-
-    // Keep the painting visible behind the transparent header, but never
-    // let the scrolling title, description or CTA overlap the logo/menu.
-    // Clip only the content layer at the viewport position of the header.
-    if (heroContent) {
-      const rect = heroContent.getBoundingClientRect();
-      const clipTop = Math.ceil(Math.max(0, Math.min(rect.height, headerBottom - rect.top)));
-      if (clipTop !== previousClip) {
-        heroContent.style.setProperty('--hero-text-clip-top', `${clipTop}px`);
-        previousClip = clipTop;
-      }
-    }
-
+    const sectionTop = followingSection?.getBoundingClientRect().top ?? Infinity;
+    const overHero = sectionTop > headerBottom;
     header.classList.toggle('header--transparent', overHero);
     header.classList.toggle('header--solid', !overHero);
   }
@@ -304,52 +290,9 @@ function initHeader() {
     window.visualViewport?.addEventListener('resize', updateHeader, { passive: true });
     window.addEventListener('pageshow', updateHeader);
     document.fonts?.ready?.then(updateHeader);
-    if ('ResizeObserver' in window && heroContent) {
-      new ResizeObserver(updateHeader).observe(heroContent);
-    }
     updateHeader();
   } else {
     header.classList.add('header--solid');
-  }
-}
-
-/* ----- Obraz hero przypięty jak w Hul, bez blokowania gestów iOS -----
-   Tylko warstwa zdjęcia jest fixed. Treść, CTA i wysokość hero zostają w
-   normalnym układzie. Przy przewijaniu przycinamy warstwę na dolnej krawędzi
-   hero, żeby zdjęcie nie prześwitywało pod następnymi sekcjami. */
-function initPinnedHeroMedia() {
-  const hero = document.querySelector('.hero');
-  const slider = hero?.querySelector('.hero-slider');
-  if (!slider) return;
-
-  let heroHeight = 0;
-  let updateFrame = 0;
-
-  function updateClip() {
-    updateFrame = 0;
-    const clipBottom = Math.min(heroHeight, Math.max(0, window.scrollY));
-    slider.style.setProperty('--hero-clip-bottom', `${clipBottom}px`);
-  }
-
-  function scheduleClip() {
-    if (updateFrame) return;
-    updateFrame = requestAnimationFrame(updateClip);
-  }
-
-  function measureHero() {
-    heroHeight = hero.offsetHeight;
-    slider.style.setProperty('--hero-media-height', `${heroHeight}px`);
-    updateClip();
-  }
-
-  measureHero();
-  slider.classList.add('hero-slider--pinned');
-  window.addEventListener('scroll', scheduleClip, { passive: true });
-  window.addEventListener('resize', measureHero, { passive: true });
-  window.addEventListener('pageshow', scheduleClip);
-  // Wysokość hero może się zmienić także po załadowaniu fontów.
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(measureHero).observe(hero);
   }
 }
 
@@ -1458,7 +1401,7 @@ function initHeroSlider() {
     });
     dots.appendChild(dot);
   });
-  // Kontrolki nadal przewijają się razem z treścią hero, nie z przypiętym tłem.
+  // Kontrolki pozostają w obrębie hero i przewijają się razem z nim.
   (slider.closest('.hero') || slider).appendChild(dots);
 
   const dotEls = () => [...dots.querySelectorAll('.hero-slider__dot')];
