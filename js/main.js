@@ -598,10 +598,16 @@ function initMobilePhoneCtaPlacement() {
   const mobile = window.matchMedia('(max-width: 768px)');
   const hero = actions.closest('.hero');
   const header = document.querySelector('.header');
+  const ENTER_CLEARANCE = 12;
+  const EXIT_CLEARANCE = 32;
+  let raisedForCta = false;
   let frame = 0;
 
   const update = () => {
-    const reset = () => phone.style.removeProperty('--mobile-cta-lift');
+    const reset = () => {
+      raisedForCta = false;
+      phone.style.removeProperty('--mobile-cta-lift');
+    };
     const phoneStyle = getComputedStyle(phone);
     if (!mobile.matches || phoneStyle.position !== 'fixed' ||
         phoneStyle.display === 'none' || phoneStyle.visibility === 'hidden' ||
@@ -629,13 +635,17 @@ function initMobilePhoneCtaPlacement() {
     const nextSectionTop = hero?.nextElementSibling?.getBoundingClientRect().top ?? Infinity;
 
     // Check the phone's NORMAL position, not its animated current position.
-    // Otherwise moving the phone would itself clear the collision and cause a jump.
+    // Use distinct entry/exit clearances to prevent rapid toggling when
+    // a finger nudges the page around the collision boundary.
+    const clearance = raisedForCta ? EXIT_CLEARANCE : ENTER_CLEARANCE;
     const collision = [...actions.querySelectorAll('.btn')].some((button) => {
       const rect = button.getBoundingClientRect();
       return rect.bottom > 0 && rect.top < viewportHeight &&
         rect.top < nextSectionTop &&
-        rect.left < phoneRect.right + 12 && rect.right > phoneRect.left - 12 &&
-        rect.top < normalPhoneBottom + 12 && rect.bottom > normalTop - 12;
+        rect.left < phoneRect.right + ENTER_CLEARANCE &&
+        rect.right > phoneRect.left - ENTER_CLEARANCE &&
+        rect.top < normalPhoneBottom + clearance &&
+        rect.bottom > normalTop - clearance;
     });
 
     if (!collision) {
@@ -643,8 +653,10 @@ function initMobilePhoneCtaPlacement() {
       return;
     }
 
-    // Protect BOTH full-width CTA buttons, with 12px of clearance.
-    const desiredTop = actionsRect.top - phoneHeight - 12;
+    // Always protect BOTH CTA buttons with the same 12px visual gap;
+    // the wider EXIT_CLEARANCE only affects when we drop the raised state.
+    raisedForCta = true;
+    const desiredTop = actionsRect.top - phoneHeight - ENTER_CLEARANCE;
     const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
     const minimumTop = Math.max(8, headerBottom + 8);
     const requestedLift = Math.max(0, normalTop - desiredTop);
