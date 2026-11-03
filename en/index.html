@@ -50,57 +50,64 @@
         root.classList.add('privacy-banner-visible');
       }
 
-      /* Wzór z Hul: trzymaj cały dokument nieruchomo podczas pierwszego
-         renderu. Reset scrolla po wyrenderowaniu jest wtedy niewidoczny,
-         a zwykłe przewijanie działa od momentu zwolnienia blokady.
-         Cofnij/dalej i linki z kotwicą obsługuje natywnie przeglądarka. */
-      var navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-      var isBackForward = navigation
+      /* Przy zwykłym wejściu / odświeżeniu strona główna zawsze startuje
+         od scrollY=0. Nie zmieniamy body na fixed (powodowało skoki hero)
+         i nie cofamy scrollRestoration do "auto" po załadowaniu.
+         Natywną pozycję zostawiamy dla back/forward i kotwic. */
+      var navigation = performance.getEntriesByType &&
+        performance.getEntriesByType('navigation')[0];
+      var backForward = navigation
         ? navigation.type === 'back_forward'
         : (performance.navigation && performance.navigation.type === 2);
-      var hasScrollRestoration = 'scrollRestoration' in history;
-      if (isBackForward || location.hash) {
-        if (hasScrollRestoration) history.scrollRestoration = 'auto';
+      if (backForward || location.hash) {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
         return;
       }
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-      if (hasScrollRestoration) history.scrollRestoration = 'manual';
-      root.classList.add('initial-home-load', 'initial-home-load-visual');
-      var initialLock = true;
-      var fallback;
+      var resetActive = true;
+      var resetTimer = null;
+      var previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
 
-      function pinTop() {
-        if (initialLock && window.scrollY !== 0) window.scrollTo(0, 0);
+      function resetToTop() {
+        if (resetActive && window.scrollY > 0) window.scrollTo(0, 0);
+      }
+      function releaseReset() {
+        if (!resetActive) return;
+        resetActive = false;
+        root.style.scrollBehavior = previousScrollBehavior;
+        window.removeEventListener('scroll', resetToTop);
+        clearTimeout(resetTimer);
       }
 
-      function releaseTop() {
-        if (!initialLock) return;
-        pinTop();
-        initialLock = false;
-        root.style.scrollBehavior = 'auto';
-        root.classList.remove('initial-home-load', 'initial-home-load-visual');
-        window.scrollTo(0, 0);
-        root.style.removeProperty('scroll-behavior');
-        if (hasScrollRestoration) history.scrollRestoration = 'auto';
-        clearTimeout(fallback);
-      }
-
-      pinTop();
-      document.addEventListener('DOMContentLoaded', pinTop, { once: true });
-      window.addEventListener('load', pinTop, { once: true });
-      window.addEventListener('pageshow', function (event) {
-        if (event.persisted) { releaseTop(); return; }
-        pinTop();
-        requestAnimationFrame(function () {
-          pinTop();
-          requestAnimationFrame(releaseTop);
+      window.addEventListener('scroll', resetToTop, { passive: true });
+      ['touchstart', 'pointerdown', 'wheel', 'keydown'].forEach(function (type) {
+        window.addEventListener(type, releaseReset, {
+          once: true, passive: true, capture: true
         });
+      });
+      document.addEventListener('DOMContentLoaded', resetToTop, { once: true });
+      window.addEventListener('load', resetToTop, { once: true });
+      window.addEventListener('pageshow', function (event) {
+        if (event.persisted) { releaseReset(); return; }
+        if (!resetActive) return;
+        resetToTop();
+        requestAnimationFrame(function () {
+          resetToTop();
+          requestAnimationFrame(resetToTop);
+        });
+        // Safari potrafi odtwarzać scroll jeszcze po pageshow.
+        // Dajemy mu krótki czas na ustabilizowanie, bez blokowania gestów.
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(releaseReset, 350);
       }, { once: true });
-      /* Fallback dla wolnych lub zablokowanych obrazów: nie blokuj strony. */
-      fallback = setTimeout(releaseTop, 2500);
+      // Gdy pageshow się opóźnia, reset nie może działać bez końca.
+      resetTimer = setTimeout(releaseReset, 2000);
+      resetToTop();
     })();
   </script>
-  <link rel="stylesheet" href="../css/style.css?v=20261103homeloadfix">
+  <link rel="stylesheet" href="../css/style.css?v=20261103stabletop2">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -400,6 +407,6 @@
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
 
-  <script src="../js/main.js?v=20261103homeloadfix"></script>
+  <script src="../js/main.js?v=20261103stabletop2"></script>
 </body>
 </html>
