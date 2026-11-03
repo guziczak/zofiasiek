@@ -557,9 +557,17 @@ p + p { margin-top: var(--space-sm); }
 
 .hero__content {
   position: relative;
+  top: 0;
   z-index: 1;
   max-width: 700px;
   padding: 0 var(--space-md);
+  /* Move the entire block only as far as the first CTA needs to clear cookies.
+     Relative positioning keeps the sticky hero's natural layout unchanged. */
+  transition: top 280ms ease;
+}
+
+.privacy-banner-visible .hero__content {
+  top: calc(0px - var(--hero-cookie-lift, 0px));
 }
 
 .hero__subtitle {
@@ -2276,32 +2284,27 @@ body.privacy-dialog-open {
     margin-left: 0;
   }
 
-  /* Z cookies na ekranie zaczynamy treść hero ZAWSZE poniżej nagłówka.
-     Wcześniejsze przesuwanie całego bloku transformem ucinało tytuł.
-     Ciaśniejsze odstępy zostawiają miejsce na pierwszy przycisk nad banerem. */
-  .privacy-banner-visible .hero {
-    align-items: flex-start;
-    padding-top: calc(var(--header-height) + 0.75rem);
-  }
-
-  .privacy-banner-visible .hero__subtitle {
+  /* Normally cookies do not change hero alignment or typography.
+     Compact styling is an emergency fallback ONLY when JS determines that
+     the first CTA cannot clear the banner without covering the header. */
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__subtitle {
     font-size: 0.875rem;
     letter-spacing: 4px;
     margin-bottom: 0.5rem;
   }
 
-  .privacy-banner-visible .hero__title {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__title {
     font-size: 2.125rem;
     margin-bottom: 0.75rem;
   }
 
-  .privacy-banner-visible .hero__description {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__description {
     font-size: 1rem;
     line-height: 1.45;
     margin-bottom: 0.75rem;
   }
 
-  .privacy-banner-visible .hero__actions {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__actions {
     gap: 0.75rem;
   }
 
@@ -2401,12 +2404,12 @@ body.privacy-dialog-open {
 /* Przy niższych viewportach (np. Safari z paskiem narzędzi) skracamy
    jedynie opis PODCZAS widocznych cookies. Nagłówek zostaje w całości. */
 @media (max-width: 768px) and (max-height: 720px) {
-  .privacy-banner-visible .hero__title {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__title {
     font-size: 1.875rem;
     margin-bottom: 0.5rem;
   }
 
-  .privacy-banner-visible .hero__description {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__description {
     font-size: 0.9375rem;
     line-height: 1.4;
     margin-bottom: 0.625rem;
@@ -2416,18 +2419,18 @@ body.privacy-dialog-open {
     overflow: hidden;
   }
 
-  .privacy-banner-visible .hero__actions {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__actions {
     gap: 0.5rem;
   }
 }
 
 /* Telefony 320px: nie ścinaj nagłówka w celu pokazania CTA. */
 @media (max-width: 340px) and (max-height: 620px) {
-  .privacy-banner-visible .hero__title {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__title {
     font-size: 1.625rem;
   }
 
-  .privacy-banner-visible .hero__description {
+  .privacy-banner-visible .hero.hero--cookie-tight .hero__description {
     -webkit-line-clamp: 1;
   }
 }
