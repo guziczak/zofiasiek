@@ -217,6 +217,22 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-white);
 }
 
+/* Na stronie głównej cały hero (obraz i tekst) jest sticky. Kolejne sekcje
+   przesuwają się NAD nim, jak w Hul. Domyślne sekcje odtwarzają teksturę
+   tła body, żeby obraz nie prześwitywał pod ich treścią. */
+.hero ~ .section {
+  position: relative;
+  z-index: 2;
+}
+
+.hero ~ .section:not(.section--warm):not(.section--dark) {
+  background-color: var(--color-texture-base);
+  background-image:
+    linear-gradient(var(--texture-scrim), var(--texture-scrim)),
+    url('../img/tlo.jpg');
+  background-repeat: repeat;
+}
+
 .text-center {
   text-align: center;
 }
@@ -524,7 +540,9 @@ p + p { margin-top: var(--space-sm); }
 
 /* ----- 7. Hero ----- */
 .hero {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1;
   min-height: 100vh;
   /* Nie utrzymuj automatycznej kotwicy scrolla na bloku zmieniającym układ
      po inicjalizacji zgód; naturalne przewijanie reszty strony bez zmian. */
@@ -542,10 +560,6 @@ p + p { margin-top: var(--space-sm); }
   z-index: 1;
   max-width: 700px;
   padding: 0 var(--space-md);
-  /* Obraz zostaje pod transparentnym headerem, ale przewijany tekst
-     jest przycinany dokładnie na jego dolnej krawędzi. */
-  -webkit-clip-path: inset(var(--hero-text-clip-top, 0px) 0 0 0);
-  clip-path: inset(var(--hero-text-clip-top, 0px) 0 0 0);
 }
 
 .hero__subtitle {
@@ -1192,6 +1206,8 @@ p + p { margin-top: var(--space-sm); }
 
 /* ----- 16. Footer ----- */
 .footer {
+  position: relative;
+  z-index: 2;
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
   /* Dopóki baner zgód jest widoczny, stopka dokłada pod sobą jego wysokość,
@@ -2460,18 +2476,6 @@ body {
   z-index: 0;
   background-color: #3a3228;
   overflow: hidden;
-}
-
-/* Wzór z Hul: nieruchome zdjęcie pod nagłówkiem, ale normalnie przewijana
-   treść hero. JS przycina fixed warstwę na granicy kolejnej sekcji,
-   więc nie prześwituje pod zawartością strony. */
-.hero-slider--pinned {
-  position: fixed;
-  bottom: auto;
-  width: 100%;
-  height: var(--hero-media-height, 100vh);
-  -webkit-clip-path: inset(0 0 var(--hero-clip-bottom, 0px) 0);
-  clip-path: inset(0 0 var(--hero-clip-bottom, 0px) 0);
 }
 
 .hero-slider__slide {
