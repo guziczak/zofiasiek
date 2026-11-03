@@ -282,13 +282,6 @@ p + p { margin-top: var(--space-sm); }
   font-size: 0.75rem;
 }
 
-/* Na stronie głównej wyłącz pionowy rubber-band na granicy dokumentu.
-   Bez tego iOS potrafi przesunąć hero pod stałym nagłówkiem i odsłonić
-   tło strony. Klasa jest dodawana tylko dla strony z hero w main.js. */
-html.home-overscroll-guard {
-  overscroll-behavior-y: none;
-}
-
 /* ----- 6. Header & Navigation ----- */
 .header {
   position: fixed;
@@ -2399,6 +2392,18 @@ body {
   overflow: hidden;
 }
 
+/* Wzór z Hul: nieruchome zdjęcie pod nagłówkiem, ale normalnie przewijana
+   treść hero. JS przycina fixed warstwę na granicy kolejnej sekcji,
+   więc nie prześwituje pod zawartością strony. */
+.hero-slider--pinned {
+  position: fixed;
+  bottom: auto;
+  width: 100%;
+  height: var(--hero-media-height, 100vh);
+  -webkit-clip-path: inset(0 0 var(--hero-clip-bottom, 0px) 0);
+  clip-path: inset(0 0 var(--hero-clip-bottom, 0px) 0);
+}
+
 .hero-slider__slide {
   position: absolute;
   inset: 0;
@@ -2456,7 +2461,7 @@ body {
   border-radius: 100px;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  z-index: 2;
+  z-index: 0; /* za treścią hero, tak jak poprzednio wewnątrz slidera */
 }
 
 .hero-slider__dot {
