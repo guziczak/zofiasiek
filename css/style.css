@@ -1561,7 +1561,8 @@ body.privacy-dialog-open {
   justify-content: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 998;
-  transition: all var(--transition);
+  /* Bottom animates more gently; other interactions keep their existing timing. */
+  transition: all var(--transition), bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-cta:hover {
