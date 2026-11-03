@@ -272,24 +272,41 @@ function initHeader() {
 
   const isHomePage = header.classList.contains('header--transparent');
   const hero = isHomePage ? document.querySelector('.hero') : null;
+  const heroContent = hero?.querySelector('.hero__content');
+  let previousClip = -1;
 
   function updateHeader() {
     if (!isHomePage) return;
 
-    // Keep the header transparent while the hero artwork is behind it.
-    // Switching at scrollY > 50 made the header turn white in the middle
-    // of the hero and cover its heading on mobile Safari.
+    const headerBottom = header.getBoundingClientRect().bottom;
     const heroBottom = hero?.getBoundingClientRect().bottom ?? 0;
-    const overHero = heroBottom > header.getBoundingClientRect().height;
+    const overHero = heroBottom > headerBottom;
+
+    // Keep the painting visible behind the transparent header, but never
+    // let the scrolling title, description or CTA overlap the logo/menu.
+    // Clip only the content layer at the viewport position of the header.
+    if (heroContent) {
+      const rect = heroContent.getBoundingClientRect();
+      const clipTop = Math.ceil(Math.max(0, Math.min(rect.height, headerBottom - rect.top)));
+      if (clipTop !== previousClip) {
+        heroContent.style.setProperty('--hero-text-clip-top', `${clipTop}px`);
+        previousClip = clipTop;
+      }
+    }
+
     header.classList.toggle('header--transparent', overHero);
     header.classList.toggle('header--solid', !overHero);
   }
 
   if (isHomePage) {
-    // Przywracanie pozycji przy odświeżaniu obsługuje wczesny skrypt w <head>.
-    // Tu tylko odświeżamy wygląd nagłówka przy scrollu i po powrocie z bfcache.
     window.addEventListener('scroll', updateHeader, { passive: true });
+    window.addEventListener('resize', updateHeader, { passive: true });
+    window.visualViewport?.addEventListener('resize', updateHeader, { passive: true });
     window.addEventListener('pageshow', updateHeader);
+    document.fonts?.ready?.then(updateHeader);
+    if ('ResizeObserver' in window && heroContent) {
+      new ResizeObserver(updateHeader).observe(heroContent);
+    }
     updateHeader();
   } else {
     header.classList.add('header--solid');
