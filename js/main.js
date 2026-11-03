@@ -649,7 +649,7 @@ function initCookieConsent() {
 
 function resolveSiteUrl(path) {
   const explicitBase = document.querySelector('base')?.href;
-  const siteRoot = explicitBase || new URL('/', window.location.origin).href;
+  const siteRoot = explicitBase || SEARCH_PATHS.root || new URL('/', window.location.origin).href;
   return new URL(path.replace(/^\/+/, ''), siteRoot).href;
 }
 
@@ -659,11 +659,14 @@ function renderPrivacyBanner() {
   privacyBanner.setAttribute('aria-label', STR.privacySettings);
   privacyBanner.innerHTML = `
     <div class="cookie-banner__inner">
-      <p class="cookie-banner__text">${STR.cookieIntro} <a href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>.</p>
+      <p class="cookie-banner__text">${STR.cookieIntro}</p>
       <div class="cookie-banner__actions">
         <button type="button" class="btn btn--primary btn--small" data-consent-accept-all>${STR.acceptAll}</button>
         <button type="button" class="btn btn--outline btn--small" data-consent-reject>${STR.rejectOptional}</button>
-        <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
+        <div class="cookie-banner__links">
+          <a class="cookie-banner__more" href="${resolveSiteUrl(STR.privacyUrl)}">${STR.learnMore}</a>
+          <button type="button" class="cookie-banner__settings" data-consent-settings>${STR.settings}</button>
+        </div>
       </div>
     </div>`;
 }
