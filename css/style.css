@@ -2256,7 +2256,7 @@ body.privacy-dialog-open {
      by pierwsze CTA zmieściło się nad banerem i telefonem. Wartość podaje JS
      na podstawie rzeczywistych wysokości, a nie stałego offsetu. */
   .privacy-banner-visible .hero__content {
-    transform: translateY(calc(-1 * var(--hero-cta-lift, 0px)));
+    transform: translateY(calc(0px - var(--hero-cta-lift, 0px)));
   }
 
   .privacy-banner-visible .hero__title {
