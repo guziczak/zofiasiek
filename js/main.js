@@ -266,36 +266,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initExpandable();
 });
 
-/* ----- Sticky Header -----
-   Hero (obraz i treść) jest jednym elementem sticky. Dopóki kolejna sekcja
-   nie zasłoni jego górnej części, pokazuj przezroczysty nagłówek nad obrazem. */
+/* ----- Header & normal document scrolling -----
+   At the top, the navigation overlays the artwork. Once the document scrolls,
+   give it a solid background so moving text never overlaps the logo/menu. */
 function initHeader() {
   const header = document.querySelector('.header');
   if (!header) return;
 
-  const isHomePage = header.classList.contains('header--transparent');
-  const hero = isHomePage ? document.querySelector('.hero') : null;
-  const followingSection = hero?.nextElementSibling;
+  const hero = document.querySelector('.hero');
+  const isHomePage = Boolean(hero && header.classList.contains('header--transparent'));
 
   function updateHeader() {
-    if (!isHomePage) return;
-    const headerBottom = header.getBoundingClientRect().bottom;
-    const sectionTop = followingSection?.getBoundingClientRect().top ?? Infinity;
-    const overHero = sectionTop > headerBottom;
-    header.classList.toggle('header--transparent', overHero);
-    header.classList.toggle('header--solid', !overHero);
+    const atTop = isHomePage && window.scrollY <= 24;
+    header.classList.toggle('header--transparent', atTop);
+    header.classList.toggle('header--solid', !atTop);
   }
 
-  if (isHomePage) {
-    window.addEventListener('scroll', updateHeader, { passive: true });
-    window.addEventListener('resize', updateHeader, { passive: true });
-    window.visualViewport?.addEventListener('resize', updateHeader, { passive: true });
-    window.addEventListener('pageshow', updateHeader);
-    document.fonts?.ready?.then(updateHeader);
-    updateHeader();
-  } else {
-    header.classList.add('header--solid');
-  }
+  window.addEventListener('scroll', updateHeader, { passive: true });
+  window.addEventListener('resize', updateHeader, { passive: true });
+  window.addEventListener('pageshow', updateHeader);
+  updateHeader();
 }
 
 /* ----- Mobile Navigation ----- */
@@ -616,11 +606,13 @@ function initHeroCookiePlacement() {
       return;
     }
 
-    // 'top' is animated; subtract its CURRENT interpolated offset to
-    // recover the unshifted centered positions without a feedback loop.
+    // Measure the unshifted block in DOCUMENT coordinates. Subtract the
+    // current animated offset and add scrollY, so scrolling cannot change
+    // the cookie lift or pin the text while the background keeps moving.
     const currentOffset = Number.parseFloat(getComputedStyle(content).top) || 0;
-    const naturalPrimaryBottom = primary.getBoundingClientRect().bottom - currentOffset;
-    const naturalContentTop = content.getBoundingClientRect().top - currentOffset;
+    const scrollY = window.scrollY;
+    const naturalPrimaryBottom = primary.getBoundingClientRect().bottom - currentOffset + scrollY;
+    const naturalContentTop = content.getBoundingClientRect().top - currentOffset + scrollY;
     const bannerBottom = Number.parseFloat(getComputedStyle(banner).bottom) || 0;
     const bannerFinalTop = window.innerHeight - bannerBottom - banner.offsetHeight;
     const requiredLift = Math.max(0, Math.ceil(naturalPrimaryBottom + GAP - bannerFinalTop));
@@ -636,7 +628,9 @@ function initHeroCookiePlacement() {
       return;
     }
 
-    const next = `${requiredLift}px`;
+    // On exceptionally short screens, never move the title behind the
+    // navigation to satisfy an impossible fit. The page remains scrollable.
+    const next = `${Math.min(requiredLift, safeLift)}px`;
     if (content.style.getPropertyValue('--hero-cookie-lift') !== next) {
       content.style.setProperty('--hero-cookie-lift', next);
       scheduleMobilePhoneCtaPlacement();

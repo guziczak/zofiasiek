@@ -217,22 +217,6 @@ p + p { margin-top: var(--space-sm); }
   color: var(--color-white);
 }
 
-/* Na stronie głównej cały hero (obraz i tekst) jest sticky. Kolejne sekcje
-   przesuwają się NAD nim, jak w Hul. Domyślne sekcje odtwarzają teksturę
-   tła body, żeby obraz nie prześwitywał pod ich treścią. */
-.hero ~ .section {
-  position: relative;
-  z-index: 2;
-}
-
-.hero ~ .section:not(.section--warm):not(.section--dark) {
-  background-color: var(--color-texture-base);
-  background-image:
-    linear-gradient(var(--texture-scrim), var(--texture-scrim)),
-    url('../img/tlo.jpg');
-  background-repeat: repeat;
-}
-
 .text-center {
   text-align: center;
 }
@@ -540,9 +524,7 @@ p + p { margin-top: var(--space-sm); }
 
 /* ----- 7. Hero ----- */
 .hero {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  position: relative;
   min-height: 100vh;
   /* Nie utrzymuj automatycznej kotwicy scrolla na bloku zmieniającym układ
      po inicjalizacji zgód; naturalne przewijanie reszty strony bez zmian. */
@@ -1214,8 +1196,6 @@ p + p { margin-top: var(--space-sm); }
 
 /* ----- 16. Footer ----- */
 .footer {
-  position: relative;
-  z-index: 2;
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
   /* Dopóki baner zgód jest widoczny, stopka dokłada pod sobą jego wysokość,
