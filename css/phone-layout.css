@@ -1,0 +1,108 @@
+/* The hero phone has a real layout cell, never an overlay over text or CTAs.
+   Keep the existing floating control for the rest of the page and the footer. */
+.hero__phone-slot {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hero--phone-layout .hero__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 56px;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .hero--phone-layout .hero__actions > .btn--primary {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    min-height: 56px;
+    width: 100%;
+    padding-inline: 12px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero--phone-layout .hero__actions > .btn--outline {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    min-height: 56px;
+    width: 100%;
+  }
+
+  .hero--phone-layout .hero__phone-slot {
+    display: flex;
+    grid-column: 2;
+    grid-row: 1;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    min-height: 56px;
+  }
+
+  .hero__phone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-accent-dark);
+    color: var(--color-on-accent);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .hero__phone:hover {
+    background: var(--color-accent-darker);
+    color: var(--color-on-accent);
+  }
+
+  .hero__phone:focus-visible {
+    outline: 3px solid var(--color-white);
+    outline-offset: 3px;
+  }
+
+  .hero__phone svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    pointer-events: none;
+  }
+
+  /* The floating control must not compete with the in-flow hero phone.
+     display:none also excludes it from focus and the old collision solver. */
+  .hero-phone-in-flow .mobile-cta:not(.mobile-cta--docked) {
+    display: none;
+  }
+}
+
+/* Very narrow screens keep both contact buttons full width. The phone gets
+   its own row BEFORE the primary CTA, so the cookie-clearance calculation
+   still accounts for it without reserving space for the secondary CTA. */
+@media (max-width: 340px) {
+  .hero--phone-layout .hero__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero--phone-layout .hero__phone-slot {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .hero--phone-layout .hero__actions > .btn--primary {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .hero--phone-layout .hero__actions > .btn--outline {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
