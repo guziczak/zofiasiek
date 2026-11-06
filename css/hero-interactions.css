@@ -1,0 +1,17 @@
+/* Pin only the artwork. The hero, its copy, CTAs and slider controls remain
+   in normal document flow. The clip prevents the fixed image from showing
+   through later sections; it does not pin those sections or their content. */
+@supports (clip-path: inset(0)) {
+  .hero {
+    -webkit-clip-path: inset(0);
+    clip-path: inset(0);
+  }
+
+  .hero > .hero-slider {
+    position: fixed;
+    inset: 0 0 auto;
+    width: 100%;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
