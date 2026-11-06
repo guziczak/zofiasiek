@@ -15,23 +15,13 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   let raisedForCta = false;
   let frame = 0;
 
-  function setLift(lift, snap) {
+  function setLift(lift) {
     const value = lift > 0 ? `${Math.ceil(lift)}px` : '';
     if (phone.style.getPropertyValue('--mobile-cta-lift') === value) return;
-    const previousTransition = phone.style.transitionProperty;
-    // A 400ms bottom animation can otherwise travel THROUGH the hitbox,
-    // even when both its start and end positions are outside the buttons.
-    if (snap) {
-      phone.style.transitionProperty = 'background-color, color, box-shadow, opacity, transform';
-    }
+    // Let CSS interpolate from the current position, including when a
+    // gesture reverses direction. Never disable the bottom transition.
     if (value) phone.style.setProperty('--mobile-cta-lift', value);
     else phone.style.removeProperty('--mobile-cta-lift');
-    if (snap) {
-      // Commit the safe position before restoring ordinary transitions.
-      phone.getBoundingClientRect();
-      if (previousTransition) phone.style.transitionProperty = previousTransition;
-      else phone.style.removeProperty('transition-property');
-    }
   }
 
   function update() {
@@ -42,7 +32,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
         phone.classList.contains('mobile-cta--footer-hidden') ||
         phone.classList.contains('mobile-cta--docked')) {
       raisedForCta = false;
-      setLift(0, true);
+      setLift(0);
       return;
     }
 
@@ -69,20 +59,16 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       group.top < normalTop + height + clearance &&
       group.bottom > normalTop - clearance;
 
-    const wasRaised = raisedForCta;
     raisedForCta = collision;
     const desiredTop = group.top - height - ENTER_CLEARANCE;
     const minimumTop = Math.max(8, headerBottom + 8);
     const lift = collision
       ? Math.ceil(Math.min(Math.max(0, normalTop - desiredTop), Math.max(0, normalTop - minimumTop)))
       : 0;
-    const targetTop = normalTop - lift;
-    const crossesGroup = groupVisible && horizontalOverlap &&
-      Math.min(phoneRect.top, targetTop) < group.bottom + ENTER_CLEARANCE &&
-      Math.max(phoneRect.bottom, targetTop + height) > group.top - ENTER_CLEARANCE;
-    // Track scrolling without animation lag while guarding. The return must
-    // not briefly pass through the gap either. Safe unrelated moves keep CSS easing.
-    setLift(lift, collision || wasRaised || crossesGroup);
+    // The combined hitbox and hysteresis choose the destination, not the
+    // animation path. Passing briefly over a button is intentional; the
+    // gap between buttons is never selected as a resting position.
+    setLift(lift);
   }
 
   function requestUpdate() {
