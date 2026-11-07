@@ -1,3 +1,108 @@
+/* On homepages, derive consent spacing from the CURRENT natural layout.
+   This replaces main.js's one-way compact fallback before DOMContentLoaded.
+   Measure both modes synchronously: no intermediate class state is painted. */
+initHeroCookiePlacement = function initRecoverableHeroCookiePlacement() {
+  'use strict';
+  const hero = document.querySelector('.hero');
+  const content = hero?.querySelector('.hero__content');
+  const primary = content?.querySelector('.hero__actions .btn--primary');
+  const banner = document.querySelector('.cookie-banner');
+  const header = document.querySelector('.header');
+  if (!hero || !content || !primary || !banner) return;
+
+  const root = document.documentElement;
+  const mobile = window.matchMedia('(max-width: 768px)');
+  const GAP = 12;
+  const HEADER_GAP = 8;
+  let frame = 0;
+  let wasOverscrolling = false;
+
+  function measure() {
+    const offset = parseFloat(getComputedStyle(content).top) || 0;
+    const scroll = window.scrollY;
+    // Remove the CURRENT interpolated parent offset, not its future target.
+    // Child copy offsets do not alter the parent or the CTA layout boxes.
+    const naturalTop = content.getBoundingClientRect().top - offset + scroll;
+    const primaryBottom = primary.getBoundingClientRect().bottom - offset + scroll;
+    const bannerInset = parseFloat(getComputedStyle(banner).bottom) || 0;
+    const bannerTop = window.innerHeight - bannerInset - banner.offsetHeight;
+    const headerBottom = header?.getBoundingClientRect().bottom || 0;
+    return {
+      required: Math.max(0, Math.ceil(primaryBottom + GAP - bannerTop)),
+      safe: Math.max(0, Math.floor(naturalTop - headerBottom - HEADER_GAP))
+    };
+  }
+
+  function update() {
+    frame = 0;
+    // iOS rubber-band coordinates are transient. Preserve the last settled
+    // layout during the pull, then measure again when the document returns.
+    if (window.scrollY < -0.5) {
+      wasOverscrolling = true;
+      return;
+    }
+    const pending = root.classList.contains('privacy-banner-visible') &&
+      banner.classList.contains('visible');
+    const previouslyTight = hero.classList.contains('hero--cookie-tight');
+    // Always test the normal typography first. Testing the compact layout
+    // itself cannot tell us whether the full layout fits again.
+    hero.classList.remove('hero--cookie-tight');
+    let lift = 0;
+    if (pending) {
+      let fit = measure();
+      if (mobile.matches && fit.required > fit.safe) {
+        hero.classList.add('hero--cookie-tight');
+        fit = measure();
+      }
+      lift = Math.min(fit.required, fit.safe);
+    }
+    const next = lift > 0 ? `${lift}px` : '';
+    const changed = content.style.getPropertyValue('--hero-cookie-lift') !== next;
+    if (changed) {
+      if (next) content.style.setProperty('--hero-cookie-lift', next);
+      else content.style.removeProperty('--hero-cookie-lift');
+    }
+    if (changed || previouslyTight !== hero.classList.contains('hero--cookie-tight')) {
+      scheduleMobilePhoneCtaPlacement();
+    }
+  }
+
+  function requestUpdate() {
+    if (!frame) frame = requestAnimationFrame(update);
+  }
+
+  scheduleHeroCookiePlacement = requestUpdate;
+  content.addEventListener('transitionend', event => {
+    if (event.target === content && event.propertyName === 'top') {
+      scheduleMobilePhoneCtaPlacement();
+    }
+  });
+  window.addEventListener('resize', requestUpdate, { passive: true });
+  window.addEventListener('pageshow', requestUpdate);
+  window.visualViewport?.addEventListener('resize', requestUpdate, { passive: true });
+  // Normal scrolling must not re-center the copy. Only a bounce recovery
+  // needs this extra measurement; real size changes have their own hooks.
+  window.addEventListener('scroll', () => {
+    if (window.scrollY < -0.5) wasOverscrolling = true;
+    else if (wasOverscrolling) {
+      wasOverscrolling = false;
+      requestUpdate();
+    }
+  }, { passive: true });
+  window.addEventListener('scrollend', requestUpdate, { passive: true });
+  window.addEventListener('touchend', requestUpdate, { passive: true });
+  window.addEventListener('touchcancel', requestUpdate, { passive: true });
+  document.fonts?.ready?.then(requestUpdate);
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(requestUpdate);
+    observer.observe(content);
+    observer.observe(primary);
+    observer.observe(banner);
+    if (header) observer.observe(header);
+  }
+  requestUpdate();
+};
+
 /* Loaded after main.js, before DOMContentLoaded on the homepages only.
    Replace the legacy initializer rather than running a second phone solver.
    No cloned phone, additional CTA cell, or changes to button widths. */
@@ -24,6 +129,9 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     return range;
   });
   let motionUntil = 0;
+  let viewportKey = '';
+  let returnedFromPull = false;
+  let wasAtTop = window.scrollY <= 0.5;
 
   function watchMotion() {
     motionUntil = performance.now() + 500;
@@ -72,7 +180,15 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // Bound the lift in document coordinates, like the cookie adjustment.
     // This protects the heading at page top without pinning it to the menu
     // when the user deliberately scrolls the entire section out of view.
-    const maxLift = Math.max(0, Math.floor(naturalTop + window.scrollY - headerBottom - 8));
+    // The parent may still be animating to a new cookie offset. Reserve
+    // space for its final position too; otherwise the two lifts can add up
+    // and temporarily put the subtitle behind the fixed header.
+    const parentOffset = parseFloat(getComputedStyle(content).top) || 0;
+    const parentTarget = root.classList.contains('privacy-banner-visible')
+      ? -(parseFloat(content.style.getPropertyValue('--hero-cookie-lift')) || 0) : 0;
+    const remainingParentLift = Math.min(0, parentTarget - parentOffset);
+    const maxLift = Math.max(0, Math.floor(
+      naturalTop + window.scrollY + remainingParentLift - headerBottom - 8));
     setCopyLift(Math.max(0, Math.min(required, maxLift)));
   }
   let raisedForCta = false;
@@ -90,6 +206,21 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
 
   function update() {
     frame = 0;
+    if (window.scrollY < -0.5) {
+      returnedFromPull = true;
+      return;
+    }
+    const key = [window.innerWidth, window.innerHeight,
+      root.classList.contains('privacy-banner-visible')].join(':');
+    const atTop = window.scrollY <= 0.5;
+    const reachedTop = atTop && !wasAtTop;
+    wasAtTop = atTop;
+    // Hysteresis is for scrolling, not for retaining an old viewport state.
+    if (key !== viewportKey || returnedFromPull || reachedTop) {
+      viewportKey = key;
+      returnedFromPull = false;
+      raisedForCta = false;
+    }
     const style = getComputedStyle(phone);
     if (!mobile.matches || style.position !== 'fixed' ||
         style.display === 'none' || style.visibility === 'hidden' ||
@@ -146,6 +277,9 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   window.addEventListener('scroll', requestUpdate, { passive: true });
   window.addEventListener('resize', requestUpdate, { passive: true });
   window.addEventListener('pageshow', requestUpdate);
+  window.addEventListener('scrollend', requestUpdate, { passive: true });
+  window.addEventListener('touchend', requestUpdate, { passive: true });
+  window.addEventListener('touchcancel', requestUpdate, { passive: true });
   window.visualViewport?.addEventListener('resize', requestUpdate, { passive: true });
   window.visualViewport?.addEventListener('scroll', requestUpdate, { passive: true });
   if (typeof mobile.addEventListener === 'function') mobile.addEventListener('change', requestUpdate);
