@@ -30,7 +30,8 @@
    The existing reduced-motion rule still overrides transition duration. */
 @media (max-width: 768px) {
   .scroll-top {
-    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 64px + var(--phone-controls-lift, 0px));
+    --phone-controls-step: 64px; /* phone height (56px) plus the 8px gap */
+    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + var(--phone-controls-step) + var(--phone-controls-lift, 0px));
     transition: all var(--transition), bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }

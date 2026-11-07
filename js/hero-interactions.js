@@ -196,11 +196,13 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   }
   // State belongs to each complete group, never to an individual button.
   const guardedGroups = new Set();
+  let previousTopVisible = false;
   let frame = 0;
 
   function setLift(lift) {
     const value = lift > 0 ? `${Math.ceil(lift)}px` : '';
-    if (phone.style.getPropertyValue('--mobile-cta-lift') === value) return;
+    if (phone.style.getPropertyValue('--mobile-cta-lift') === value &&
+        (!scrollTopButton || scrollTopButton.style.getPropertyValue('--phone-controls-lift') === value)) return;
     // Let CSS interpolate from the current position, including when a
     // gesture reverses direction. Never disable the bottom transition.
     if (value) phone.style.setProperty('--mobile-cta-lift', value);
@@ -219,7 +221,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       return;
     }
     const key = [window.innerWidth, window.innerHeight,
-      root.classList.contains('privacy-banner-visible')].join(':');
+      root.classList.contains('privacy-banner-visible'),
+      scrollTopButton?.classList.contains('visible') || false].join(':');
     const atTop = window.scrollY <= 0.5;
     const reachedTop = atTop && !wasAtTop;
     wasAtTop = atTop;
@@ -251,6 +254,35 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const height = phone.offsetHeight;
     const normalTop = window.innerHeight - baseBottom - height;
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
+    // Test the entire VISIBLE stack at its unlifted destination: phone,
+    // spacer and back-to-top button. Never derive this from animated bottom
+    // values, or the collision would disappear as soon as the stack moves.
+    const topStyle = scrollTopButton ? getComputedStyle(scrollTopButton) : null;
+    const topVisible = topStyle && topStyle.position === 'fixed' &&
+      topStyle.visibility !== 'hidden' && topStyle.display !== 'none';
+    // A completed fade changes the stack footprint even without a scroll.
+    // Do not retain a collision that belonged only to the vanished arrow.
+    if (Boolean(topVisible) !== previousTopVisible) {
+      previousTopVisible = Boolean(topVisible);
+      guardedGroups.clear();
+    }
+    let controlsTop = normalTop;
+    let controlsBottom = normalTop + height;
+    let controlsLeft = phoneRect.left;
+    let controlsRight = phoneRect.right;
+    if (topVisible) {
+      const topRect = scrollTopButton.getBoundingClientRect();
+      // Shared with the CSS resting offset; dimensions come from the
+      // rendered control, not a guessed total height for two circles.
+      const step = parseFloat(topStyle.getPropertyValue('--phone-controls-step')) || 64;
+      const topRestingBottom = inset + bannerOffset + step;
+      const topRestingTop = window.innerHeight - topRestingBottom - scrollTopButton.offsetHeight;
+      controlsTop = Math.min(controlsTop, topRestingTop);
+      controlsBottom = Math.max(controlsBottom, window.innerHeight - topRestingBottom);
+      controlsLeft = Math.min(controlsLeft, topRect.left);
+      controlsRight = Math.max(controlsRight, topRect.right);
+    }
+    const controlsHeight = controlsBottom - controlsTop;
     // Protect complete action rows throughout this homepage, including the
     // portfolio links and the bottom contact CTA. Empty space between
     // buttons remains inside each exclusion rectangle. No DOM tap overlay.
@@ -261,31 +293,27 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       return groupStyle.display !== 'none' && groupStyle.visibility !== 'hidden' &&
         rect.width > 0 && rect.height > 0 && rect.bottom > headerBottom &&
         rect.top < window.innerHeight &&
-        rect.left < phoneRect.right + ENTER_CLEARANCE &&
-        rect.right > phoneRect.left - ENTER_CLEARANCE;
+        rect.left < controlsRight + ENTER_CLEARANCE &&
+        rect.right > controlsLeft - ENTER_CLEARANCE;
     });
     const nextGuarded = new Set();
-    let desiredTop = normalTop;
+    let desiredTop = controlsTop;
     // A move above one group must not land inside another. Descending order
-    // solves the intervals from the phone's resting position upwards.
+    // solves the intervals from the complete stack's resting position upwards.
     groups.sort((a, b) => b.rect.top - a.rect.top);
     for (const {element, rect} of groups) {
       const clearance = guardedGroups.has(element) ? EXIT_CLEARANCE : ENTER_CLEARANCE;
-      if (rect.top < desiredTop + height + clearance &&
+      if (rect.top < desiredTop + controlsHeight + clearance &&
           rect.bottom > desiredTop - clearance) {
-        desiredTop = Math.min(desiredTop, rect.top - height - ENTER_CLEARANCE);
+        desiredTop = Math.min(desiredTop, rect.top - controlsHeight - ENTER_CLEARANCE);
         nextGuarded.add(element);
       }
     }
     guardedGroups.clear();
     nextGuarded.forEach(element => guardedGroups.add(element));
-    const topControlVisible = scrollTopButton &&
-      getComputedStyle(scrollTopButton).visibility !== 'hidden' &&
-      getComputedStyle(scrollTopButton).display !== 'none';
-    const controlsAbovePhone = topControlVisible ? 64 : 0;
-    const minimumTop = Math.max(8, headerBottom + 8 + controlsAbovePhone);
-    const lift = Math.ceil(Math.min(Math.max(0, normalTop - desiredTop),
-      Math.max(0, normalTop - minimumTop)));
+    const minimumTop = Math.max(8, headerBottom + 8);
+    const lift = Math.ceil(Math.min(Math.max(0, controlsTop - desiredTop),
+      Math.max(0, controlsTop - minimumTop)));
     // The combined hitbox and hysteresis choose the destination, not the
     // animation path. Passing briefly over a button is intentional; the
     // gap between buttons is never selected as a resting position.
@@ -313,11 +341,14 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const observer = new ResizeObserver(requestUpdate);
     actionGroups.forEach(element => observer.observe(element));
     observer.observe(phone);
+    if (scrollTopButton) observer.observe(scrollTopButton);
     copy.forEach(element => observer.observe(element));
     if (header) observer.observe(header);
   }
   if ('MutationObserver' in window) {
-    new MutationObserver(requestUpdate).observe(phone, { attributes: true, attributeFilter: ['class'] });
+    const observer = new MutationObserver(requestUpdate);
+    observer.observe(phone, { attributes: true, attributeFilter: ['class'] });
+    if (scrollTopButton) observer.observe(scrollTopButton, { attributes: true, attributeFilter: ['class'] });
   }
   // ResizeObserver does not report positional changes caused by 'top'.
   // Sample during consent/copy/phone motion as well as on user scroll.
@@ -326,6 +357,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   }
   content?.addEventListener('transitionrun', trackTransition);
   phone.addEventListener('transitionrun', trackTransition);
+  scrollTopButton?.addEventListener('transitionrun', watchMotion);
+  scrollTopButton?.addEventListener('transitionend', requestUpdate);
   // Portfolio groups reveal with a transform. Follow that short movement
   // as well as scroll events, then stop sampling once the transition ends.
   actionGroups.forEach(element => {
