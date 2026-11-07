@@ -95,6 +95,7 @@ initHeroCookiePlacement = function initRecoverableHeroCookiePlacement() {
   document.fonts?.ready?.then(requestUpdate);
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(requestUpdate);
+    observer.observe(hero);
     observer.observe(content);
     observer.observe(primary);
     observer.observe(banner);
@@ -110,6 +111,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   'use strict';
   const phone = document.querySelector('.mobile-cta');
   const actions = document.querySelector('.hero .hero__actions');
+  const actionGroups = [...document.querySelectorAll('.hero__actions, .portfolio-actions, .cta__actions')];
+  const scrollTopButton = document.querySelector('.scroll-top');
   if (!phone || !actions) return;
 
   const root = document.documentElement;
@@ -191,7 +194,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       naturalTop + window.scrollY + remainingParentLift - headerBottom - 8));
     setCopyLift(Math.max(0, Math.min(required, maxLift)));
   }
-  let raisedForCta = false;
+  // State belongs to each complete group, never to an individual button.
+  const guardedGroups = new Set();
   let frame = 0;
 
   function setLift(lift) {
@@ -201,6 +205,10 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // gesture reverses direction. Never disable the bottom transition.
     if (value) phone.style.setProperty('--mobile-cta-lift', value);
     else phone.style.removeProperty('--mobile-cta-lift');
+    // Keep the back-to-top control above the phone rather than colliding
+    // with it when the portfolio group pushes the phone upwards.
+    if (value) scrollTopButton?.style.setProperty('--phone-controls-lift', value);
+    else scrollTopButton?.style.removeProperty('--phone-controls-lift');
     watchMotion();
   }
 
@@ -219,14 +227,14 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     if (key !== viewportKey || returnedFromPull || reachedTop) {
       viewportKey = key;
       returnedFromPull = false;
-      raisedForCta = false;
+      guardedGroups.clear();
     }
     const style = getComputedStyle(phone);
     if (!mobile.matches || style.position !== 'fixed' ||
         style.display === 'none' || style.visibility === 'hidden' ||
         phone.classList.contains('mobile-cta--footer-hidden') ||
         phone.classList.contains('mobile-cta--docked')) {
-      raisedForCta = false;
+      guardedGroups.clear();
       setLift(0);
       setCopyLift(0);
       return;
@@ -243,24 +251,41 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const height = phone.offsetHeight;
     const normalTop = window.innerHeight - baseBottom - height;
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
-    // One rectangle covers BOTH buttons AND every pixel of the gap. It is
-    // geometry only, not an invisible DOM element that could intercept taps.
-    const group = actions.getBoundingClientRect();
-    const clearance = raisedForCta ? EXIT_CLEARANCE : ENTER_CLEARANCE;
-    const horizontalOverlap = group.left < phoneRect.right + clearance &&
-      group.right > phoneRect.left - clearance;
-    const groupVisible = group.width > 0 && group.height > 0 &&
-      group.bottom > headerBottom && group.top < window.innerHeight;
-    const collision = groupVisible && horizontalOverlap &&
-      group.top < normalTop + height + clearance &&
-      group.bottom > normalTop - clearance;
-
-    raisedForCta = collision;
-    const desiredTop = group.top - height - ENTER_CLEARANCE;
-    const minimumTop = Math.max(8, headerBottom + 8);
-    const lift = collision
-      ? Math.ceil(Math.min(Math.max(0, normalTop - desiredTop), Math.max(0, normalTop - minimumTop)))
-      : 0;
+    // Protect complete action rows throughout this homepage, including the
+    // portfolio links and the bottom contact CTA. Empty space between
+    // buttons remains inside each exclusion rectangle. No DOM tap overlay.
+    const groups = actionGroups.map(element => ({
+      element, rect: element.getBoundingClientRect()
+    })).filter(({element, rect}) => {
+      const groupStyle = getComputedStyle(element);
+      return groupStyle.display !== 'none' && groupStyle.visibility !== 'hidden' &&
+        rect.width > 0 && rect.height > 0 && rect.bottom > headerBottom &&
+        rect.top < window.innerHeight &&
+        rect.left < phoneRect.right + ENTER_CLEARANCE &&
+        rect.right > phoneRect.left - ENTER_CLEARANCE;
+    });
+    const nextGuarded = new Set();
+    let desiredTop = normalTop;
+    // A move above one group must not land inside another. Descending order
+    // solves the intervals from the phone's resting position upwards.
+    groups.sort((a, b) => b.rect.top - a.rect.top);
+    for (const {element, rect} of groups) {
+      const clearance = guardedGroups.has(element) ? EXIT_CLEARANCE : ENTER_CLEARANCE;
+      if (rect.top < desiredTop + height + clearance &&
+          rect.bottom > desiredTop - clearance) {
+        desiredTop = Math.min(desiredTop, rect.top - height - ENTER_CLEARANCE);
+        nextGuarded.add(element);
+      }
+    }
+    guardedGroups.clear();
+    nextGuarded.forEach(element => guardedGroups.add(element));
+    const topControlVisible = scrollTopButton &&
+      getComputedStyle(scrollTopButton).visibility !== 'hidden' &&
+      getComputedStyle(scrollTopButton).display !== 'none';
+    const controlsAbovePhone = topControlVisible ? 64 : 0;
+    const minimumTop = Math.max(8, headerBottom + 8 + controlsAbovePhone);
+    const lift = Math.ceil(Math.min(Math.max(0, normalTop - desiredTop),
+      Math.max(0, normalTop - minimumTop)));
     // The combined hitbox and hysteresis choose the destination, not the
     // animation path. Passing briefly over a button is intentional; the
     // gap between buttons is never selected as a resting position.
@@ -286,7 +311,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   else mobile.addListener(requestUpdate);
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(requestUpdate);
-    observer.observe(actions);
+    actionGroups.forEach(element => observer.observe(element));
     observer.observe(phone);
     copy.forEach(element => observer.observe(element));
     if (header) observer.observe(header);
@@ -301,8 +326,119 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   }
   content?.addEventListener('transitionrun', trackTransition);
   phone.addEventListener('transitionrun', trackTransition);
+  // Portfolio groups reveal with a transform. Follow that short movement
+  // as well as scroll events, then stop sampling once the transition ends.
+  actionGroups.forEach(element => {
+    element.addEventListener('transitionrun', watchMotion);
+    element.addEventListener('transitionend', requestUpdate);
+  });
   content?.addEventListener('transitionend', requestUpdate);
   phone.addEventListener('transitionend', requestUpdate);
   document.fonts?.ready?.then(requestUpdate);
   requestUpdate();
 };
+
+/* Recover only a documented attempt to reach page top, never an arbitrary
+   small scroll. iOS can settle a completed pull a toolbar-height below zero.
+   No touch cancellation, fixed body, snap points or perpetual scroll lock. */
+(function initHomeTopRecovery() {
+  'use strict';
+  function init() {
+    if (!document.querySelector('.hero')) return;
+    const mobile = window.matchMedia('(max-width: 768px)');
+    let gesture = null;
+    let armedUntil = 0;
+    let settleTimer = 0;
+    let expiryTimer = 0;
+    let lastY = window.scrollY;
+
+    function canRecover() {
+      const focused = document.activeElement;
+      return mobile.matches && (window.visualViewport?.scale || 1) <= 1.01 &&
+        !location.hash && !document.body.classList.contains('nav-open') &&
+        !document.body.classList.contains('privacy-dialog-open') &&
+        !document.querySelector('dialog[open], .lightbox.active, .search-overlay.active') &&
+        !focused?.matches('input, textarea, select, [contenteditable="true"]');
+    }
+    function cancel() {
+      armedUntil = 0;
+      clearTimeout(settleTimer);
+      clearTimeout(expiryTimer);
+    }
+    function checkSettledTop() {
+      if (gesture || !armedUntil || performance.now() > armedUntil || !canRecover()) return;
+      const y = window.scrollY;
+      // Limit correction to a small leftover offset after a witnessed top
+      // gesture. A deliberate scroll farther down the page is never reset.
+      const headerHeight = document.querySelector('.header')?.offsetHeight || 80;
+      const limit = Math.min(120, Math.max(80, headerHeight + 32));
+      if (y > limit) { cancel(); return; }
+      if (y < -0.5) return; // Native bounce is still in progress.
+      if (y > 0.5) window.scrollTo({top: 0, left: window.scrollX, behavior: 'instant'});
+      if (typeof scheduleHeroCookiePlacement === 'function') scheduleHeroCookiePlacement();
+      if (typeof scheduleMobilePhoneCtaPlacement === 'function') scheduleMobilePhoneCtaPlacement();
+    }
+    function scheduleCheck() {
+      if (!armedUntil) return;
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(checkSettledTop, 140);
+    }
+    function nestedScroller(target) {
+      for (let node = target instanceof Element ? target : target?.parentElement;
+           node && node !== document.body && node !== document.documentElement;
+           node = node.parentElement) {
+        const style = getComputedStyle(node);
+        if (/(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1) return true;
+      }
+      return false;
+    }
+    window.addEventListener('touchstart', event => {
+      cancel();
+      gesture = null;
+      if (event.touches.length !== 1 || !canRecover() || nestedScroller(event.target)) return;
+      gesture = {startY: event.touches[0].clientY, lastY: event.touches[0].clientY,
+        startScroll: Math.max(0, window.scrollY), requestedTop: false, towardTop: false};
+    }, {passive: true});
+    window.addEventListener('touchmove', event => {
+      if (!gesture) return;
+      if (event.touches.length !== 1) { gesture = null; cancel(); return; }
+      const y = event.touches[0].clientY;
+      const delta = y - gesture.lastY;
+      if (Math.abs(delta) > 2) gesture.towardTop = delta > 0;
+      gesture.lastY = y;
+      // A downward finger drag beyond the initial scroll distance expresses
+      // the same top intent even if the browser does not report negative Y.
+      if (y - gesture.startY > gesture.startScroll + 12 ||
+          (gesture.towardTop && window.scrollY <= 0.5 && y - gesture.startY > 12)) {
+        gesture.requestedTop = true;
+      }
+    }, {passive: true});
+    window.addEventListener('touchend', event => {
+      if (event.touches.length) return;
+      const shouldRecover = gesture?.requestedTop && gesture.towardTop;
+      gesture = null;
+      if (!shouldRecover || !canRecover()) return;
+      armedUntil = performance.now() + 1200;
+      expiryTimer = setTimeout(cancel, 1250);
+      scheduleCheck();
+    }, {passive: true});
+    window.addEventListener('touchcancel', () => { gesture = null; cancel(); }, {passive: true});
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (gesture && y < lastY && y <= 0.5) gesture.requestedTop = true;
+      lastY = y;
+      scheduleCheck();
+    }, {passive: true});
+    window.addEventListener('scrollend', scheduleCheck, {passive: true});
+    window.visualViewport?.addEventListener('resize', scheduleCheck, {passive: true});
+    window.visualViewport?.addEventListener('scroll', scheduleCheck, {passive: true});
+    // Further deliberate input always wins over the short recovery window.
+    ['wheel', 'keydown', 'pointerdown'].forEach(type => {
+      window.addEventListener(type, cancel, {passive: true});
+    });
+    window.addEventListener('pagehide', cancel);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, {once: true});
+  } else init();
+})();

@@ -25,3 +25,12 @@
     transition: top 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
+
+/* Keep the independent controls together when a CTA group lifts the phone.
+   The existing reduced-motion rule still overrides transition duration. */
+@media (max-width: 768px) {
+  .scroll-top {
+    bottom: calc(var(--space-md) + var(--privacy-banner-offset) + 64px + var(--phone-controls-lift, 0px));
+    transition: all var(--transition), bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
