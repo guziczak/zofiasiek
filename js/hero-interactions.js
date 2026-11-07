@@ -132,12 +132,15 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     return range;
   });
   let motionUntil = 0;
+  let verificationTimer = 0;
+  let geometryKey = '';
+  let suspended = false;
   let viewportKey = '';
   let returnedFromPull = false;
   let wasAtTop = window.scrollY <= 0.5;
 
   function watchMotion() {
-    motionUntil = performance.now() + 500;
+    motionUntil = Math.max(motionUntil, performance.now() + 500);
     requestUpdate();
   }
 
@@ -228,6 +231,9 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     wasAtTop = atTop;
     // Hysteresis is for scrolling, not for retaining an old viewport state.
     if (key !== viewportKey || returnedFromPull || reachedTop) {
+      // A touchend can arrive before the native bounce finishes. The
+      // geometry verifier below also observes its eventual return to zero.
+      if (returnedFromPull) scheduleHeroCookiePlacement();
       viewportKey = key;
       returnedFromPull = false;
       guardedGroups.clear();
@@ -251,8 +257,14 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const bannerOffset = parseFloat(rootStyle.getPropertyValue('--privacy-banner-offset')) || 0;
     const baseBottom = bannerOffset + (root.classList.contains('privacy-banner-visible') ? 12 : inset);
     const phoneRect = phone.getBoundingClientRect();
-    const height = phone.offsetHeight;
-    const normalTop = window.innerHeight - baseBottom - height;
+    const height = phoneRect.height;
+    // Recover the resting rectangle from the RENDERED fixed element and
+    // its current (possibly interpolated) CSS bottom. innerHeight can lag
+    // behind browser chrome/overscroll; it is not our positioning origin.
+    // Removing the current offset also prevents animation feedback loops.
+    const currentBottom = parseFloat(style.bottom) || 0;
+    const normalTop = Math.round((phoneRect.top + currentBottom - baseBottom) * 64) / 64;
+    const viewportBottom = Math.max(window.innerHeight, normalTop + height + baseBottom);
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
     // Test the entire VISIBLE stack at its unlifted destination: phone,
     // spacer and back-to-top button. Never derive this from animated bottom
@@ -276,9 +288,10 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       // rendered control, not a guessed total height for two circles.
       const step = parseFloat(topStyle.getPropertyValue('--phone-controls-step')) || 64;
       const topRestingBottom = inset + bannerOffset + step;
-      const topRestingTop = window.innerHeight - topRestingBottom - scrollTopButton.offsetHeight;
+      const topOffset = (parseFloat(topStyle.bottom) || 0) - topRestingBottom;
+      const topRestingTop = Math.round((topRect.top + topOffset) * 64) / 64;
       controlsTop = Math.min(controlsTop, topRestingTop);
-      controlsBottom = Math.max(controlsBottom, window.innerHeight - topRestingBottom);
+      controlsBottom = Math.max(controlsBottom, topRestingTop + topRect.height);
       controlsLeft = Math.min(controlsLeft, topRect.left);
       controlsRight = Math.max(controlsRight, topRect.right);
     }
@@ -292,7 +305,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       const groupStyle = getComputedStyle(element);
       return groupStyle.display !== 'none' && groupStyle.visibility !== 'hidden' &&
         rect.width > 0 && rect.height > 0 && rect.bottom > headerBottom &&
-        rect.top < window.innerHeight &&
+        rect.top < viewportBottom &&
         rect.left < controlsRight + ENTER_CLEARANCE &&
         rect.right > controlsLeft - ENTER_CLEARANCE;
     });
@@ -312,8 +325,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     guardedGroups.clear();
     nextGuarded.forEach(element => guardedGroups.add(element));
     const minimumTop = Math.max(8, headerBottom + 8);
-    const lift = Math.ceil(Math.min(Math.max(0, controlsTop - desiredTop),
-      Math.max(0, controlsTop - minimumTop)));
+    const lift = Math.max(0, Math.ceil(Math.min(Math.max(0, controlsTop - desiredTop),
+      Math.max(0, controlsTop - minimumTop)) - 0.05));
     // The combined hitbox and hysteresis choose the destination, not the
     // animation path. Passing briefly over a button is intentional; the
     // gap between buttons is never selected as a resting position.
@@ -323,24 +336,79 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   }
 
   function requestUpdate() {
-    if (!frame) frame = requestAnimationFrame(update);
+    if (!suspended && !document.hidden && !frame) frame = requestAnimationFrame(update);
+  }
+
+  // Size observers do not detect position-only changes. At rest, compare
+  // geometry twice a second and wake the solver only when something moved.
+  // This repairs late layout/viewport changes even when iOS sends no final
+  // scroll event. No permanent animation loop and no scroll manipulation.
+  function verifyGeometry() {
+    verificationTimer = 0;
+    if (suspended || document.hidden || !mobile.matches) return;
+    const viewport = window.visualViewport;
+    const values = [window.scrollY, window.innerWidth, window.innerHeight,
+      viewport?.offsetTop, viewport?.height, viewport?.scale,
+      root.classList.contains('privacy-banner-visible'), phone.className,
+      scrollTopButton?.className, phone.style.getPropertyValue('--mobile-cta-lift')];
+    for (const element of [phone, scrollTopButton, header, content, ...actionGroups]) {
+      if (!element) continue;
+      const rect = element.getBoundingClientRect();
+      values.push(...[rect.top, rect.bottom, rect.left, rect.right].map(v => Math.round(v * 4)));
+    }
+    const next = values.join(':');
+    if (next !== geometryKey) {
+      geometryKey = next;
+      requestUpdate();
+    }
+    verificationTimer = setTimeout(verifyGeometry, 500);
+  }
+
+  function settlePlacement() {
+    if (suspended || document.hidden) return;
+    motionUntil = Math.max(motionUntil, performance.now() + 1200);
+    requestUpdate();
+    if (!verificationTimer) verifyGeometry();
+  }
+
+  function suspendPlacement() {
+    suspended = true;
+    clearTimeout(verificationTimer);
+    verificationTimer = 0;
+    cancelAnimationFrame(frame);
+    frame = 0;
+  }
+
+  function resumePlacement() {
+    suspended = false;
+    geometryKey = '';
+    settlePlacement();
   }
 
   scheduleMobilePhoneCtaPlacement = requestUpdate;
   window.addEventListener('scroll', requestUpdate, { passive: true });
-  window.addEventListener('resize', requestUpdate, { passive: true });
-  window.addEventListener('pageshow', requestUpdate);
-  window.addEventListener('scrollend', requestUpdate, { passive: true });
-  window.addEventListener('touchend', requestUpdate, { passive: true });
-  window.addEventListener('touchcancel', requestUpdate, { passive: true });
-  window.visualViewport?.addEventListener('resize', requestUpdate, { passive: true });
-  window.visualViewport?.addEventListener('scroll', requestUpdate, { passive: true });
-  if (typeof mobile.addEventListener === 'function') mobile.addEventListener('change', requestUpdate);
-  else mobile.addListener(requestUpdate);
+  window.addEventListener('resize', settlePlacement, { passive: true });
+  window.addEventListener('load', settlePlacement);
+  window.addEventListener('pageshow', resumePlacement);
+  window.addEventListener('pagehide', suspendPlacement);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) suspendPlacement();
+    else resumePlacement();
+  });
+  window.addEventListener('scrollend', settlePlacement, { passive: true });
+  window.addEventListener('touchend', settlePlacement, { passive: true });
+  window.addEventListener('touchcancel', settlePlacement, { passive: true });
+  window.visualViewport?.addEventListener('resize', settlePlacement, { passive: true });
+  window.visualViewport?.addEventListener('scroll', settlePlacement, { passive: true });
+  if (typeof mobile.addEventListener === 'function') mobile.addEventListener('change', settlePlacement);
+  else mobile.addListener(settlePlacement);
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(requestUpdate);
     actionGroups.forEach(element => observer.observe(element));
     observer.observe(phone);
+    if (content) observer.observe(content);
+    const hero = actions.closest('.hero');
+    if (hero) observer.observe(hero);
     if (scrollTopButton) observer.observe(scrollTopButton);
     copy.forEach(element => observer.observe(element));
     if (header) observer.observe(header);
@@ -353,12 +421,13 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   // ResizeObserver does not report positional changes caused by 'top'.
   // Sample during consent/copy/phone motion as well as on user scroll.
   function trackTransition(event) {
-    if (event.propertyName === 'top' || event.propertyName === 'bottom') watchMotion();
+    if (['top', 'bottom', 'transform'].includes(event.propertyName)) watchMotion();
   }
   content?.addEventListener('transitionrun', trackTransition);
   phone.addEventListener('transitionrun', trackTransition);
   scrollTopButton?.addEventListener('transitionrun', watchMotion);
   scrollTopButton?.addEventListener('transitionend', requestUpdate);
+  scrollTopButton?.addEventListener('transitioncancel', settlePlacement);
   // Portfolio groups reveal with a transform. Follow that short movement
   // as well as scroll events, then stop sampling once the transition ends.
   actionGroups.forEach(element => {
@@ -366,9 +435,12 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     element.addEventListener('transitionend', requestUpdate);
   });
   content?.addEventListener('transitionend', requestUpdate);
+  content?.addEventListener('transitioncancel', settlePlacement);
   phone.addEventListener('transitionend', requestUpdate);
-  document.fonts?.ready?.then(requestUpdate);
-  requestUpdate();
+  phone.addEventListener('transitioncancel', settlePlacement);
+  document.fonts?.ready?.then(settlePlacement);
+  document.fonts?.addEventListener('loadingdone', settlePlacement);
+  settlePlacement();
 };
 
 /* Recover only a documented attempt to reach page top, never an arbitrary
