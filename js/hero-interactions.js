@@ -12,6 +12,69 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   const mobile = window.matchMedia('(max-width: 768px)');
   const ENTER_CLEARANCE = 12;
   const EXIT_CLEARANCE = 32;
+  const content = actions.closest('.hero__content');
+  // Move only these three text elements. Relative offsets do not change
+  // the hero's height, CTA positions, button widths or the consent layout.
+  const copy = [...(content?.children || [])].filter(element =>
+    element.matches('.hero__subtitle, .hero__title, .hero__description'));
+  const textRanges = copy.map(element => {
+    element.classList.add('hero__phone-copy');
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range;
+  });
+  let motionUntil = 0;
+
+  function watchMotion() {
+    motionUntil = performance.now() + 500;
+    requestUpdate();
+  }
+
+  function setCopyLift(lift) {
+    if (!content) return;
+    const value = lift > 0 ? `${lift}px` : '';
+    if (content.style.getPropertyValue('--hero-phone-copy-lift') === value) return;
+    if (value) content.style.setProperty('--hero-phone-copy-lift', value);
+    else content.style.removeProperty('--hero-phone-copy-lift');
+    watchMotion();
+  }
+
+  function clearCopyFromPhone(targetTop, phoneRect, height, headerBottom) {
+    if (!copy.length) return;
+    const currentOffset = parseFloat(getComputedStyle(copy[0]).top) || 0;
+    // Recover the original, unshifted text even during its transition.
+    // Measuring the shifted text would repeatedly lift/reset it on scroll.
+    const naturalTop = Math.min(...copy.map(element =>
+      element.getBoundingClientRect().top - currentOffset));
+    const lines = textRanges.flatMap((range, index) => {
+      const box = copy[index].getBoundingClientRect();
+      // Ranges include text hidden by the existing short-screen line clamp.
+      // Only painted lines may request extra space, not the clipped ones.
+      return [...range.getClientRects()]
+        .filter(rect => rect.top < box.bottom && rect.bottom > box.top)
+        .map(rect => ({left: rect.left, right: rect.right,
+          top: Math.max(rect.top, box.top) - currentOffset,
+          bottom: Math.min(rect.bottom, box.bottom) - currentOffset}));
+    });
+    // Both the current animated phone and its destination matter. Keep
+    // the copy clear until the returning phone actually passes below it.
+    const phoneTop = Math.min(phoneRect.top, targetTop);
+    const phoneBottom = Math.max(phoneRect.bottom, targetTop + height);
+    const nearPhone = lines.filter(line =>
+      line.left < phoneRect.right + ENTER_CLEARANCE &&
+      line.right > phoneRect.left - ENTER_CLEARANCE);
+    const obstructed = nearPhone.some(line =>
+      line.bottom > phoneTop - ENTER_CLEARANCE &&
+      line.top < phoneBottom + ENTER_CLEARANCE);
+    const required = obstructed
+      ? Math.ceil(Math.max(...nearPhone.map(line => line.bottom)) + ENTER_CLEARANCE - phoneTop)
+      : 0;
+    // Bound the lift in document coordinates, like the cookie adjustment.
+    // This protects the heading at page top without pinning it to the menu
+    // when the user deliberately scrolls the entire section out of view.
+    const maxLift = Math.max(0, Math.floor(naturalTop + window.scrollY - headerBottom - 8));
+    setCopyLift(Math.max(0, Math.min(required, maxLift)));
+  }
   let raisedForCta = false;
   let frame = 0;
 
@@ -22,6 +85,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // gesture reverses direction. Never disable the bottom transition.
     if (value) phone.style.setProperty('--mobile-cta-lift', value);
     else phone.style.removeProperty('--mobile-cta-lift');
+    watchMotion();
   }
 
   function update() {
@@ -33,6 +97,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
         phone.classList.contains('mobile-cta--docked')) {
       raisedForCta = false;
       setLift(0);
+      setCopyLift(0);
       return;
     }
 
@@ -69,6 +134,8 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // animation path. Passing briefly over a button is intentional; the
     // gap between buttons is never selected as a resting position.
     setLift(lift);
+    clearCopyFromPhone(normalTop - lift, phoneRect, height, headerBottom);
+    if (performance.now() < motionUntil) requestUpdate();
   }
 
   function requestUpdate() {
@@ -87,13 +154,21 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const observer = new ResizeObserver(requestUpdate);
     observer.observe(actions);
     observer.observe(phone);
+    copy.forEach(element => observer.observe(element));
     if (header) observer.observe(header);
   }
   if ('MutationObserver' in window) {
     new MutationObserver(requestUpdate).observe(phone, { attributes: true, attributeFilter: ['class'] });
   }
-  const content = actions.closest('.hero__content');
+  // ResizeObserver does not report positional changes caused by 'top'.
+  // Sample during consent/copy/phone motion as well as on user scroll.
+  function trackTransition(event) {
+    if (event.propertyName === 'top' || event.propertyName === 'bottom') watchMotion();
+  }
+  content?.addEventListener('transitionrun', trackTransition);
+  phone.addEventListener('transitionrun', trackTransition);
   content?.addEventListener('transitionend', requestUpdate);
+  phone.addEventListener('transitionend', requestUpdate);
   document.fonts?.ready?.then(requestUpdate);
   requestUpdate();
 };
