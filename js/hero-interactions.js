@@ -200,6 +200,9 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   // State belongs to each complete group, never to an individual button.
   const guardedGroups = new Set();
   let previousTopVisible = false;
+  let renderedOriginBias = 0;
+  let lastLiftChange = 0;
+  let stableGeometryAt = 0;
   let frame = 0;
 
   function setLift(lift) {
@@ -214,6 +217,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // with it when the portfolio group pushes the phone upwards.
     if (value) scrollTopButton?.style.setProperty('--phone-controls-lift', value);
     else scrollTopButton?.style.removeProperty('--phone-controls-lift');
+    lastLiftChange = performance.now();
     watchMotion();
   }
 
@@ -235,6 +239,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       // geometry verifier below also observes its eventual return to zero.
       if (returnedFromPull) scheduleHeroCookiePlacement();
       viewportKey = key;
+      renderedOriginBias = 0;
       returnedFromPull = false;
       guardedGroups.clear();
     }
@@ -263,7 +268,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     // behind browser chrome/overscroll; it is not our positioning origin.
     // Removing the current offset also prevents animation feedback loops.
     const currentBottom = parseFloat(style.bottom) || 0;
-    const normalTop = Math.round((phoneRect.top + currentBottom - baseBottom) * 64) / 64;
+    const normalTop = Math.round((phoneRect.top + currentBottom - baseBottom + renderedOriginBias) * 64) / 64;
     const viewportBottom = Math.max(window.innerHeight, normalTop + height + baseBottom);
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
     // Test the entire VISIBLE stack at its unlifted destination: phone,
@@ -289,7 +294,7 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
       const step = parseFloat(topStyle.getPropertyValue('--phone-controls-step')) || 64;
       const topRestingBottom = inset + bannerOffset + step;
       const topOffset = (parseFloat(topStyle.bottom) || 0) - topRestingBottom;
-      const topRestingTop = Math.round((topRect.top + topOffset) * 64) / 64;
+      const topRestingTop = Math.round((topRect.top + topOffset + renderedOriginBias) * 64) / 64;
       controlsTop = Math.min(controlsTop, topRestingTop);
       controlsBottom = Math.max(controlsBottom, topRestingTop + topRect.height);
       controlsLeft = Math.min(controlsLeft, topRect.left);
@@ -359,7 +364,31 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
     const next = values.join(':');
     if (next !== geometryKey) {
       geometryKey = next;
+      stableGeometryAt = performance.now();
       requestUpdate();
+    } else if (performance.now() - lastLiftChange > 650 &&
+               performance.now() - stableGeometryAt >= 450 && window.scrollY >= 0) {
+      // Verify the painted result, not just the requested CSS destination.
+      // A fixed element can finish compositing at a different origin from
+      // its computed 'bottom'. Calibrate ONLY once the animation is at rest;
+      // doing this mid-transition would create cumulative feedback.
+      const style = getComputedStyle(phone);
+      const requested = parseFloat(phone.style.getPropertyValue('--mobile-cta-lift')) || 0;
+      if (mobile.matches && style.position === 'fixed' && style.visibility !== 'hidden' &&
+          style.display !== 'none' && !phone.classList.contains('mobile-cta--docked')) {
+        const rootStyle = getComputedStyle(root);
+        const space = rootStyle.getPropertyValue('--space-md').trim();
+        const inset = space.endsWith('rem')
+          ? (parseFloat(space) || 1.5) * (parseFloat(rootStyle.fontSize) || 16)
+          : (parseFloat(space) || 24);
+        const banner = parseFloat(rootStyle.getPropertyValue('--privacy-banner-offset')) || 0;
+        const base = banner + (root.classList.contains('privacy-banner-visible') ? 12 : inset);
+        const bias = requested - ((parseFloat(style.bottom) || 0) - base);
+        if (Math.abs(bias - renderedOriginBias) > 0.75 && Math.abs(bias) <= 160) {
+          renderedOriginBias = bias;
+          requestUpdate();
+        }
+      }
     }
     verificationTimer = setTimeout(verifyGeometry, 500);
   }
@@ -546,4 +575,96 @@ initMobilePhoneCtaPlacement = function initGroupedPhonePlacement() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init, {once: true});
   } else init();
+})();
+
+/* Finish a fresh home navigation at its declared start position. The old
+   inline guard expires 350ms after pageshow; native reload restoration can
+   arrive later. This bounded lease ends immediately on real navigation
+   input, not on merely touching the screen during a pull-to-refresh. */
+(function settleFreshHomeNavigation() {
+  'use strict';
+  const navigation = performance.getEntriesByType?.('navigation')[0];
+  if (location.hash || navigation?.type === 'back_forward' ||
+      (!navigation && performance.navigation?.type === 2)) return;
+  const root = document.documentElement;
+  let cancelled = false;
+  let timer = 0;
+  let deadline = 0;
+  let touch = null;
+  let frame = 0;
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  function cancel() {
+    cancelled = true;
+    clearTimeout(timer);
+    timer = 0;
+    cancelAnimationFrame(frame);
+    frame = 0;
+  }
+  function editableOrOverlay() {
+    return document.activeElement?.matches('input, textarea, select, [contenteditable="true"]') ||
+      document.body?.classList.contains('nav-open') ||
+      document.body?.classList.contains('privacy-dialog-open') ||
+      document.querySelector('dialog[open], .lightbox.active, .search-overlay.active');
+  }
+  function check() {
+    timer = 0;
+    if (cancelled || document.hidden || performance.now() > deadline) return;
+    if (location.hash || (window.visualViewport?.scale || 1) > 1.01 || editableOrOverlay()) { cancel(); return; }
+    // Do not interrupt the user's finger or native negative rubber-band.
+    if (!touch && window.scrollY > 0.5) {
+      const previous = root.style.getPropertyValue('scroll-behavior');
+      const priority = root.style.getPropertyPriority('scroll-behavior');
+      root.style.setProperty('scroll-behavior', 'auto', 'important');
+      window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+      if (previous) root.style.setProperty('scroll-behavior', previous, priority);
+      else root.style.removeProperty('scroll-behavior');
+      if (typeof scheduleHeroCookiePlacement === 'function') scheduleHeroCookiePlacement();
+      if (typeof scheduleMobilePhoneCtaPlacement === 'function') scheduleMobilePhoneCtaPlacement();
+    }
+    timer = setTimeout(check, 100);
+  }
+  function begin() {
+    if (cancelled) return;
+    deadline = performance.now() + 3000;
+    clearTimeout(timer);
+    check();
+  }
+  function wake() {
+    if (cancelled || !deadline || performance.now() > deadline) return;
+    if (!frame) frame = requestAnimationFrame(() => { frame = 0; clearTimeout(timer); check(); });
+  }
+  // Directional movement, keyboard scrolling and links always take priority.
+  window.addEventListener('touchstart', event => {
+    if (event.touches.length !== 1) { cancel(); return; }
+    touch = {x: event.touches[0].clientX, y: event.touches[0].clientY};
+  }, {capture: true, passive: true});
+  window.addEventListener('touchmove', event => {
+    if (!touch || event.touches.length !== 1) { cancel(); return; }
+    const dx = event.touches[0].clientX - touch.x;
+    const dy = event.touches[0].clientY - touch.y;
+    // Upward drag means the visitor wants to read farther down, not reset.
+    if (dy < -6 || Math.abs(dx) > 12) cancel();
+  }, {capture: true, passive: true});
+  window.addEventListener('touchend', () => { touch = null; wake(); }, {passive: true});
+  window.addEventListener('touchcancel', () => { touch = null; wake(); }, {passive: true});
+  window.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'touch') cancel();
+  }, {capture: true, passive: true});
+  window.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('a, button, input, select, textarea')) cancel();
+  }, {capture: true, passive: true});
+  window.addEventListener('wheel', cancel, {capture: true, passive: true});
+  window.addEventListener('keydown', event => {
+    if (['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Tab'].includes(event.key)) cancel();
+  }, {capture: true});
+  window.addEventListener('hashchange', cancel);
+  window.addEventListener('pagehide', cancel);
+  window.addEventListener('scroll', wake, {passive: true});
+  window.visualViewport?.addEventListener('resize', wake, {passive: true});
+  window.visualViewport?.addEventListener('scroll', wake, {passive: true});
+  window.addEventListener('load', begin, {once: true});
+  window.addEventListener('pageshow', event => { if (event.persisted) cancel(); else begin(); }, {once: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', begin, {once: true});
+  else begin();
 })();
