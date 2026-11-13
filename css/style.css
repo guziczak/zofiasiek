@@ -40,6 +40,8 @@
      tle, żeby barwa kopii czytała się tak, jak będzie wisieć u klienta. */
   --artwork-mat: transparent;
   --artwork-mat-pad: 0px;
+  --gallery-gap: var(--space-sm);
+  --gallery-radius: var(--border-radius);
   /* Papierowa tekstura tła i wybielanie logo — sterowane tokenem, żeby ciemny
      motyw nie musiał powielać reguł, tylko wartości. */
   --color-texture-base: #e8dccb;
@@ -900,7 +902,7 @@ p + p { margin-top: var(--space-sm); }
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
+  gap: var(--gallery-gap);
 }
 
 .gallery-grid--2 {
@@ -911,8 +913,13 @@ p + p { margin-top: var(--space-sm); }
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border-radius: var(--border-radius);
+  border-radius: var(--gallery-radius);
   cursor: pointer;
+}
+
+.gallery-item:focus-visible {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: calc(var(--artwork-mat-pad) + 3px);
 }
 
 .gallery-item img {
@@ -3520,7 +3527,7 @@ body.search-open {
 /* Wejście z wyników na pracę konserwatorską (?work=…) — podświetlenie kafelka. */
 .gallery-item.is-search-target {
   outline: 3px solid var(--color-accent-dark);
-  outline-offset: 3px;
+  outline-offset: calc(var(--artwork-mat-pad) + 3px);
   scroll-margin-top: calc(var(--header-height) + var(--space-md));
 }
 
@@ -3604,7 +3611,9 @@ body.search-open {
     --texture-scrim: rgba(20, 17, 12, 0.88);
     --logo-filter-solid: brightness(0) invert(1);
     --artwork-mat: #e8dccb;
-    --artwork-mat-pad: 10px;
+    --artwork-mat-pad: 4px;
+    --gallery-gap: calc(var(--space-md) + var(--artwork-mat-pad) + var(--artwork-mat-pad));
+    --gallery-radius: 2px;
   }
 }
 
@@ -3633,12 +3642,15 @@ body.search-open {
   --texture-scrim: rgba(20, 17, 12, 0.88);
   --logo-filter-solid: brightness(0) invert(1);
   --artwork-mat: #e8dccb;
-  --artwork-mat-pad: 10px;
+  --artwork-mat-pad: 4px;
+  --gallery-gap: calc(var(--space-md) + var(--artwork-mat-pad) + var(--artwork-mat-pad));
+  --gallery-radius: 2px;
 }
 
 /* Passe-partout: jasna obwódka WYŁĄCZNIE wokół kafelka z reprodukcją.
    `box-shadow` z rozrzutem nie zajmuje miejsca w układzie, więc w jasnym motywie
    (kolor `transparent`, rozrzut 0) rule jest całkowicie bezkosztowa.
+   --gallery-gap uwzględnia obie obwódki, zostawiając między nimi ciemne tło.
    Obwódki celowo nie ma pod podpisami — jasna płaszczyzna pod jasnym tekstem
    ciemnego motywu dałaby tekst niewidoczny. */
 .gallery-item {
