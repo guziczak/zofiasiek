@@ -451,12 +451,69 @@ function initFooterAccordion() {
       const list = group.querySelector('.footer__links');
       if (!heading || !list) return null;
       if (!list.id) list.id = `footer-panel-${index + 1}`;
-      return { group, heading, list, label: heading.textContent.trim(), button: null };
+      return { group, heading, list, label: heading.textContent.trim(), button: null, animation: null };
     })
     .filter(Boolean);
   if (!records.length) return;
 
   const mobileLayout = window.matchMedia('(max-width: 960px)');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const cancelAnimation = (record) => {
+    if (record.animation) {
+      record.animation.onfinish = null;
+      record.animation.cancel();
+      record.animation = null;
+    }
+    record.list.style.removeProperty('overflow');
+  };
+
+  const finish = (record, expanded) => {
+    // Hide only after the closing motion; open panels return to their natural size.
+    record.list.hidden = !expanded;
+    record.list.inert = !expanded;
+    cancelAnimation(record);
+  };
+
+  const setExpanded = (record, expanded) => {
+    const { list, button } = record;
+    if (!expanded && list.contains(document.activeElement)) {
+      button.focus({ preventScroll: true });
+    }
+    button.setAttribute('aria-expanded', String(expanded));
+    list.inert = !expanded;
+
+    if (reduceMotion.matches || typeof list.animate !== 'function') {
+      finish(record, expanded);
+      return;
+    }
+
+    // Sample before cancelling so a quick second click reverses from this frame.
+    const startHeight = list.getBoundingClientRect().height;
+    const startPadding = list.hidden ? '0px' : getComputedStyle(list).paddingBottom;
+    cancelAnimation(record);
+    list.hidden = false;
+    const endHeight = expanded ? list.getBoundingClientRect().height : 0;
+    const endPadding = expanded ? getComputedStyle(list).paddingBottom : '0px';
+    list.style.overflow = 'hidden';
+
+    // Padding must collapse too: these lists use border-box and have a bottom inset.
+    const animation = list.animate(
+      {
+        height: [`${startHeight}px`, `${endHeight}px`],
+        paddingBottom: [startPadding, endPadding]
+      },
+      {
+        duration: 260,
+        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        fill: 'both'
+      }
+    );
+    record.animation = animation;
+    animation.onfinish = () => {
+      if (record.animation === animation) finish(record, expanded);
+    };
+  };
 
   const enable = () => {
     document.documentElement.classList.add('footer-accordion-enabled');
@@ -471,13 +528,13 @@ function initFooterAccordion() {
       button.setAttribute('aria-controls', record.list.id);
       button.addEventListener('click', () => {
         const expanded = button.getAttribute('aria-expanded') === 'true';
-        button.setAttribute('aria-expanded', String(!expanded));
-        record.list.hidden = expanded;
+        setExpanded(record, !expanded);
       });
 
       record.group.classList.add('footer__group');
       record.heading.replaceChildren(button);
       record.list.hidden = true;
+      record.list.inert = true;
       record.button = button;
     });
   };
@@ -485,7 +542,7 @@ function initFooterAccordion() {
   const disable = () => {
     document.documentElement.classList.remove('footer-accordion-enabled');
     records.forEach((record) => {
-      record.list.hidden = false;
+      finish(record, true);
       record.heading.textContent = record.label;
       record.group.classList.remove('footer__group');
       record.button = null;
@@ -497,11 +554,25 @@ function initFooterAccordion() {
     else disable();
   };
 
+  const handleMotionPreference = () => {
+    if (!reduceMotion.matches) return;
+    records.forEach((record) => {
+      if (record.animation && record.button) {
+        finish(record, record.button.getAttribute('aria-expanded') === 'true');
+      }
+    });
+  };
+
   update();
   if (typeof mobileLayout.addEventListener === 'function') {
     mobileLayout.addEventListener('change', update);
   } else {
     mobileLayout.addListener(update);
+  }
+  if (typeof reduceMotion.addEventListener === 'function') {
+    reduceMotion.addEventListener('change', handleMotionPreference);
+  } else {
+    reduceMotion.addListener(handleMotionPreference);
   }
 }
 
