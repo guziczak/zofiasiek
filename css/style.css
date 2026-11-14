@@ -1586,16 +1586,16 @@ body.privacy-dialog-open {
   height: 40px;
   border: 1px solid var(--color-accent);
   border-radius: 50%;
-  background: transparent;
-  color: var(--color-muted);
+  background: var(--color-accent);
+  color: #1a1a1a;
   box-shadow: none;
   transform: none;
 }
 
 .footer .social-links .mobile-cta--docked:hover {
-  border-color: var(--color-accent-dark);
-  background-color: var(--color-accent-dark);
-  color: var(--color-on-accent);
+  border-color: var(--color-accent-light);
+  background-color: var(--color-accent-light);
+  color: #1a1a1a;
   transform: none;
 }
 
